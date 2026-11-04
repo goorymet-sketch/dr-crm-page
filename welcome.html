@@ -390,7 +390,11 @@ $('upGo').addEventListener('click',function(){
         o.page=o.page||'';o.id=uid();db.posts.push(o)
       }
       added++});
-    save();renderAll();$('upMsg').textContent='تم استيراد '+added+' شركة جديدة، وتحديث '+updated+' شركة في الخانات الفاضية فقط، وتخطي '+skipped+' صف بدون بيانات جديدة.';$('upF').value=''};
+    save();renderAll();
+    $('upMsg').textContent=tgt==='companies'
+      ?'تم استيراد '+added+' شركة جديدة، وتحديث '+updated+' شركة في الخانات الفاضية فقط، وتخطي '+skipped+' صف بدون بيانات جديدة.'
+      :'تم استيراد '+added+' منشور، وتخطي '+skipped+' صف بدون بيانات جديدة.';
+    $('upF').value=''};
   r.readAsText(f,'UTF-8')});
 
 /* ---------- الأداء ---------- */
