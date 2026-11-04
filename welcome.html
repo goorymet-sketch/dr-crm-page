@@ -205,14 +205,7 @@ function whatsappUrl(company){
   var phone=String(company.phone||'').replace(/[^0-9]/g,'');
   if(phone.indexOf('00')===0)phone=phone.slice(2);
   if(!phone)return '';
-  var name=company.contact?'أستاذ '+company.contact:'';
-  var message='السلام عليكم '+name+'، مع حضرتك فريق Digital Reach.\\n\\n';
-  message+='بتواصل مع حضرتك بخصوص شركة '+(company.name||'حضرتكم')+(company.industry?' في مجال '+company.industry:'')+'.\\n';
-  message+='إحنا بنساعد الشركات في تنظيم عملية البيع ومتابعة العملاء المحتملين وتحسين فرص تحويل الاستفسارات لمبيعات، من خلال خطوات واضحة قابلة للمتابعة.\\n\\n';
-  if(company.stage)message+='حالة التواصل الحالية عندنا: '+company.stage+'.\\n';
-  if(company.notes)message+='ملاحظاتنا: '+company.notes+'.\\n';
-  message+='لو مناسب لحضرتك، نقدر نحدد مكالمة قصيرة نفهم فيها طريقة استقبال العملاء ومتابعتهم، ونشوف هل فيه فرصة لتحسين النتائج.\\n\\n';
-  message+='هل يناسب حضرتك نتواصل في وقت مناسب؟';
+  var message='مساء الخير يا فندم، لو سمحت عايز أتواصل مع مسؤول المبيعات.';
   return 'https://wa.me/'+phone+'?text='+encodeURIComponent(message);
 }
 function uid(){return 'x'+Date.now()+Math.floor(Math.random()*100000)}
