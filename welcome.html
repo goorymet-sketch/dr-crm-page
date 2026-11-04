@@ -201,6 +201,20 @@ function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'
 function num(v){var n=parseFloat(v);return isNaN(n)?0:n}
 function fmt(n){return Number(n).toLocaleString('en-US')}
 function today(){return new Date().toISOString().slice(0,10)}
+function whatsappUrl(company){
+  var phone=String(company.phone||'').replace(/[^0-9]/g,'');
+  if(phone.indexOf('00')===0)phone=phone.slice(2);
+  if(!phone)return '';
+  var name=company.contact?'أستاذ '+company.contact:'';
+  var message='السلام عليكم '+name+'، مع حضرتك فريق Digital Reach.\\n\\n';
+  message+='بتواصل مع حضرتك بخصوص شركة '+(company.name||'حضرتكم')+(company.industry?' في مجال '+company.industry:'')+'.\\n';
+  message+='إحنا بنساعد الشركات في تنظيم عملية البيع ومتابعة العملاء المحتملين وتحسين فرص تحويل الاستفسارات لمبيعات، من خلال خطوات واضحة قابلة للمتابعة.\\n\\n';
+  if(company.stage)message+='حالة التواصل الحالية عندنا: '+company.stage+'.\\n';
+  if(company.notes)message+='ملاحظاتنا: '+company.notes+'.\\n';
+  message+='لو مناسب لحضرتك، نقدر نحدد مكالمة قصيرة نفهم فيها طريقة استقبال العملاء ومتابعتهم، ونشوف هل فيه فرصة لتحسين النتائج.\\n\\n';
+  message+='هل يناسب حضرتك نتواصل في وقت مناسب؟';
+  return 'https://wa.me/'+phone+'?text='+encodeURIComponent(message);
+}
 function uid(){return 'x'+Date.now()+Math.floor(Math.random()*100000)}
 function dl(name,txt,type){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:type}));a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(a.href)},1000)}
 function cc(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}
@@ -248,7 +262,7 @@ function renderSales(){
   $('stats').innerHTML=[['إجمالي الشركات',L.length],['صفقات مفتوحة',open],['قيمة المفتوح',fmt(pv)],['تم إغلاقها',won],['قيمة المغلق',fmt(wv)]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
   var q=$('q').value.trim().toLowerCase(),st=$('fst').value;
   var F=L.filter(function(c){if(st&&c.stage!==st)return false;return !q||[c.name,c.contact,c.phone,c.industry,c.source,c.notes].join(' ').toLowerCase().indexOf(q)>-1});
-  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.contact)+'</td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td>'+(c.value?fmt(num(c.value)):'-')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act"><button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="10" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>'}
+  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.contact)+'</td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td>'+(c.value?fmt(num(c.value)):'-')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act">'+(c.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl(c))+'">واتساب</a>':'<button class="btn s" disabled title="أضف رقم الهاتف أولًا">واتساب</button>')+'<button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="10" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>'}
 $('q').addEventListener('input',renderSales);$('fst').addEventListener('change',renderSales);
 $('addC').addEventListener('click',function(){editC(null)});
 function editC(id){var c=id?byId(db.companies,id):null;
