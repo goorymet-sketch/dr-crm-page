@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Reach CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--nd:#1f1650;--n:#29386a;--nl:#34457d;--y:#ffc400;--t:#58bec6;--w:#fff;--m:#aab3d1;--r:#ff6b6b;--g:#4ade80}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Cairo',Tahoma,Arial,sans-serif;background:var(--nd);color:var(--w);min-height:100vh;display:flex}
+.side{width:230px;background:#181040;border-left:1px solid rgba(255,255,255,.08);padding:18px 12px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{text-align:center;margin-bottom:20px}.logo b{font-size:23px;font-weight:900}.logo b span{color:var(--y)}.logo small{display:block;color:var(--t);font-size:12px;letter-spacing:3px}
+.nav button{display:block;width:100%;text-align:right;background:0;border:0;color:var(--m);font:600 15px inherit;font-family:inherit;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:4px}
+.nav button:hover{background:rgba(255,255,255,.06);color:var(--w)}.nav button.on{background:var(--y);color:var(--nd)}
+.tools{margin-top:16px;border-top:1px solid rgba(255,255,255,.1);padding-top:12px}.tools p{font-size:12px;color:var(--m);margin-bottom:8px}.tools .btn{width:100%;margin-bottom:6px;font-size:13px}
+main{flex:1;padding:24px;min-width:0}
+h1{font-size:25px;font-weight:900;margin-bottom:3px}h1 span{color:var(--y)}.sub{color:var(--m);margin-bottom:16px;font-size:14px}
+.panel{display:none}.panel.on{display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--n);border-radius:14px;padding:12px 15px;border-top:3px solid var(--t)}.stat:nth-child(even){border-top-color:var(--y)}.stat small{color:var(--m);font-size:13px}.stat div{font-size:23px;font-weight:900}
+.bar2{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+input,select,textarea{font-family:inherit;font-size:14px;background:#1b1348;color:var(--w);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 11px;outline:0}
+input:focus,select:focus,textarea:focus{border-color:var(--t)}.bar2 input{flex:1;min-width:170px}
+.btn{font-family:inherit;font-size:14px;font-weight:700;border:0;border-radius:10px;padding:8px 15px;cursor:pointer;background:var(--nl);color:var(--w)}.btn:hover{filter:brightness(1.15)}
+.btn.p{background:var(--y);color:var(--nd)}.btn.t{background:var(--t);color:var(--nd)}.btn.d{background:0;color:var(--r);border:1px solid var(--r);padding:4px 9px;font-size:12px}.btn.s{padding:4px 9px;font-size:12px}
+.tw{overflow-x:auto;background:var(--n);border-radius:14px}table{width:100%;border-collapse:collapse;min-width:780px}
+th,td{padding:10px 11px;text-align:right;font-size:14px;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:middle}
+th{color:var(--t);background:rgba(0,0,0,.15);white-space:nowrap}tr:last-child td{border:0}
+td.nt{max-width:220px;color:var(--m);font-size:13px}td select{padding:4px 7px;font-size:13px}.empty{text-align:center;color:var(--m);padding:36px 10px}
+.act{display:flex;gap:6px}
+details summary{cursor:pointer;color:var(--t);font-size:13px}details div{white-space:pre-wrap;font-size:13px;color:var(--m);margin-top:6px;max-width:320px}
+dialog{background:var(--n);color:var(--w);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:20px;width:min(540px,94vw);margin:auto}
+dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-size:19px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fg label{font-size:13px;color:var(--m)}.fg label input,.fg label select,.fg label textarea{width:100%;margin-top:4px}.fg .full{grid-column:1/-1}
+.da{display:flex;gap:8px;margin-top:14px}
+.card{background:var(--n);border-radius:14px;padding:16px;margin-bottom:14px}
+.chk{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.chk label{background:#1b1348;border-radius:20px;padding:6px 12px;font-size:13px;cursor:pointer}.chk input{margin-left:6px}
+#planTxt{width:100%;min-height:300px;line-height:1.8}
+.bw{display:flex;align-items:center;gap:8px;min-width:150px}.bb{flex:1;height:10px;background:#1b1348;border-radius:6px;overflow:hidden}.bb i{display:block;height:100%;border-radius:6px}.bw b{font-size:13px;width:42px}
+.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.dl .card{margin:0}.dl p{color:var(--m);font-size:13px;margin:4px 0 10px}
+.note{color:var(--m);font-size:12px;margin-top:10px;line-height:1.7}
+@media(max-width:800px){body{flex-direction:column}.side{width:100%;height:auto;position:static}.nav{display:flex;flex-wrap:wrap;gap:4px}.nav button{width:auto;margin:0}main{padding:14px}}
+</style>
+</head>
+<body>
+<aside class="side">
+  <div class="logo"><b>Digital <span>Reach</span></b><small>CRM</small></div>
+  <nav class="nav" id="nav">
+    <button data-tab="sales" class="on">💼 CRM المبيعات</button>
+    <button data-tab="posts">📱 CRM المنشورات</button>
+    <button data-tab="plans">📝 خطط الشركات</button>
+    <button data-tab="upload">⬆️ رفع الملفات</button>
+    <button data-tab="download">⬇️ تنزيل الملفات</button>
+    <button data-tab="perf">📊 الأداء والنسب</button>
+  </nav>
+  <div class="tools">
+    <p>البيانات محفوظة في المتصفح ده بس. نزّل نسخة احتياطية قبل ما تبعت الفايل أو تغيّر الجهاز.</p>
+    <button class="btn t" data-dl="backup">تنزيل نسخة احتياطية</button>
+    <button class="btn" id="bRestore">استرجاع نسخة</button>
+    <input type="file" id="fRestore" accept=".json" hidden>
+  </div>
+</aside>
+<main>
+  <!-- المبيعات -->
+  <section class="panel on" id="tab-sales">
+    <h1>CRM <span>المبيعات</span></h1><div class="sub">سجّل الشركات وتابع كل واحدة في أي مرحلة.</div>
+    <div class="stats" id="stats"></div>
+    <div class="bar2">
+      <input id="q" placeholder="🔍 ابحث بالاسم أو الرقم أو المجال...">
+      <select id="fst"></select>
+      <button class="btn p" id="addC">+ إضافة شركة</button>
+      <button class="btn t" data-dl="companies">تنزيل CSV</button>
+    </div>
+    <div class="tw"><table><thead><tr><th>#</th><th>الشركة</th><th>المسؤول</th><th>الرقم</th><th>المجال</th><th>المصدر</th><th>المرحلة</th><th>القيمة</th><th>ملاحظات</th><th></th></tr></thead><tbody id="tbC"></tbody></table></div>
+  </section>
+  <!-- المنشورات -->
+  <section class="panel" id="tab-posts">
+    <h1>CRM <span>المنشورات</span></h1><div class="sub">منشورات فيسبوك وانستجرام: الاسم، الصفحة، اللايكات، الكومنتات ونصها.</div>
+    <div class="stats" id="pStats"></div>
+    <div class="bar2">
+      <input id="pq" placeholder="🔍 ابحث في المنشورات أو الصفحات أو الكومنتات...">
+      <select id="pf"><option value="">كل المنصات</option><option>فيسبوك</option><option>انستجرام</option></select>
+      <button class="btn p" id="addP">+ إضافة منشور</button>
+      <button class="btn t" data-dl="posts">تنزيل CSV</button>
+    </div>
+    <div class="tw"><table><thead><tr><th>#</th><th>المنصة</th><th>الصفحة</th><th>اسم المنشور</th><th>الايكات</th><th>الكومنتات</th><th>نص الكومنتات</th><th>التاريخ</th><th></th></tr></thead><tbody id="tbP"></tbody></table></div>
+  </section>
+  <!-- الخطط -->
+  <section class="panel" id="tab-plans">
+    <h1>خطط <span>الشركات</span></h1><div class="sub">اختار الشركة واحتياجاتها، والخطة تتولد من قوالب جاهزة وتقدر تعدلها.</div>
+    <div class="card">
+      <select id="planCo"></select>
+      <div class="chk" id="needs"></div>
+      <div class="bar2"><button class="btn p" id="genPlan">توليد الخطة</button><button class="btn t" id="savePlan">حفظ الخطة</button><button class="btn" id="copyPlan">نسخ النص</button></div>
+      <textarea id="planTxt" placeholder="الخطة هتظهر هنا..."></textarea>
+    </div>
+  </section>
+  <!-- رفع -->
+  <section class="panel" id="tab-upload">
+    <h1>رفع <span>الملفات</span></h1><div class="sub">استورد بيانات من ملف CSV (لو معاك Excel احفظه الأول كـ CSV).</div>
+    <div class="card">
+      <div class="bar2">
+        <select id="upT"><option value="companies">شركات (المبيعات)</option><option value="posts">منشورات</option></select>
+        <input type="file" id="upF" accept=".csv,.txt">
+        <button class="btn p" id="upGo">استيراد</button>
+      </div>
+      <div id="upMsg" class="note"></div>
+      <div class="note">أسماء الأعمدة المقبولة — شركات: الشركة/name/title ، المسؤول ، الرقم/phone ، المجال/category ، المصدر ، المرحلة ، القيمة ، ملاحظات. منشورات: المنصة ، الصفحة ، اسم المنشور/title ، الايكات/likes ، عدد الكومنتات ، الكومنتات ، الرابط ، التاريخ. الشركات المكررة بالاسم بتتخطى.</div>
+    </div>
+  </section>
+  <!-- تنزيل -->
+  <section class="panel" id="tab-download">
+    <h1>تنزيل <span>الملفات</span></h1><div class="sub">نزّل الداتا والتحليل.</div>
+    <div class="dl">
+      <div class="card"><b>بيانات الشركات</b><p>CSV يفتح في Excel</p><button class="btn t" data-dl="companies">تنزيل</button></div>
+      <div class="card"><b>بيانات المنشورات</b><p>بالكومنتات والنسب</p><button class="btn t" data-dl="posts">تنزيل</button></div>
+      <div class="card"><b>الخطط</b><p>كل الخطط المحفوظة (نص)</p><button class="btn t" data-dl="plans">تنزيل</button></div>
+      <div class="card"><b>تقرير التحليل</b><p>نسب أداء الشركات والمنشورات</p><button class="btn t" data-dl="report">تنزيل</button></div>
+      <div class="card"><b>نسخة احتياطية كاملة</b><p>JSON، ترجّعه على أي جهاز</p><button class="btn p" data-dl="backup">تنزيل</button></div>
+    </div>
+  </section>
+  <!-- الأداء -->
+  <section class="panel" id="tab-perf">
+    <h1>الأداء <span>والنسب</span></h1><div class="sub">شريط أداء لكل شركة ولكل منشور.</div>
+    <div class="card"><b>الشركات</b>
+      <div class="tw" style="margin-top:10px"><table><thead><tr><th>الشركة</th><th>المرحلة</th><th>اكتمال البيانات</th><th>تقدم الصفقة</th><th>السوشيال</th><th>الإجمالي</th></tr></thead><tbody id="tbPerfC"></tbody></table></div>
+    </div>
+    <div class="card"><b>المنشورات</b>
+      <div class="tw" style="margin-top:10px"><table><thead><tr><th>المنصة</th><th>الصفحة</th><th>المنشور</th><th>ايكات</th><th>كومنتات</th><th>نسبة التفاعل</th></tr></thead><tbody id="tbPerfP"></tbody></table></div>
+    </div>
+    <div class="note">النسب دي مؤشرات داخلية محسوبة من بياناتك، مش توقع أو ضمان. اكتمال البيانات = الحقول المعبّية من 6. تقدم الصفقة = موقع المرحلة (خسرنا = 0%). السوشيال = متوسط تفاعل منشورات الصفحة اللي اسمها نفس اسم الشركة. التفاعل = (ايكات + 3×كومنتات) نسبةً لأعلى منشور عندك. الإجمالي: بيانات 30% + صفقة 40% + سوشيال 30% (ولو مفيش منشورات: 40% + 60%).</div>
+  </section>
+</main>
+<dialog id="dlg"><h2 id="dT"></h2><form id="frm"><div class="fg" id="dF"></div><div class="da"><button class="btn p" type="submit">حفظ</button><button class="btn" type="button" id="dX">إلغاء</button></div></form></dialog>
+
+<script>
+(function(){
+'use strict';
+var STAGES=['جديد','تم التواصل','مهتم','عرض سعر','تفاوض','تم الإغلاق','خسرنا'];
+var SOURCES=['جوجل ماب','انستجرام','فيسبوك','واتساب','ترشيح','أخرى'];
+var NEEDS=['زيادة المبيعات','ظهور على السوشيال','محتوى ومنشورات','التواصل والردود','عروض وحجوزات'];
+var NEXT={'جديد':'ابعت رسالة تعارف على واتساب خلال 24 ساعة','تم التواصل':'تابع بعد يومين واسأله عن احتياجه الأساسي','مهتم':'حدد معاه مكالمة قصيرة واعرض الحل','عرض سعر':'ابعت عرض السعر وحدد موعد للرد','تفاوض':'اتفق على النقاط المعلقة وحدد موعد التوقيع','تم الإغلاق':'ابدأ التنفيذ وخد رأيه بعد أسبوع','خسرنا':'اسأله عن السبب وارجع له بعد 60 يوم'};
+var STEPS={
+'زيادة المبيعات':['حدد أفضل 3 منتجات/خدمات وسعر كل واحد بوضوح','جهّز رسالة بيع جاهزة واتساب وردود على الاعتراضات الشائعة','حدد هدف مبيعات أسبوعي وتابعه كل يوم'],
+'ظهور على السوشيال':['راجع الصفحة: صورة، وصف، رقم تواصل، زرار الرسائل','ثبّت منشور تعريفي أعلى الصفحة','حدد مواعيد نشر ثابتة (3–4 مرات أسبوعيًا)'],
+'محتوى ومنشورات':['اعمل 12 فكرة منشور (عروض، آراء عملاء، كواليس، نصايح)','جهّز تقويم نشر لـ 30 يوم','كل أسبوع: قارن أعلى وأقل منشور تفاعلًا وكرر النوع الأفضل'],
+'التواصل والردود':['حدد وقت رد أقصاه ساعة على الرسائل والكومنتات','جهّز 5 ردود جاهزة للأسئلة المتكررة','سجّل كل عميل مهتم في الـ CRM مع موعد المتابعة'],
+'عروض وحجوزات':['صمّم عرض واضح بمدة محددة وسعر وشروط','حط زرار حجز/واتساب في كل منشور عرض','تابع الحجوزات يوميًا واسأل كل عميل لم يكمل ليه']};
+var KEY='dr_crm_v1';
+var db=load();
+function load(){var b={companies:[],posts:[],plans:{}};try{var r=localStorage.getItem(KEY);if(r){var p=JSON.parse(r);if(p&&typeof p==='object'){if(Array.isArray(p.companies))b.companies=p.companies;if(Array.isArray(p.posts))b.posts=p.posts;if(p.plans&&typeof p.plans==='object')b.plans=p.plans}}}catch(e){}return b}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('تعذّر الحفظ في المتصفح. نزّل نسخة احتياطية.')}}
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function num(v){var n=parseFloat(v);return isNaN(n)?0:n}
+function fmt(n){return Number(n).toLocaleString('en-US')}
+function today(){return new Date().toISOString().slice(0,10)}
+function uid(){return 'x'+Date.now()+Math.floor(Math.random()*100000)}
+function dl(name,txt,type){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:type}));a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(a.href)},1000)}
+function cc(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}
+function csv(head,rows){return '\uFEFF'+[head.map(cc).join(',')].concat(rows.map(function(r){return r.map(cc).join(',')})).join('\r\n')}
+function byId(arr,id){for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i];return null}
+function opts(a,sel){return a.map(function(s){return '<option'+(s===sel?' selected':'')+'>'+esc(s)+'</option>'}).join('')}
+
+/* ---------- حسابات ---------- */
+function cCount(p){var n=parseInt(p.commentsCount,10);if(!isNaN(n)&&p.commentsCount!=='')return n;return p.comments?String(p.comments).split(/\r?\n/).filter(function(x){return x.trim()}).length:0}
+function eng(p){return num(p.likes)+3*cCount(p)}
+function maxEng(){var m=0;db.posts.forEach(function(p){var e=eng(p);if(e>m)m=e});return m}
+function pScore(p,m){return m?Math.round(eng(p)/m*100):0}
+function complete(c){var f=[c.name,c.contact,c.phone,c.industry,c.value,c.notes],n=0;f.forEach(function(x){if(x!==''&&x!=null)n++});return Math.round(n/6*100)}
+function pipe(c){if(c.stage==='خسرنا')return 0;var i=STAGES.indexOf(c.stage);return i<0?0:Math.round(i/5*100)}
+function social(c){var m=maxEng(),a=db.posts.filter(function(p){return String(p.page).toLowerCase()===String(c.name).toLowerCase()});if(!a.length)return null;var s=0;a.forEach(function(p){s+=pScore(p,m)});return Math.round(s/a.length)}
+function total(c){var d=complete(c),p=pipe(c),s=social(c);return s===null?Math.round(d*.4+p*.6):Math.round(d*.3+p*.4+s*.3)}
+function color(v){return v<40?'var(--r)':v<70?'var(--y)':'var(--t)'}
+function bar(v){return '<div class="bw"><div class="bb"><i style="width:'+v+'%;background:'+color(v)+'"></i></div><b>'+v+'%</b></div>'}
+
+/* ---------- تبويبات ---------- */
+$('nav').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  [].forEach.call($('nav').querySelectorAll('button'),function(x){x.classList.remove('on')});b.classList.add('on');
+  [].forEach.call(document.querySelectorAll('.panel'),function(x){x.classList.remove('on')});$('tab-'+b.getAttribute('data-tab')).classList.add('on');renderAll()});
+
+/* ---------- نموذج عام ---------- */
+var cb=null;
+function form(title,fields,vals,fn){
+  $('dT').textContent=title;
+  $('dF').innerHTML=fields.map(function(f){
+    var inp=f.t==='select'?'<select name="'+f.k+'">'+opts(f.o,'')+'</select>':f.t==='textarea'?'<textarea name="'+f.k+'" rows="'+(f.r||3)+'"></textarea>':'<input name="'+f.k+'" type="'+(f.t||'text')+'"'+(f.req?' required':'')+(f.step?' step="any"':'')+'>';
+    return '<label class="'+(f.full?'full':'')+'">'+f.l+inp+'</label>'}).join('');
+  var el=$('frm').elements;fields.forEach(function(f){el[f.k].value=vals&&vals[f.k]!=null?vals[f.k]:(f.t==='select'?f.o[0]:'')});
+  cb=function(){var o={};fields.forEach(function(f){o[f.k]=el[f.k].value.trim?el[f.k].value.trim():el[f.k].value});fn(o)};
+  $('dlg').showModal()}
+$('frm').addEventListener('submit',function(e){e.preventDefault();if(cb)cb();$('dlg').close()});
+$('dX').addEventListener('click',function(){$('dlg').close()});
+
+var FC=[{k:'name',l:'اسم الشركة *',req:1,full:1},{k:'contact',l:'اسم المسؤول'},{k:'phone',l:'الرقم'},{k:'industry',l:'المجال'},{k:'source',l:'المصدر',t:'select',o:SOURCES},{k:'stage',l:'المرحلة',t:'select',o:STAGES},{k:'value',l:'قيمة الصفقة',t:'number',step:1},{k:'notes',l:'ملاحظات',t:'textarea',full:1}];
+var FP=[{k:'platform',l:'المنصة',t:'select',o:['فيسبوك','انستجرام']},{k:'page',l:'الصفحة / الشركة *',req:1},{k:'title',l:'اسم المنشور *',req:1,full:1},{k:'likes',l:'عدد الايكات',t:'number'},{k:'commentsCount',l:'عدد الكومنتات (اختياري)',t:'number'},{k:'link',l:'رابط المنشور',full:1},{k:'date',l:'التاريخ',t:'date'},{k:'comments',l:'نص الكومنتات (كل كومنت في سطر)',t:'textarea',full:1,r:5}];
+
+/* ---------- المبيعات ---------- */
+function renderSales(){
+  var L=db.companies,open=0,won=0,pv=0,wv=0;
+  L.forEach(function(c){if(c.stage==='تم الإغلاق'){won++;wv+=num(c.value)}else if(c.stage!=='خسرنا'){open++;pv+=num(c.value)}});
+  $('stats').innerHTML=[['إجمالي الشركات',L.length],['صفقات مفتوحة',open],['قيمة المفتوح',fmt(pv)],['تم إغلاقها',won],['قيمة المغلق',fmt(wv)]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
+  var q=$('q').value.trim().toLowerCase(),st=$('fst').value;
+  var F=L.filter(function(c){if(st&&c.stage!==st)return false;return !q||[c.name,c.contact,c.phone,c.industry,c.source,c.notes].join(' ').toLowerCase().indexOf(q)>-1});
+  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.contact)+'</td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td>'+(c.value?fmt(num(c.value)):'-')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act"><button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="10" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>'}
+$('q').addEventListener('input',renderSales);$('fst').addEventListener('change',renderSales);
+$('addC').addEventListener('click',function(){editC(null)});
+function editC(id){var c=id?byId(db.companies,id):null;
+  form(c?'تعديل شركة':'إضافة شركة',FC,c,function(o){if(!o.name)return;o.value=o.value===''?'':num(o.value);
+    if(c){for(var k in o)c[k]=o[k]}else{o.id=uid();o.created=today();db.companies.push(o)}save();renderAll()})}
+
+/* ---------- المنشورات ---------- */
+function renderPosts(){
+  var L=db.posts,m=maxEng(),lk=0,cm=0;L.forEach(function(p){lk+=num(p.likes);cm+=cCount(p)});
+  $('pStats').innerHTML=[['عدد المنشورات',L.length],['إجمالي الايكات',fmt(lk)],['إجمالي الكومنتات',fmt(cm)],['متوسط الايكات',L.length?Math.round(lk/L.length):0]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
+  var q=$('pq').value.trim().toLowerCase(),pf=$('pf').value;
+  var F=L.filter(function(p){if(pf&&p.platform!==pf)return false;return !q||[p.page,p.title,p.comments].join(' ').toLowerCase().indexOf(q)>-1});
+  $('tbP').innerHTML=F.length?F.map(function(p,i){var n=cCount(p);return '<tr><td>'+(i+1)+'</td><td>'+esc(p.platform)+'</td><td>'+esc(p.page)+'</td><td><b>'+(p.link?'<a style="color:var(--y)" target="_blank" rel="noopener" href="'+esc(p.link)+'">'+esc(p.title)+'</a>':esc(p.title))+'</b></td><td>'+fmt(num(p.likes))+'</td><td>'+n+'</td><td>'+(p.comments?'<details><summary>عرض ('+n+')</summary><div>'+esc(p.comments)+'</div></details>':'-')+'</td><td>'+esc(p.date)+'</td><td><div class="act"><button class="btn s" data-act="eP" data-id="'+esc(p.id)+'">تعديل</button><button class="btn d" data-act="dP" data-id="'+esc(p.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="9" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش منشورات. دوس "إضافة منشور".')+'</td></tr>'}
+$('pq').addEventListener('input',renderPosts);$('pf').addEventListener('change',renderPosts);
+$('addP').addEventListener('click',function(){editP(null)});
+function editP(id){var p=id?byId(db.posts,id):null;
+  form(p?'تعديل منشور':'إضافة منشور',FP,p,function(o){if(!o.page||!o.title)return;
+    if(p){for(var k in o)p[k]=o[k]}else{o.id=uid();db.posts.push(o)}save();renderAll()})}
+
+/* ---------- أحداث الجداول ---------- */
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b)return;var a=b.getAttribute('data-act'),id=b.getAttribute('data-id');
+  if(a==='eC')editC(id);if(a==='eP')editP(id);
+  if(a==='dC'){var c=byId(db.companies,id);if(c&&confirm('تمسح "'+c.name+'"؟ مفيش رجوع.')){db.companies=db.companies.filter(function(x){return x.id!==id});delete db.plans[id];save();renderAll()}}
+  if(a==='dP'){var p=byId(db.posts,id);if(p&&confirm('تمسح المنشور ده؟ مفيش رجوع.')){db.posts=db.posts.filter(function(x){return x.id!==id});save();renderAll()}}});
+document.addEventListener('change',function(e){var s=e.target.closest('[data-stg]');if(!s)return;var c=byId(db.companies,s.getAttribute('data-stg'));if(c){c.stage=s.value;save();renderAll()}});
+
+/* ---------- الخطط ---------- */
+$('needs').innerHTML=NEEDS.map(function(n,i){return '<label><input type="checkbox" value="'+esc(n)+'">'+esc(n)+'</label>'}).join('');
+function curCo(){return byId(db.companies,$('planCo').value)}
+function renderPlanSel(){var cur=$('planCo').value;
+  $('planCo').innerHTML=db.companies.length?db.companies.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>'}).join(''):'<option value="">— ضيف شركة الأول —</option>';
+  if(cur&&byId(db.companies,cur))$('planCo').value=cur;loadPlan()}
+function loadPlan(){var c=curCo(),pl=c&&db.plans[c.id];
+  [].forEach.call($('needs').querySelectorAll('input'),function(i){i.checked=!!(pl&&pl.needs.indexOf(i.value)>-1)});$('planTxt').value=pl?pl.text:''}
+$('planCo').addEventListener('change',loadPlan);
+function selNeeds(){return [].filter.call($('needs').querySelectorAll('input'),function(i){return i.checked}).map(function(i){return i.value})}
+function makePlan(c,needs){
+  var L=['خطة شركة: '+c.name,'المجال: '+(c.industry||'غير محدد'),'المرحلة الحالية في المبيعات: '+c.stage,'الاحتياجات: '+(needs.length?needs.join('، '):'غير محددة'),'',
+    'الخطوة التالية في البيع: '+NEXT[c.stage]];
+  var sp=social(c);if(sp!==null){var n=db.posts.filter(function(p){return String(p.page).toLowerCase()===String(c.name).toLowerCase()}).length;L.push('السوشيال: '+n+' منشور مسجل، متوسط نسبة التفاعل '+sp+'%')}
+  needs.forEach(function(n){L.push('','▪ '+n);STEPS[n].forEach(function(s,i){L.push('   '+(i+1)+'. '+s)})});
+  L.push('','جدول 30 يوم:','الأسبوع 1: مراجعة الوضع وتجهيز المواد','الأسبوع 2: التنفيذ والنشر والتواصل','الأسبوع 3: متابعة النتائج وتعديل ما لا يعمل','الأسبوع 4: تقييم الأرقام وتحديد خطة الشهر التالي');
+  return L.join('\n')}
+$('genPlan').addEventListener('click',function(){var c=curCo();if(!c){alert('اختار شركة الأول');return}var n=selNeeds();if(!n.length){alert('اختار احتياج واحد على الأقل');return}$('planTxt').value=makePlan(c,n)});
+$('savePlan').addEventListener('click',function(){var c=curCo();if(!c)return;db.plans[c.id]={needs:selNeeds(),text:$('planTxt').value,updated:today()};save();alert('تم حفظ الخطة')});
+$('copyPlan').addEventListener('click',function(){var t=$('planTxt');t.select();try{document.execCommand('copy')}catch(e){}});
+
+/* ---------- رفع CSV ---------- */
+function parseCSV(t){t=t.replace(/^\uFEFF/,'');var first=t.split(/\r?\n/)[0]||'',d=',';
+  if((first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length)d=';';if((first.match(/\t/g)||[]).length>(first.match(/,/g)||[]).length)d='\t';
+  var rows=[],row=[],f='',q=false;
+  for(var i=0;i<t.length;i++){var ch=t[i];
+    if(q){if(ch==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=ch}
+    else if(ch==='"')q=true;else if(ch===d){row.push(f);f=''}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;row.push(f);f='';if(row.some(function(x){return x.trim()}))rows.push(row);row=[]}
+    else f+=ch}
+  row.push(f);if(row.some(function(x){return x.trim()}))rows.push(row);return rows}
+var MAPC={name:['name','title','company','الشركة','اسم الشركة','الاسم'],contact:['contact','المسؤول','اسم المسؤول'],phone:['phone','phone number','mobile','telephone','الرقم','رقم','الموبايل','الهاتف'],industry:['industry','category','المجال','النشاط'],source:['source','المصدر'],stage:['stage','المرحلة'],value:['value','القيمة','قيمة الصفقة'],notes:['notes','ملاحظات','address','العنوان']};
+var MAPP={platform:['platform','المنصة'],page:['page','company','الصفحة','الشركة'],title:['title','post','caption','اسم المنشور','المنشور'],likes:['likes','الايكات','لايكات','الإعجابات'],commentsCount:['comments_count','comments count','عدد الكومنتات','عدد التعليقات'],comments:['comments','الكومنتات','التعليقات'],link:['link','url','الرابط'],date:['date','التاريخ']};
+$('upGo').addEventListener('click',function(){
+  var f=$('upF').files[0];if(!f){$('upMsg').textContent='اختار ملف الأول.';return}
+  var r=new FileReader();r.onload=function(){
+    var rows=parseCSV(String(r.result));if(rows.length<2){$('upMsg').textContent='الملف فاضي أو مفيش فيه صفوف بيانات.';return}
+    var tgt=$('upT').value,M=tgt==='companies'?MAPC:MAPP,head=rows[0].map(function(h){return h.trim().toLowerCase()}),idx={};
+    for(var k in M){for(var j=0;j<head.length;j++){if(M[k].indexOf(head[j])>-1){idx[k]=j;break}}}
+    var need=tgt==='companies'?'name':'title';if(idx[need]===undefined){$('upMsg').textContent='مفيش عمود '+(tgt==='companies'?'اسم الشركة':'اسم المنشور')+' في الملف. راجع أسماء الأعمدة.';return}
+    var added=0,skipped=0;
+    rows.slice(1).forEach(function(r){var o={};for(var k in idx)o[k]=(r[idx[k]]||'').trim();
+      if(tgt==='companies'){if(!o.name)return;var dup=db.companies.some(function(c){return String(c.name).toLowerCase()===o.name.toLowerCase()});if(dup){skipped++;return}
+        if(STAGES.indexOf(o.stage)<0)o.stage='جديد';if(!o.source)o.source='أخرى';o.value=o.value?num(o.value):'';o.id=uid();o.created=today();db.companies.push(o)}
+      else{if(!o.title)return;if(o.platform!=='فيسبوك'&&o.platform!=='انستجرام'){var s=(o.platform||'').toLowerCase();o.platform=s.indexOf('insta')>-1||s.indexOf('انستجرام')>-1?'انستجرام':'فيسبوك'}
+        o.page=o.page||'';o.id=uid();db.posts.push(o)}
+      added++});
+    save();renderAll();$('upMsg').textContent='تم استيراد '+added+' صف'+(skipped?' وتخطّي '+skipped+' مكرر':'')+'.';$('upF').value=''};
+  r.readAsText(f,'UTF-8')});
+
+/* ---------- الأداء ---------- */
+function renderPerf(){var m=maxEng();
+  $('tbPerfC').innerHTML=db.companies.length?db.companies.map(function(c){var s=social(c);return '<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.stage)+'</td><td>'+bar(complete(c))+'</td><td>'+bar(pipe(c))+'</td><td>'+(s===null?'<span style="color:var(--m)">مفيش منشورات</span>':bar(s))+'</td><td>'+bar(total(c))+'</td></tr>'}).join(''):'<tr><td colspan="6" class="empty">مفيش شركات.</td></tr>';
+  var P=db.posts.slice().sort(function(a,b){return eng(b)-eng(a)});
+  $('tbPerfP').innerHTML=P.length?P.map(function(p){return '<tr><td>'+esc(p.platform)+'</td><td>'+esc(p.page)+'</td><td>'+esc(p.title)+'</td><td>'+fmt(num(p.likes))+'</td><td>'+cCount(p)+'</td><td>'+bar(pScore(p,m))+'</td></tr>'}).join(''):'<tr><td colspan="6" class="empty">مفيش منشورات.</td></tr>'}
+
+/* ---------- تنزيل ---------- */
+function report(){var m=maxEng(),L=['تقرير Digital Reach — '+today(),'عدد الشركات: '+db.companies.length+' | عدد المنشورات: '+db.posts.length,'','== الشركات =='];
+  db.companies.forEach(function(c){var s=social(c);L.push(c.name+' | '+c.stage+' | بيانات '+complete(c)+'% | صفقة '+pipe(c)+'% | سوشيال '+(s===null?'—':s+'%')+' | إجمالي '+total(c)+'%')});
+  L.push('','== المنشورات (الأعلى تفاعلًا أولًا) ==');
+  db.posts.slice().sort(function(a,b){return eng(b)-eng(a)}).forEach(function(p){L.push('['+p.platform+'] '+p.page+' — '+p.title+' | ايكات '+num(p.likes)+' | كومنتات '+cCount(p)+' | تفاعل '+pScore(p,m)+'%')});
+  L.push('','ملحوظة: النسب مؤشرات داخلية مش ضمان نتائج.');return L.join('\n')}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-dl]');if(!b)return;var k=b.getAttribute('data-dl'),d=today();
+  if(k==='companies')dl('sales-crm-'+d+'.csv',csv(['الشركة','المسؤول','الرقم','المجال','المصدر','المرحلة','القيمة','ملاحظات','تاريخ الإضافة','اكتمال البيانات %','تقدم الصفقة %','الإجمالي %'],db.companies.map(function(c){return [c.name,c.contact,c.phone,c.industry,c.source,c.stage,c.value,c.notes,c.created,complete(c),pipe(c),total(c)]})),'text/csv;charset=utf-8');
+  if(k==='posts'){var m=maxEng();dl('posts-crm-'+d+'.csv',csv(['المنصة','الصفحة','اسم المنشور','الايكات','عدد الكومنتات','نص الكومنتات','الرابط','التاريخ','نسبة التفاعل %'],db.posts.map(function(p){return [p.platform,p.page,p.title,p.likes,cCount(p),p.comments,p.link,p.date,pScore(p,m)]})),'text/csv;charset=utf-8')}
+  if(k==='plans'){var t=[];db.companies.forEach(function(c){if(db.plans[c.id]&&db.plans[c.id].text)t.push(db.plans[c.id].text)});if(!t.length){alert('مفيش خطط محفوظة');return}dl('plans-'+d+'.txt',t.join('\n\n==============================\n\n'),'text/plain;charset=utf-8')}
+  if(k==='report')dl('report-'+d+'.txt',report(),'text/plain;charset=utf-8');
+  if(k==='backup')dl('digital-reach-backup-'+d+'.json',JSON.stringify(db,null,2),'application/json')});
+$('bRestore').addEventListener('click',function(){$('fRestore').click()});
+$('fRestore').addEventListener('change',function(){var f=this.files[0],inp=this;if(!f)return;var r=new FileReader();
+  r.onload=function(){try{var p=JSON.parse(r.result);if(!p||!Array.isArray(p.companies))throw 0;
+    if(confirm('هيتم استبدال البيانات الحالية بالنسخة دي. متأكد؟')){db={companies:p.companies,posts:Array.isArray(p.posts)?p.posts:[],plans:p.plans&&typeof p.plans==='object'?p.plans:{}};save();renderAll()}}
+    catch(e){alert('الفايل ده مش نسخة احتياطية صحيحة.')}inp.value=''};r.readAsText(f)});
+
+/* ---------- تشغيل ---------- */
+function renderAll(){renderSales();renderPosts();renderPlanSel();renderPerf()}
+$('fst').innerHTML='<option value="">كل المراحل</option>'+opts(STAGES,'');
+renderAll();
+})();
+</script>
+</body>
+</html>
