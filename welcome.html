@@ -45,6 +45,12 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
 .bw{display:flex;align-items:center;gap:8px;min-width:150px}.bb{flex:1;height:10px;background:#1b1348;border-radius:6px;overflow:hidden}.bb i{display:block;height:100%;border-radius:6px}.bw b{font-size:13px;width:42px}
 .dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.dl .card{margin:0}.dl p{color:var(--m);font-size:13px;margin:4px 0 10px}
 .note{color:var(--m);font-size:12px;margin-top:10px;line-height:1.7}
+.table-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px}
+.profile-section{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1)}.profile-section h3{font-size:16px;margin-bottom:10px;color:var(--t)}
+.profile-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.profile-summary>div{background:#1b1348;border-radius:10px;padding:10px;font-size:13px}.profile-summary small{display:block;color:var(--m)}
+.contact-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#1b1348;border-radius:10px;padding:9px 11px;margin:6px 0;font-size:13px;flex-wrap:wrap}
+.timeline-item{border-right:3px solid var(--t);padding:4px 12px 12px;margin:10px 0;background:rgba(255,255,255,.025);border-radius:0 9px 9px 0}.timeline-item small{color:var(--m);display:block;margin-bottom:4px}.timeline-item p{white-space:pre-wrap;line-height:1.7}
+.status-pill{display:inline-block;border-radius:20px;padding:3px 9px;background:rgba(88,190,198,.14);color:var(--t);font-size:12px;white-space:nowrap}
 @media(max-width:800px){body{flex-direction:column}.side{width:100%;height:auto;position:static}.nav{display:flex;flex-wrap:wrap;gap:4px}.nav button{width:auto;margin:0}main{padding:14px}}
 </style>
 </head>
@@ -68,9 +74,10 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
     <button data-tab="upload">⬆️ رفع الملفات</button>
     <button data-tab="download">⬇️ تنزيل الملفات</button>
     <button data-tab="perf">📊 الأداء والنسب</button>
+    <button data-tab="followups">⏰ المتابعات</button>
   </nav>
   <div class="tools">
-    <p>البيانات محفوظة في المتصفح ده بس. نزّل نسخة احتياطية قبل ما تبعت الفايل أو تغيّر الجهاز.</p>
+    <p>البيانات بتتحفظ سحابيًا في Firestore بعد تسجيل الدخول، ومعاها نسخة محلية على الجهاز. نزّل نسخة احتياطية بشكل دوري.</p>
     <button class="btn t" data-dl="backup">تنزيل نسخة احتياطية</button>
     <button class="btn" id="bRestore">استرجاع نسخة</button>
     <button class="btn" id="bSignOut">تسجيل الخروج</button>
@@ -88,7 +95,15 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
       <button class="btn p" id="addC">+ إضافة شركة</button>
       <button class="btn t" data-dl="companies">تنزيل CSV</button>
     </div>
-    <div class="tw"><table><thead><tr><th>#</th><th>الشركة</th><th>المسؤول</th><th>الرقم</th><th>المجال</th><th>عدد الموظفين</th><th>المبيعات السنوية التقديرية</th><th>روابط الشركة</th><th>المصدر</th><th>المرحلة</th><th>قيمة الصفقة</th><th>ملاحظات</th><th></th></tr></thead><tbody id="tbC"></tbody></table></div>
+    <div class="table-tools"><strong id="selectedCount">0 شركة محددة</strong><button class="btn d" id="bulkDelete" disabled>حذف المحدد</button><button class="btn" id="clearSelection" disabled>إلغاء التحديد</button></div>
+    <div class="tw"><table><thead><tr><th><input type="checkbox" id="selectAllCompanies" title="تحديد النتائج الظاهرة"></th><th>#</th><th>الشركة</th><th>المسؤول</th><th>الرقم</th><th>المجال</th><th>عدد الموظفين</th><th>المبيعات السنوية التقديرية</th><th>روابط الشركة</th><th>المصدر</th><th>المرحلة</th><th>حالة الرد</th><th>قيمة الصفقة</th><th>ملاحظات</th><th></th></tr></thead><tbody id="tbC"></tbody></table></div>
+  </section>
+  <!-- المتابعات -->
+  <section class="panel" id="tab-followups">
+    <h1>مركز <span>المتابعات</span></h1><div class="sub">الشركات اللي عليها موعد متابعة، مرتبة حسب تاريخ الاستحقاق.</div>
+    <div class="stats" id="followStats"></div>
+    <div class="tw"><table><thead><tr><th>الشركة</th><th>المرحلة</th><th>حالة الرد</th><th>موعد المتابعة</th><th>سبب الخسارة / ملاحظات</th><th>إجراء</th></tr></thead><tbody id="tbFollowups"></tbody></table></div>
+    <div class="note">إضافة أو تعديل موعد المتابعة وسجل التواصل بيتم من ملف الشركة. المواعيد لا ترسل تنبيهات خارج الـCRM حاليًا.</div>
   </section>
   <!-- المنشورات -->
   <section class="panel" id="tab-posts">
@@ -149,6 +164,10 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
   </section>
 </main>
 <dialog id="dlg"><h2 id="dT"></h2><form id="frm"><div class="fg" id="dF"></div><div class="da"><button class="btn p" type="submit">حفظ</button><button class="btn" type="button" id="dX">إلغاء</button></div></form></dialog>
+<dialog id="profileDlg" style="width:min(820px,96vw)"><h2>ملف الشركة: <span id="profileName" style="color:var(--y)"></span></h2><div id="profileSummary" class="profile-summary"></div>
+<div class="profile-section"><h3>جهات الاتصال</h3><div id="profileContacts"></div><div class="fg"><label>الاسم<input id="newContactName"></label><label>المنصب<input id="newContactRole"></label><label>رقم الهاتف<input id="newContactPhone"></label><label>البريد الإلكتروني<input id="newContactEmail" type="email"></label></div><div class="da"><button class="btn t" type="button" id="addContact">إضافة جهة اتصال</button></div></div>
+<div class="profile-section"><h3>سجل التواصل والنشاط</h3><div class="fg"><label>نوع النشاط<select id="activityType"><option>مكالمة</option><option>واتساب</option><option>بريد إلكتروني</option><option>اجتماع</option><option>رد العميل</option><option>ملاحظة داخلية</option></select></label><label>حالة الرد<select id="profileReplyStatus"><option>لم يتم التواصل</option><option>لا يوجد رد</option><option>رد العميل</option><option>مهتم</option><option>محوّل للإدارة</option><option>غير مناسب</option></select></label><label class="full">تفاصيل النشاط<textarea id="activityNote" rows="3"></textarea></label></div><div class="da"><button class="btn p" type="button" id="addActivity">تسجيل النشاط</button></div><div id="activityTimeline"></div></div>
+<div class="profile-section"><h3>المتابعة والنتيجة</h3><div class="fg"><label>موعد المتابعة القادمة<input id="profileFollowUp" type="date"></label><label>سبب خسارة الفرصة<input id="profileLostReason"></label></div><div class="da"><button class="btn p" type="button" id="saveProfileMeta">حفظ بيانات المتابعة</button><button class="btn" type="button" id="closeProfile">إغلاق</button></div></div></dialog>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -158,6 +177,8 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
 'use strict';
 var STAGES=['جديد','تم التواصل','مهتم','عرض سعر','تفاوض','تم الإغلاق','خسرنا'];
 var SOURCES=['جوجل ماب','انستجرام','فيسبوك','واتساب','ترشيح','أخرى'];
+var REPLY_STATUSES=['لم يتم التواصل','لا يوجد رد','رد العميل','مهتم','محوّل للإدارة','غير مناسب'];
+var selectedCompanyIds={};var currentProfileId=null;
 var NEEDS=['زيادة المبيعات','ظهور على السوشيال','محتوى ومنشورات','التواصل والردود','عروض وحجوزات'];
 var NEXT={'جديد':'ابعت رسالة تعارف على واتساب خلال 24 ساعة','تم التواصل':'تابع بعد يومين واسأله عن احتياجه الأساسي','مهتم':'حدد معاه مكالمة قصيرة واعرض الحل','عرض سعر':'ابعت عرض السعر وحدد موعد للرد','تفاوض':'اتفق على النقاط المعلقة وحدد موعد التوقيع','تم الإغلاق':'ابدأ التنفيذ وخد رأيه بعد أسبوع','خسرنا':'اسأله عن السبب وارجع له بعد 60 يوم'};
 var STEPS={
@@ -227,6 +248,7 @@ function dl(name,txt,type){var a=document.createElement('a');a.href=URL.createOb
 function cc(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}
 function csv(head,rows){return '\uFEFF'+[head.map(cc).join(',')].concat(rows.map(function(r){return r.map(cc).join(',')})).join('\r\n')}
 function byId(arr,id){for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i];return null}
+function addCompanyActivity(company,type,note){if(!company)return;if(!Array.isArray(company.activities))company.activities=[];company.activities.push({id:uid(),type:type||'ملاحظة داخلية',note:String(note||''),date:new Date().toLocaleString('ar-EG')});company.lastActivityAt=new Date().toISOString()}
 function opts(a,sel){return a.map(function(s){return '<option'+(s===sel?' selected':'')+'>'+esc(s)+'</option>'}).join('')}
 
 /* ---------- حسابات ---------- */
@@ -267,7 +289,8 @@ var FC=[
   {k:'annualRevenueEstimate',l:'المبيعات السنوية التقديرية (بالعملة والنطاق)',full:1},
   {k:'revenueConfidence',l:'مستوى الثقة في تقدير المبيعات',t:'select',o:['غير محدد','مرتفع','متوسط','منخفض']},
   {k:'source',l:'المصدر',t:'select',o:SOURCES},{k:'stage',l:'المرحلة',t:'select',o:STAGES},
-  {k:'value',l:'قيمة الصفقة',t:'number',step:1},
+  {k:'replyStatus',l:'حالة الرد',t:'select',o:REPLY_STATUSES},{k:'followUpDate',l:'موعد المتابعة',t:'date'},
+  {k:'value',l:'قيمة الصفقة',t:'number',step:1},{k:'lostReason',l:'سبب خسارة الفرصة',full:1},
   {k:'facebook',l:'رابط Facebook',full:1},{k:'instagram',l:'رابط Instagram',full:1},{k:'linkedin',l:'رابط LinkedIn',full:1},
   {k:'estimateBasis',l:'أساس التقدير ومصدره',t:'textarea',full:1,r:3},
   {k:'notes',l:'ملاحظات',t:'textarea',full:1}
@@ -280,13 +303,69 @@ function renderSales(){
   L.forEach(function(c){if(c.stage==='تم الإغلاق'){won++;wv+=num(c.value)}else if(c.stage!=='خسرنا'){open++;pv+=num(c.value)}});
   $('stats').innerHTML=[['إجمالي الشركات',L.length],['صفقات مفتوحة',open],['قيمة المفتوح',fmt(pv)],['تم إغلاقها',won],['قيمة المغلق',fmt(wv)]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
   var q=$('q').value.trim().toLowerCase(),st=$('fst').value;
-  var F=L.filter(function(c){if(st&&c.stage!==st)return false;return !q||[c.name,c.contact,c.phone,c.industry,c.source,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.estimateBasis].join(' ').toLowerCase().indexOf(q)>-1});
-  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.contact)+'</td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td>'+esc(c.employees)+'</td><td>'+esc(c.annualRevenueEstimate)+'</td><td><div class="act">'+socialLinks(c)+'</div></td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td>'+(c.value?fmt(num(c.value)):'-')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act">'+(c.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl(c))+'">واتساب</a>':'<button class="btn s" disabled title="أضف رقم الهاتف أولًا">واتساب</button>')+'<button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="13" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>'}
+  var F=L.filter(function(c){if(st&&c.stage!==st)return false;return !q||[c.name,c.contact,c.phone,c.industry,c.source,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.estimateBasis,c.replyStatus,c.lostReason].join(' ').toLowerCase().indexOf(q)>-1});
+  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td><input type="checkbox" data-company-select="'+esc(c.id)+'" '+(selectedCompanyIds[c.id]?'checked':'')+'></td><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.contact)+'</td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td>'+esc(c.employees)+'</td><td>'+esc(c.annualRevenueEstimate)+'</td><td><div class="act">'+socialLinks(c)+'</div></td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td><span class="status-pill">'+esc(c.replyStatus||'لم يتم التواصل')+'</span></td><td>'+(c.value?fmt(num(c.value)):'-')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act">'+(c.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl(c))+'">واتساب</a>':'<button class="btn s" disabled>واتساب</button>')+'<button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">الملف</button><button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="15" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>';
+  renderBulkState(F);
+}
+function renderBulkState(visible){
+  var ids=Object.keys(selectedCompanyIds).filter(function(id){return selectedCompanyIds[id]});
+  $('selectedCount').textContent=ids.length+' شركة محددة';$('bulkDelete').disabled=!ids.length;$('clearSelection').disabled=!ids.length;
+  var all=visible&&visible.length>0&&visible.every(function(c){return !!selectedCompanyIds[c.id]});
+  $('selectAllCompanies').checked=!!all;$('selectAllCompanies').indeterminate=!!(visible&&visible.some(function(c){return !!selectedCompanyIds[c.id]})&&!all);
+}
 $('q').addEventListener('input',renderSales);$('fst').addEventListener('change',renderSales);
 $('addC').addEventListener('click',function(){editC(null)});
 function editC(id){var c=id?byId(db.companies,id):null;
   form(c?'تعديل شركة':'إضافة شركة',FC,c,function(o){if(!o.name)return;o.value=o.value===''?'':num(o.value);
-    if(c){for(var k in o)c[k]=o[k]}else{o.id=uid();o.created=today();db.companies.push(o)}save();renderAll()})}
+    if(c){var oldStage=c.stage;for(var k in o)c[k]=o[k];if(oldStage!==c.stage)addCompanyActivity(c,'تغيير المرحلة','تم تغيير المرحلة من '+oldStage+' إلى '+c.stage)}
+    else{o.id=uid();o.created=today();o.contacts=[];o.activities=[];o.replyStatus=o.replyStatus||'لم يتم التواصل';db.companies.push(o);addCompanyActivity(o,'إنشاء الشركة','تمت إضافة الشركة إلى CRM')}
+    save();renderAll()})}
+
+
+/* ---------- ملفات الشركات ---------- */
+function renderProfile(){
+  var c=byId(db.companies,currentProfileId);if(!c)return;
+  if(!Array.isArray(c.contacts))c.contacts=[];if(!Array.isArray(c.activities))c.activities=[];
+  $('profileName').textContent=c.name||'';
+  $('profileSummary').innerHTML='<div><small>المجال</small>'+esc(c.industry||'—')+'</div><div><small>المرحلة</small>'+esc(c.stage||'—')+'</div><div><small>حالة الرد</small>'+esc(c.replyStatus||'لم يتم التواصل')+'</div><div><small>رقم الشركة</small>'+esc(c.phone||'—')+'</div><div><small>المسؤول الرئيسي</small>'+esc(c.contact||'—')+'</div><div><small>روابط الشركة</small>'+socialLinks(c)+'</div>';
+  $('profileReplyStatus').value=c.replyStatus||'لم يتم التواصل';$('profileFollowUp').value=c.followUpDate||'';$('profileLostReason').value=c.lostReason||'';
+  $('profileContacts').innerHTML=c.contacts.length?c.contacts.map(function(p){return '<div class="contact-row"><span><b>'+esc(p.name||'بدون اسم')+'</b> '+esc(p.role||'')+'<br><span dir="ltr">'+esc(p.phone||'')+'</span> '+esc(p.email||'')+'</span><span class="act">'+(p.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl({phone:p.phone}))+'">واتساب</a>':'')+'<button class="btn d s" data-contact-delete="'+esc(p.id)+'">حذف</button></span></div>'}).join(''):'<div class="note">لسه مفيش جهات اتصال إضافية مسجلة.</div>';
+  var acts=c.activities.slice().reverse();
+  $('activityTimeline').innerHTML=acts.length?acts.map(function(a){return '<div class="timeline-item"><small>'+esc(a.date||'')+' — '+esc(a.type||'نشاط')+'</small><p>'+esc(a.note||'')+'</p></div>'}).join(''):'<div class="note">سجل التواصل لسه فاضي.</div>';
+}
+function openProfile(id){if(!byId(db.companies,id))return;currentProfileId=id;renderProfile();$('profileDlg').showModal()}
+$('addContact').addEventListener('click',function(){
+  var c=byId(db.companies,currentProfileId);if(!c)return;
+  var p={id:uid(),name:$('newContactName').value.trim(),role:$('newContactRole').value.trim(),phone:$('newContactPhone').value.trim(),email:$('newContactEmail').value.trim()};
+  if(!p.name&&!p.phone&&!p.email){alert('اكتب اسم أو رقم أو بريد جهة الاتصال.');return}
+  if(!Array.isArray(c.contacts))c.contacts=[];c.contacts.push(p);addCompanyActivity(c,'إضافة جهة اتصال','تمت إضافة جهة اتصال: '+(p.name||p.phone||p.email));
+  $('newContactName').value='';$('newContactRole').value='';$('newContactPhone').value='';$('newContactEmail').value='';
+  save();renderProfile();renderAll();
+});
+$('addActivity').addEventListener('click',function(){
+  var c=byId(db.companies,currentProfileId);if(!c)return;var note=$('activityNote').value.trim();if(!note){alert('اكتب تفاصيل النشاط الأول.');return}
+  addCompanyActivity(c,$('activityType').value,note);c.replyStatus=$('profileReplyStatus').value;$('activityNote').value='';save();renderProfile();renderAll();
+});
+$('saveProfileMeta').addEventListener('click',function(){
+  var c=byId(db.companies,currentProfileId);if(!c)return;
+  c.followUpDate=$('profileFollowUp').value;c.lostReason=$('profileLostReason').value.trim();c.replyStatus=$('profileReplyStatus').value;
+  addCompanyActivity(c,'تحديث بيانات المتابعة','حالة الرد: '+c.replyStatus+' | موعد المتابعة: '+(c.followUpDate||'غير محدد')+(c.lostReason?' | سبب الخسارة: '+c.lostReason:''));
+  save();renderProfile();renderAll();alert('تم حفظ بيانات المتابعة.');
+});
+$('profileContacts').addEventListener('click',function(e){
+  var b=e.target.closest('[data-contact-delete]');if(!b)return;var c=byId(db.companies,currentProfileId);if(!c)return;
+  var id=b.getAttribute('data-contact-delete');if(!confirm('تحذف جهة الاتصال دي؟'))return;
+  c.contacts=(c.contacts||[]).filter(function(p){return p.id!==id});addCompanyActivity(c,'حذف جهة اتصال','تم حذف جهة اتصال من ملف الشركة.');save();renderProfile();renderAll();
+});
+$('closeProfile').addEventListener('click',function(){$('profileDlg').close()});
+
+/* ---------- مركز المتابعات ---------- */
+function renderFollowups(){
+  var t=today(),list=db.companies.filter(function(c){return !!c.followUpDate}).slice().sort(function(a,b){return String(a.followUpDate).localeCompare(String(b.followUpDate))});
+  var overdue=list.filter(function(c){return c.followUpDate<t}).length,due=list.filter(function(c){return c.followUpDate===t}).length,future=list.filter(function(c){return c.followUpDate>t}).length;
+  $('followStats').innerHTML=[['متابعات متأخرة',overdue],['مستحقة اليوم',due],['قادمة',future]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
+  $('tbFollowups').innerHTML=list.length?list.map(function(c){var status=c.followUpDate<t?'متأخرة':c.followUpDate===t?'اليوم':'قادمة';return '<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.stage||'—')+'</td><td>'+esc(c.replyStatus||'لم يتم التواصل')+'</td><td><span class="status-pill">'+esc(c.followUpDate)+' — '+status+'</span></td><td class="nt">'+esc(c.lostReason||c.notes||'—')+'</td><td><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">فتح الملف</button></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">مفيش مواعيد متابعة مسجلة. افتح ملف الشركة وحدد موعد المتابعة القادمة.</td></tr>';
+}
 
 /* ---------- المنشورات ---------- */
 function renderPosts(){
@@ -304,10 +383,26 @@ function editP(id){var p=id?byId(db.posts,id):null;
 /* ---------- أحداث الجداول ---------- */
 document.addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;var a=b.getAttribute('data-act'),id=b.getAttribute('data-id');
-  if(a==='eC')editC(id);if(a==='eP')editP(id);
-  if(a==='dC'){var c=byId(db.companies,id);if(c&&confirm('تمسح "'+c.name+'"؟ مفيش رجوع.')){db.companies=db.companies.filter(function(x){return x.id!==id});delete db.plans[id];save();renderAll()}}
+  if(a==='eC')editC(id);if(a==='eP')editP(id);if(a==='profileC')openProfile(id);
+  if(a==='dC'){var c=byId(db.companies,id);if(c&&confirm('تمسح "'+c.name+'"؟ مفيش رجوع.')){db.companies=db.companies.filter(function(x){return x.id!==id});delete db.plans[id];delete selectedCompanyIds[id];save();renderAll()}}
   if(a==='dP'){var p=byId(db.posts,id);if(p&&confirm('تمسح المنشور ده؟ مفيش رجوع.')){db.posts=db.posts.filter(function(x){return x.id!==id});save();renderAll()}}});
-document.addEventListener('change',function(e){var s=e.target.closest('[data-stg]');if(!s)return;var c=byId(db.companies,s.getAttribute('data-stg'));if(c){c.stage=s.value;save();renderAll()}});
+document.addEventListener('change',function(e){
+  var box=e.target.closest('[data-company-select]');
+  if(box){var id=box.getAttribute('data-company-select');if(box.checked)selectedCompanyIds[id]=true;else delete selectedCompanyIds[id];renderBulkState();return}
+  if(e.target.id==='selectAllCompanies'){
+    var q=$('q').value.trim().toLowerCase(),st=$('fst').value;
+    db.companies.filter(function(c){if(st&&c.stage!==st)return false;return !q||[c.name,c.contact,c.phone,c.industry,c.source,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.estimateBasis,c.replyStatus,c.lostReason].join(' ').toLowerCase().indexOf(q)>-1}).forEach(function(c){if(e.target.checked)selectedCompanyIds[c.id]=true;else delete selectedCompanyIds[c.id]});
+    renderSales();return;
+  }
+  var s=e.target.closest('[data-stg]');if(s){var c=byId(db.companies,s.getAttribute('data-stg'));if(c){var old=c.stage;c.stage=s.value;if(old!==c.stage)addCompanyActivity(c,'تغيير المرحلة','تم تغيير المرحلة من '+old+' إلى '+c.stage);save();renderAll()}}
+});
+$('bulkDelete').addEventListener('click',function(){
+  var ids=Object.keys(selectedCompanyIds).filter(function(id){return selectedCompanyIds[id]});if(!ids.length)return;
+  if(!confirm('هتحذف '+ids.length+' شركة والخطط المرتبطة بها. العملية لا يمكن التراجع عنها. نزّل نسخة احتياطية قبل المتابعة.'))return;
+  db.companies=db.companies.filter(function(c){if(ids.indexOf(c.id)>-1){delete db.plans[c.id];return false}return true});
+  selectedCompanyIds={};save();renderAll();
+});
+$('clearSelection').addEventListener('click',function(){selectedCompanyIds={};renderSales()});
 
 /* ---------- الخطط ---------- */
 $('needs').innerHTML=NEEDS.map(function(n,i){return '<label><input type="checkbox" value="'+esc(n)+'">'+esc(n)+'</label>'}).join('');
@@ -383,7 +478,7 @@ $('upGo').addEventListener('click',function(){
           if(changed)updated++;else skipped++;
           return;
         }
-        if(STAGES.indexOf(o.stage)<0)o.stage='جديد';if(!o.source)o.source='أخرى';o.value=o.value?num(o.value):'';o.id=uid();o.created=today();db.companies.push(o)
+        if(STAGES.indexOf(o.stage)<0)o.stage='جديد';if(!o.source)o.source='أخرى';if(REPLY_STATUSES.indexOf(o.replyStatus)<0)o.replyStatus='لم يتم التواصل';o.value=o.value?num(o.value):'';o.id=uid();o.created=today();o.contacts=[];o.activities=[];addCompanyActivity(o,'استيراد','تم استيراد الشركة من ملف CSV.');db.companies.push(o)
       }else{
         if(!o.title)return;
         if(o.platform!=='فيسبوك'&&o.platform!=='انستجرام'){var s=(o.platform||'').toLowerCase();o.platform=s.indexOf('insta')>-1||s.indexOf('انستجرام')>-1?'انستجرام':'فيسبوك'}
@@ -422,7 +517,7 @@ $('fRestore').addEventListener('change',function(){var f=this.files[0],inp=this;
     catch(e){alert('الفايل ده مش نسخة احتياطية صحيحة.')}inp.value=''};r.readAsText(f)});
 
 /* ---------- تشغيل ---------- */
-function renderAll(){renderSales();renderPosts();renderPlanSel();renderPerf()}
+function renderAll(){renderSales();renderPosts();renderPlanSel();renderPerf();renderFollowups()}
 $('fst').innerHTML='<option value="">كل المراحل</option>'+opts(STAGES,'');
 renderAll();
 
