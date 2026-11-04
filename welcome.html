@@ -122,7 +122,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
         <button class="btn p" id="upGo">استيراد</button>
       </div>
       <div id="upMsg" class="note"></div>
-      <div class="note">أسماء الأعمدة المقبولة — شركات: الشركة/name/title ، المسؤول ، الرقم/phone ، المجال/category ، المصدر ، المرحلة ، القيمة ، ملاحظات، الموقع الإلكتروني، Facebook، Instagram، LinkedIn، عدد الموظفين، المبيعات السنوية التقديرية، مستوى الثقة، أساس التقدير ومصدره. منشورات: المنصة ، الصفحة ، اسم المنشور/title ، الايكات/likes ، عدد الكومنتات ، الكومنتات ، الرابط ، التاريخ. الشركات المكررة بالاسم بتتخطى.</div>
+      <div class="note">أسماء الأعمدة المقبولة — شركات: الشركة/name/title ، المسؤول ، الرقم/phone ، المجال/category ، المصدر ، المرحلة ، القيمة ، ملاحظات، الموقع الإلكتروني، Facebook، Instagram، LinkedIn، عدد الموظفين، المبيعات السنوية التقديرية، مستوى الثقة، أساس التقدير ومصدره. منشورات: المنصة ، الصفحة ، اسم المنشور/title ، الايكات/likes ، عدد الكومنتات ، الكومنتات ، الرابط ، التاريخ. الشركات المكررة بالاسم يتم استكمال الخانات الفاضية فيها فقط دون استبدال البيانات الموجودة.</div>
     </div>
   </section>
   <!-- تنزيل -->
@@ -363,14 +363,34 @@ $('upGo').addEventListener('click',function(){
     var tgt=$('upT').value,M=tgt==='companies'?MAPC:MAPP,head=rows[0].map(function(h){return h.trim().toLowerCase()}),idx={};
     for(var k in M){for(var j=0;j<head.length;j++){if(M[k].indexOf(head[j])>-1){idx[k]=j;break}}}
     var need=tgt==='companies'?'name':'title';if(idx[need]===undefined){$('upMsg').textContent='مفيش عمود '+(tgt==='companies'?'اسم الشركة':'اسم المنشور')+' في الملف. راجع أسماء الأعمدة.';return}
-    var added=0,skipped=0;
+    var added=0,updated=0,skipped=0;
     rows.slice(1).forEach(function(r){var o={};for(var k in idx)o[k]=(r[idx[k]]||'').trim();
-      if(tgt==='companies'){if(!o.name)return;var dup=db.companies.some(function(c){return String(c.name).toLowerCase()===o.name.toLowerCase()});if(dup){skipped++;return}
-        if(STAGES.indexOf(o.stage)<0)o.stage='جديد';if(!o.source)o.source='أخرى';o.value=o.value?num(o.value):'';o.id=uid();o.created=today();db.companies.push(o)}
-      else{if(!o.title)return;if(o.platform!=='فيسبوك'&&o.platform!=='انستجرام'){var s=(o.platform||'').toLowerCase();o.platform=s.indexOf('insta')>-1||s.indexOf('انستجرام')>-1?'انستجرام':'فيسبوك'}
-        o.page=o.page||'';o.id=uid();db.posts.push(o)}
+      if(tgt==='companies'){
+        if(!o.name)return;
+        var dup=null;
+        for(var ci=0;ci<db.companies.length;ci++){
+          if(String(db.companies[ci].name||'').trim().toLowerCase()===o.name.trim().toLowerCase()){dup=db.companies[ci];break}
+        }
+        if(dup){
+          var changed=false;
+          for(var field in o){
+            if(field==='name'||o[field]==='')continue;
+            if(dup[field]===''||dup[field]==null){
+              dup[field]=field==='value'?num(o[field]):o[field];
+              changed=true;
+            }
+          }
+          if(changed)updated++;else skipped++;
+          return;
+        }
+        if(STAGES.indexOf(o.stage)<0)o.stage='جديد';if(!o.source)o.source='أخرى';o.value=o.value?num(o.value):'';o.id=uid();o.created=today();db.companies.push(o)
+      }else{
+        if(!o.title)return;
+        if(o.platform!=='فيسبوك'&&o.platform!=='انستجرام'){var s=(o.platform||'').toLowerCase();o.platform=s.indexOf('insta')>-1||s.indexOf('انستجرام')>-1?'انستجرام':'فيسبوك'}
+        o.page=o.page||'';o.id=uid();db.posts.push(o)
+      }
       added++});
-    save();renderAll();$('upMsg').textContent='تم استيراد '+added+' صف'+(skipped?' وتخطّي '+skipped+' مكرر':'')+'.';$('upF').value=''};
+    save();renderAll();$('upMsg').textContent='تم استيراد '+added+' شركة جديدة، وتحديث '+updated+' شركة في الخانات الفاضية فقط، وتخطي '+skipped+' صف بدون بيانات جديدة.';$('upF').value=''};
   r.readAsText(f,'UTF-8')});
 
 /* ---------- الأداء ---------- */
