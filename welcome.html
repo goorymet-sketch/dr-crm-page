@@ -205,7 +205,7 @@ function whatsappUrl(company){
   var phone=String(company.phone||'').replace(/[^0-9]/g,'');
   if(phone.indexOf('00')===0)phone=phone.slice(2);
   if(!phone)return '';
-  var message='مساء الخير يا فندم، لو سمحت عايز أتواصل مع مسؤول المبيعات.';
+  var message='مساء الخير يا فندم لو سمحت عايز اتواصل مع مسئول المبيعات';
   return 'https://wa.me/'+phone+'?text='+encodeURIComponent(message);
 }
 function uid(){return 'x'+Date.now()+Math.floor(Math.random()*100000)}
