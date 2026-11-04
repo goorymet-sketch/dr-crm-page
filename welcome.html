@@ -9,6 +9,11 @@
 :root{--nd:#1f1650;--n:#29386a;--nl:#34457d;--y:#ffc400;--t:#58bec6;--w:#fff;--m:#aab3d1;--r:#ff6b6b;--g:#4ade80}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Cairo',Tahoma,Arial,sans-serif;background:var(--nd);color:var(--w);min-height:100vh;display:flex}
+body.auth-locked .side,body.auth-locked main{display:none}
+#authGate{display:none;min-height:100vh;width:100%;align-items:center;justify-content:center;padding:20px;background:var(--nd)}
+body.auth-locked #authGate{display:flex}
+.auth-card{width:min(420px,100%);background:var(--n);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.auth-card h1{margin-bottom:8px}.auth-card p{color:var(--m);font-size:14px;line-height:1.7;margin-bottom:16px}.auth-card label{display:block;color:var(--m);font-size:13px;margin:12px 0}.auth-card input{display:block;width:100%;margin-top:5px}.auth-card .btn{width:100%;margin-top:8px}#authMsg{min-height:24px;color:var(--y);font-size:13px;margin-top:10px}
 .side{width:230px;background:#181040;border-left:1px solid rgba(255,255,255,.08);padding:18px 12px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
 .logo{text-align:center;margin-bottom:20px}.logo b{font-size:23px;font-weight:900}.logo b span{color:var(--y)}.logo small{display:block;color:var(--t);font-size:12px;letter-spacing:3px}
 .nav button{display:block;width:100%;text-align:right;background:0;border:0;color:var(--m);font:600 15px inherit;font-family:inherit;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:4px}
@@ -43,7 +48,17 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
 @media(max-width:800px){body{flex-direction:column}.side{width:100%;height:auto;position:static}.nav{display:flex;flex-wrap:wrap;gap:4px}.nav button{width:auto;margin:0}main{padding:14px}}
 </style>
 </head>
-<body>
+<body class="auth-locked">
+<section id="authGate">
+  <form class="auth-card" id="loginForm">
+    <h1>Digital <span style="color:var(--y)">Reach</span> CRM</h1>
+    <p>سجّل الدخول بحسابك للوصول إلى بيانات الشركات والمنشورات والخطط المحفوظة على الإنترنت.</p>
+    <label>البريد الإلكتروني<input id="loginEmail" type="email" autocomplete="username" required></label>
+    <label>كلمة المرور<input id="loginPassword" type="password" autocomplete="current-password" required></label>
+    <button class="btn p" id="loginBtn" type="submit">تسجيل الدخول</button>
+    <div id="authMsg" role="status" aria-live="polite"></div>
+  </form>
+</section>
 <aside class="side">
   <div class="logo"><b>Digital <span>Reach</span></b><small>CRM</small></div>
   <nav class="nav" id="nav">
@@ -58,6 +73,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
     <p>البيانات محفوظة في المتصفح ده بس. نزّل نسخة احتياطية قبل ما تبعت الفايل أو تغيّر الجهاز.</p>
     <button class="btn t" data-dl="backup">تنزيل نسخة احتياطية</button>
     <button class="btn" id="bRestore">استرجاع نسخة</button>
+    <button class="btn" id="bSignOut">تسجيل الخروج</button>
     <input type="file" id="fRestore" accept=".json" hidden>
   </div>
 </aside>
@@ -134,6 +150,9 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
 </main>
 <dialog id="dlg"><h2 id="dT"></h2><form id="frm"><div class="fg" id="dF"></div><div class="da"><button class="btn p" type="submit">حفظ</button><button class="btn" type="button" id="dX">إلغاء</button></div></form></dialog>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
 (function(){
 'use strict';
@@ -148,9 +167,35 @@ var STEPS={
 'التواصل والردود':['حدد وقت رد أقصاه ساعة على الرسائل والكومنتات','جهّز 5 ردود جاهزة للأسئلة المتكررة','سجّل كل عميل مهتم في الـ CRM مع موعد المتابعة'],
 'عروض وحجوزات':['صمّم عرض واضح بمدة محددة وسعر وشروط','حط زرار حجز/واتساب في كل منشور عرض','تابع الحجوزات يوميًا واسأل كل عميل لم يكمل ليه']};
 var KEY='dr_crm_v1';
+var firebaseConfig={
+  apiKey:"AIzaSyDhZKeWe1ytVMt6Vlm4JExESk9kXq3RFeg",
+  authDomain:"digitalreach-crm.firebaseapp.com",
+  projectId:"digitalreach-crm",
+  storageBucket:"digitalreach-crm.firebasestorage.app",
+  messagingSenderId:"633336135091",
+  appId:"1:633336135091:web:de8f20b2fa143ae6665fc6",
+  measurementId:"G-2M46FMRKYJ"
+};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth();
+var firestore=firebase.firestore();
+var cloudDoc=firestore.collection('crmData').doc('main');
+var cloudReady=false,cloudTimer=null;
 var db=load();
 function load(){var b={companies:[],posts:[],plans:{}};try{var r=localStorage.getItem(KEY);if(r){var p=JSON.parse(r);if(p&&typeof p==='object'){if(Array.isArray(p.companies))b.companies=p.companies;if(Array.isArray(p.posts))b.posts=p.posts;if(p.plans&&typeof p.plans==='object')b.plans=p.plans}}}catch(e){}return b}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('تعذّر الحفظ في المتصفح. نزّل نسخة احتياطية.')}}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('تعذّر الحفظ المحلي. نزّل نسخة احتياطية.')}
+  if(cloudReady){
+    if(cloudTimer)clearTimeout(cloudTimer);
+    cloudTimer=setTimeout(function(){
+      cloudDoc.set({companies:db.companies,posts:db.posts,plans:db.plans,updatedAt:firebase.firestore.FieldValue.serverTimestamp()})
+        .catch(function(e){console.error('Cloud save failed',e);setAuthMessage('الحفظ السحابي فشل. راجع الاتصال وقواعد Firestore، ونزّل نسخة احتياطية مؤقتًا.')});
+    },400);
+  }
+}
+function setAuthMessage(message){var el=document.getElementById('authMsg');if(el)el.textContent=message||''}
+function showCRM(){document.body.classList.remove('auth-locked');setAuthMessage('')}
+function lockCRM(){cloudReady=false;document.body.classList.add('auth-locked')}
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function num(v){var n=parseFloat(v);return isNaN(n)?0:n}
@@ -309,6 +354,42 @@ $('fRestore').addEventListener('change',function(){var f=this.files[0],inp=this;
 function renderAll(){renderSales();renderPosts();renderPlanSel();renderPerf()}
 $('fst').innerHTML='<option value="">كل المراحل</option>'+opts(STAGES,'');
 renderAll();
+
+$('loginForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  var email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;
+  $('loginBtn').disabled=true;setAuthMessage('جاري تسجيل الدخول...');
+  auth.signInWithEmailAndPassword(email,password).catch(function(err){
+    $('loginBtn').disabled=false;
+    var msg=err&&err.code==='auth/unauthorized-domain'?'الدومين غير مضاف في Firebase Authentication > Settings > Authorized domains.':
+      err&&err.code==='auth/invalid-credential'?'الإيميل أو كلمة المرور غير صحيحة.':'تعذّر تسجيل الدخول: '+(err.message||'راجع إعدادات Firebase.');
+    setAuthMessage(msg);
+  });
+});
+$('bSignOut').addEventListener('click',function(){cloudReady=false;auth.signOut().then(lockCRM).catch(function(){setAuthMessage('تعذّر تسجيل الخروج.')})});
+auth.onAuthStateChanged(async function(user){
+  lockCRM();
+  $('loginBtn').disabled=false;
+  if(!user){setAuthMessage('');return}
+  if(String(user.email||'').toLowerCase()!=='goory.met@gmail.com'){
+    await auth.signOut();setAuthMessage('الحساب ده مش مصرح له بالدخول.');return;
+  }
+  setAuthMessage('جاري تحميل بيانات CRM...');
+  try{
+    var snap=await cloudDoc.get();
+    if(snap.exists){
+      var remote=snap.data()||{};
+      db={companies:Array.isArray(remote.companies)?remote.companies:[],posts:Array.isArray(remote.posts)?remote.posts:[],plans:remote.plans&&typeof remote.plans==='object'?remote.plans:{}};
+      try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}
+    }else{
+      await cloudDoc.set({companies:db.companies,posts:db.posts,plans:db.plans,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    }
+    cloudReady=true;showCRM();renderAll();
+  }catch(err){
+    console.error('Cloud load failed',err);
+    setAuthMessage('تعذّر تحميل البيانات من Firestore. تأكد من نشر قواعد الحماية والاتصال بالإنترنت.');
+  }
+});
 })();
 </script>
 </body>
