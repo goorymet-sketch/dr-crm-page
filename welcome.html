@@ -3,578 +3,614 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Digital Reach CRM</title>
+<meta name="color-scheme" content="dark">
+<title>Digital Reach CRM — Company Intelligence &amp; Sales</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--nd:#1f1650;--n:#29386a;--nl:#34457d;--y:#ffc400;--t:#58bec6;--w:#fff;--m:#aab3d1;--r:#ff6b6b;--g:#4ade80}
+:root{
+  --nd:#1f1650;--n:#29386a;--nl:#34457d;--y:#ffc400;--t:#58bec6;--w:#fff;--m:#aab3d1;--r:#ff6b6b;--g:#4ade80;
+  --line:rgba(255,255,255,.1);--in:#1b1348;--card:#241a5c;
+}
 *{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
 body{font-family:'Cairo',Tahoma,Arial,sans-serif;background:var(--nd);color:var(--w);min-height:100vh;display:flex}
 body.auth-locked .side,body.auth-locked main{display:none}
 #authGate{display:none;min-height:100vh;width:100%;align-items:center;justify-content:center;padding:20px;background:var(--nd)}
 body.auth-locked #authGate{display:flex}
-.auth-card{width:min(420px,100%);background:var(--n);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
-.auth-card h1{margin-bottom:8px}.auth-card p{color:var(--m);font-size:14px;line-height:1.7;margin-bottom:16px}.auth-card label{display:block;color:var(--m);font-size:13px;margin:12px 0}.auth-card input{display:block;width:100%;margin-top:5px}.auth-card .btn{width:100%;margin-top:8px}#authMsg{min-height:24px;color:var(--y);font-size:13px;margin-top:10px}
-.side{width:230px;background:#181040;border-left:1px solid rgba(255,255,255,.08);padding:18px 12px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.logo{text-align:center;margin-bottom:20px}.logo b{font-size:23px;font-weight:900}.logo b span{color:var(--y)}.logo small{display:block;color:var(--t);font-size:12px;letter-spacing:3px}
-.nav button{display:block;width:100%;text-align:right;background:0;border:0;color:var(--m);font:600 15px inherit;font-family:inherit;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:4px}
-.nav button:hover{background:rgba(255,255,255,.06);color:var(--w)}.nav button.on{background:var(--y);color:var(--nd)}
-.tools{margin-top:16px;border-top:1px solid rgba(255,255,255,.1);padding-top:12px}.tools p{font-size:12px;color:var(--m);margin-bottom:8px}.tools .btn{width:100%;margin-bottom:6px;font-size:13px}
-main{flex:1;padding:24px;min-width:0}
-h1{font-size:25px;font-weight:900;margin-bottom:3px}h1 span{color:var(--y)}.sub{color:var(--m);margin-bottom:16px;font-size:14px}
-.panel{display:none}.panel.on{display:block}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px}
-.stat{background:var(--n);border-radius:14px;padding:12px 15px;border-top:3px solid var(--t)}.stat:nth-child(even){border-top-color:var(--y)}.stat small{color:var(--m);font-size:13px}.stat div{font-size:23px;font-weight:900}
-.bar2{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-input,select,textarea{font-family:inherit;font-size:14px;background:#1b1348;color:var(--w);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 11px;outline:0}
-input:focus,select:focus,textarea:focus{border-color:var(--t)}.bar2 input{flex:1;min-width:170px}
-.btn{font-family:inherit;font-size:14px;font-weight:700;border:0;border-radius:10px;padding:8px 15px;cursor:pointer;background:var(--nl);color:var(--w)}.btn:hover{filter:brightness(1.15)}
-.btn.p{background:var(--y);color:var(--nd)}.btn.t{background:var(--t);color:var(--nd)}.btn.d{background:0;color:var(--r);border:1px solid var(--r);padding:4px 9px;font-size:12px}.btn.s{padding:4px 9px;font-size:12px}
-.tw{overflow-x:auto;background:var(--n);border-radius:14px}table{width:100%;border-collapse:collapse;min-width:780px}
-th,td{padding:10px 11px;text-align:right;font-size:14px;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:middle}
-th{color:var(--t);background:rgba(0,0,0,.15);white-space:nowrap}tr:last-child td{border:0}
-td.nt{max-width:220px;color:var(--m);font-size:13px}td select{padding:4px 7px;font-size:13px}.empty{text-align:center;color:var(--m);padding:36px 10px}
-.act{display:flex;gap:6px;flex-wrap:wrap}
-details summary{cursor:pointer;color:var(--t);font-size:13px}details div{white-space:pre-wrap;font-size:13px;color:var(--m);margin-top:6px;max-width:320px}
-dialog{background:var(--n);color:var(--w);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:20px;width:min(540px,94vw);margin:auto;max-height:90vh;overflow-y:auto}
-dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-size:19px}
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fg label{font-size:13px;color:var(--m)}.fg label input,.fg label select,.fg label textarea{width:100%;margin-top:4px}.fg .full{grid-column:1/-1}
-.da{display:flex;gap:8px;margin-top:14px}
-.card{background:var(--n);border-radius:14px;padding:16px;margin-bottom:14px}
-.chk{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.chk label{background:#1b1348;border-radius:20px;padding:6px 12px;font-size:13px;cursor:pointer}.chk input{margin-left:6px}
-#planTxt{width:100%;min-height:300px;line-height:1.8}
-.bw{display:flex;align-items:center;gap:8px;min-width:150px}.bb{flex:1;height:10px;background:#1b1348;border-radius:6px;overflow:hidden}.bb i{display:block;height:100%;border-radius:6px}.bw b{font-size:13px;width:42px}
-.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.dl .card{margin:0}.dl p{color:var(--m);font-size:13px;margin:4px 0 10px}
-.note{color:var(--m);font-size:12px;margin-top:10px;line-height:1.7}
+.auth-card{width:min(430px,100%);background:var(--n);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.auth-card h1{margin-bottom:8px;font-size:26px}
+.auth-card p{color:var(--m);font-size:14px;line-height:1.8;margin-bottom:16px}
+.auth-card label{display:block;color:var(--m);font-size:13px;margin:12px 0}
+.auth-card input{display:block;width:100%;margin-top:6px}
+.auth-card .btn{width:100%;margin-top:10px}
+#authMsg{min-height:24px;color:var(--y);font-size:13px;margin-top:12px;line-height:1.7}
+
+.side{width:250px;background:#181040;border-left:1px solid var(--line);padding:18px 12px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{text-align:center;margin-bottom:18px}
+.logo b{font-size:23px;font-weight:900}
+.logo b span{color:var(--y)}
+.logo small{display:block;color:var(--t);font-size:11px;letter-spacing:2px;margin-top:2px}
+.nav button{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;text-align:right;background:0;border:0;color:var(--m);font:600 14px inherit;font-family:inherit;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:3px}
+.nav button:hover{background:rgba(255,255,255,.06);color:var(--w)}
+.nav button.on{background:var(--y);color:var(--nd)}
+.nav-badge{display:none;background:var(--r);color:#fff;border-radius:20px;font-size:11px;padding:0 7px;line-height:18px;min-width:18px;text-align:center}
+.tools{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.tools p{font-size:11.5px;color:var(--m);margin-bottom:10px;line-height:1.7}
+.tools .btn{width:100%;margin-bottom:6px;font-size:13px}
+
+main{flex:1;padding:22px;min-width:0;max-width:100%}
+h1{font-size:25px;font-weight:900;margin-bottom:3px}
+h1 span{color:var(--y)}
+.sub{color:var(--m);margin-bottom:16px;font-size:14px;line-height:1.7}
+h3{color:var(--t)}
+.panel{display:none}
+.panel.on{display:block}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--n);border-radius:14px;padding:12px 15px;border-top:3px solid var(--t);min-width:0}
+.stat:nth-child(even){border-top-color:var(--y)}
+.stat small{color:var(--m);font-size:12.5px;display:block}
+.stat div{font-size:22px;font-weight:900;margin-top:3px;overflow-wrap:anywhere}
+
+.bar2{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.bar2 input,.bar2 select{flex:1;min-width:150px}
+input,select,textarea{font-family:inherit;font-size:14px;background:var(--in);color:var(--w);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 11px;outline:0;max-width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--t)}
+input[type=checkbox]{width:auto;min-width:0;accent-color:var(--y);cursor:pointer}
+input[type=file]{padding:6px;background:transparent;border-style:dashed}
+textarea{width:100%;line-height:1.7;resize:vertical}
+label{font-size:13px;color:var(--m)}
+button{font-family:inherit}
+.btn{font-size:14px;font-weight:700;border:0;border-radius:10px;padding:8px 15px;cursor:pointer;background:var(--nl);color:var(--w);display:inline-block;text-decoration:none;line-height:1.6}
+.btn:hover{filter:brightness(1.15)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn.p{background:var(--y);color:var(--nd)}
+.btn.t{background:var(--t);color:var(--nd)}
+.btn.d{background:0;color:var(--r);border:1px solid var(--r);padding:4px 9px;font-size:12px}
+.btn.s{padding:4px 9px;font-size:12px}
+
+.tw{overflow-x:auto;background:var(--n);border-radius:14px}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{padding:10px 11px;text-align:right;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:middle}
+th{color:var(--t);background:rgba(0,0,0,.15);white-space:nowrap;font-size:12.5px}
+tr:last-child td{border:0}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+td.nt{max-width:240px;color:var(--m);font-size:12.5px}
+td select{padding:4px 7px;font-size:12.5px}
+.empty{text-align:center;color:var(--m);padding:36px 10px!important}
+.act{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.overdue{color:var(--r);font-weight:700}
+.muted{color:var(--m)}
+.row-sub{font-size:11.5px;color:var(--m);margin-top:3px;line-height:1.6}
+.money{font-weight:700;font-size:13px}
+.warn{color:var(--y)}
+.ok{color:var(--g)}
+.note{color:var(--m);font-size:12px;margin-top:10px;line-height:1.8}
+.note.warn{color:var(--y);background:rgba(255,196,0,.07);border-radius:10px;padding:9px 11px}
+.status-pill{display:inline-block;border-radius:20px;padding:3px 9px;background:rgba(88,190,198,.14);color:var(--t);font-size:11.5px;white-space:nowrap}
+
+.badge{display:inline-block;background:var(--bc,var(--t));color:#12102f;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;white-space:nowrap}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
+
+details summary{cursor:pointer;color:var(--t);font-size:12.5px}
+details div{white-space:pre-wrap;font-size:12.5px;color:var(--m);margin-top:6px;max-width:340px}
+
+.card{background:var(--n);border-radius:14px;padding:16px;margin-bottom:14px;border:1px solid rgba(255,255,255,.05)}
+.card>b{display:block;margin-bottom:10px;color:var(--w)}
+.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:14px}
+.dl .card{margin:0}
+.dl p{color:var(--m);font-size:12.5px;margin:4px 0 10px;line-height:1.7}
+.sub-card{background:var(--in);box-shadow:none;margin-bottom:12px}
+
 .table-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px}
-.profile-section{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1)}.profile-section h3{font-size:16px;margin-bottom:10px;color:var(--t)}
-.profile-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.profile-summary>div{background:#1b1348;border-radius:10px;padding:10px;font-size:13px}.profile-summary small{display:block;color:var(--m)}
-.contact-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#1b1348;border-radius:10px;padding:9px 11px;margin:6px 0;font-size:13px;flex-wrap:wrap}
-.timeline-item{border-right:3px solid var(--t);padding:4px 12px 12px;margin:10px 0;background:rgba(255,255,255,.025);border-radius:0 9px 9px 0}.timeline-item small{color:var(--m);display:block;margin-bottom:4px}.timeline-item p{white-space:pre-wrap;line-height:1.7}
-.status-pill{display:inline-block;border-radius:20px;padding:3px 9px;background:rgba(88,190,198,.14);color:var(--t);font-size:12px;white-space:nowrap}
-@media(max-width:800px){body{flex-direction:column}.side{width:100%;height:auto;position:static}.nav{display:flex;flex-wrap:wrap;gap:4px}.nav button{width:auto;margin:0}main{padding:14px}}
+.table-tools strong{font-size:13px}
+
+.btn-bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chk{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+.chk label{background:var(--in);border-radius:20px;padding:6px 12px;font-size:12.5px;cursor:pointer;color:var(--w)}
+.chk input{margin-left:6px;vertical-align:middle}
+
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:10px}
+.form-grid label,.form-grid .field{display:block;font-size:13px;color:var(--m);min-width:0}
+.form-grid label input,.form-grid label select,.form-grid label textarea,.form-grid .field input,.form-grid .field select,.form-grid .field textarea{width:100%;margin-top:4px}
+.form-grid .full{grid-column:1/-1}
+.form-section{margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.form-section:last-child{border:0;margin-bottom:0}
+.form-section h3{font-size:15px;margin-bottom:10px}
+
+.fit-preview{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;background:var(--in);border-radius:12px;padding:14px;margin-top:6px}
+.fit-preview small{display:block;color:var(--m);font-size:11.5px}
+.fit-score{font-size:30px;font-weight:900;line-height:1.2}
+.fit-preview .fit-notes{grid-column:1/-1;font-size:12px;color:var(--m)}
+.fit-head{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.fit-cell{display:flex;align-items:center;gap:6px}
+.fit-bar{height:8px;background:var(--in);border-radius:6px;overflow:hidden;width:70px;flex-shrink:0}
+.fit-bar i{display:block;height:100%;border-radius:6px}
+.warn-dot{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--y);color:var(--nd);font-size:10px;font-weight:900;cursor:help}
+
+.bar-row{display:flex;align-items:center;gap:8px;margin:7px 0}
+.bar-label{width:130px;font-size:12px;color:var(--m);flex-shrink:0;overflow-wrap:anywhere}
+.bar-row b{width:34px;text-align:left;font-size:12.5px}
+.bb{flex:1;height:10px;background:var(--in);border-radius:6px;overflow:hidden;min-width:60px}
+.bb i{display:block;height:100%;border-radius:6px;transition:width .3s}
+.bw{display:flex;align-items:center;gap:8px;min-width:150px}
+.bw b{font-size:12.5px;width:42px}
+
+.conv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.conv{background:var(--in);border-radius:12px;padding:12px;border-top:3px solid var(--t)}
+.conv b{font-size:13px;display:block}
+.conv-value{font-size:26px;font-weight:900;margin:4px 0}
+.conv small{color:var(--m);font-size:11px;line-height:1.6;display:block;margin-top:8px}
+
+.profile-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.profile-section h3{font-size:15px;margin-bottom:10px;color:var(--t)}
+.profile-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:8px}
+.profile-summary>div{background:var(--in);border-radius:10px;padding:9px 10px;font-size:12.5px;overflow-wrap:anywhere;line-height:1.6}
+.profile-summary small{display:block;color:var(--m);font-size:11px;margin-bottom:2px}
+.contact-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--in);border-radius:10px;padding:9px 11px;margin:6px 0;font-size:12.5px;flex-wrap:wrap}
+.timeline-item{border-right:3px solid var(--t);padding:4px 12px 12px;margin:10px 0;background:rgba(255,255,255,.025);border-radius:0 9px 9px 0}
+.timeline-item small{color:var(--m);display:block;margin-bottom:4px}
+.timeline-item p{white-space:pre-wrap;line-height:1.8;font-size:13px}
+.src-link{color:var(--t);text-decoration:none;border-bottom:1px dotted var(--t)}
+.src-link:hover{color:var(--y)}
+
+.diag-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.diag-row:last-child{border:0}
+.import-summary{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+
+.plan-preview{white-space:pre-wrap;background:var(--in);border-radius:12px;padding:14px;font-family:inherit;font-size:12.5px;line-height:1.95;max-height:420px;overflow:auto;margin-top:12px;border:1px solid var(--line)}
+#planFollowBody td{padding:5px 6px;border:0}
+#planFollowBody td:first-child{white-space:nowrap;color:var(--t);font-size:12.5px;width:80px}
+#planFollowBody textarea{min-width:220px}
+.compact{min-width:0}
+
+.toasts{position:fixed;bottom:16px;left:16px;z-index:99999;display:flex;flex-direction:column;gap:8px;max-width:min(370px,92vw)}
+.toast{background:#2b2266;color:var(--w);border-right:4px solid var(--g);border-radius:10px;padding:11px 14px;font-size:13px;box-shadow:0 12px 30px rgba(0,0,0,.35);animation:tin .2s ease-out}
+.toast.err{border-right-color:var(--r)}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.alert-banner{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.4);color:#ffd7d7;border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.status-row{display:flex;justify-content:flex-end;margin-bottom:6px}
+.cloud-status{font-size:11.5px;color:var(--m)}
+.cloud-status.ok{color:var(--g)}
+.cloud-status.err{color:var(--r)}
+.cloud-status.busy{color:var(--y)}
+
+dialog{background:var(--n);color:var(--w);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:20px;width:min(600px,95vw);margin:auto;max-height:92vh;overflow-y:auto;box-shadow:0 30px 90px rgba(0,0,0,.5)}
+dialog.wide{width:min(880px,96vw)}
+dialog::backdrop{background:rgba(0,0,0,.65);backdrop-filter:blur(2px)}
+dialog h2{margin-bottom:12px;font-size:19px;color:var(--w)}
+.da{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+
+@media(max-width:900px){
+  body{flex-direction:column}
+  .side{width:100%;height:auto;position:static;border-left:0;border-bottom:1px solid var(--line)}
+  .nav{display:flex;flex-wrap:wrap;gap:4px}
+  .nav button{width:auto;margin:0;font-size:13px;padding:8px 10px}
+  .tools{display:flex;gap:6px;flex-wrap:wrap}
+  .tools p{width:100%}
+  .tools .btn{width:auto;margin:0}
+  main{padding:14px}
+  .stats{grid-template-columns:repeat(auto-fit,minmax(125px,1fr))}
+  .form-grid{grid-template-columns:1fr}
+  .bar-label{width:88px}
+}
+@media(max-width:520px){
+  h1{font-size:21px}
+  .stat div{font-size:19px}
+  dialog{padding:15px}
+}
+@media print{
+  .side,.bar2,.table-tools,.da,.alert-banner{display:none!important}
+  body{background:#fff;color:#000}
+}
 </style>
 </head>
 <body class="auth-locked">
+
+<!-- تسجيل الدخول -->
 <section id="authGate">
   <form class="auth-card" id="loginForm">
     <h1>Digital <span style="color:var(--y)">Reach</span> CRM</h1>
-    <p>سجّل الدخول بحسابك للوصول إلى بيانات الشركات والمنشورات والخطط المحفوظة على الإنترنت.</p>
+    <p>سجّل الدخول بحسابك للوصول إلى بيانات الشركات والخطط والمتابعات المحفوظة على الإنترنت.</p>
     <label>البريد الإلكتروني<input id="loginEmail" type="email" autocomplete="username" required></label>
     <label>كلمة المرور<input id="loginPassword" type="password" autocomplete="current-password" required></label>
     <button class="btn p" id="loginBtn" type="submit">تسجيل الدخول</button>
     <div id="authMsg" role="status" aria-live="polite"></div>
   </form>
 </section>
+
+<!-- الشريط الجانبي -->
 <aside class="side">
-  <div class="logo"><b>Digital <span>Reach</span></b><small>CRM</small></div>
+  <div class="logo"><b>Digital <span>Reach</span></b><small>COMPANY INTELLIGENCE</small></div>
   <nav class="nav" id="nav">
-    <button data-tab="sales" class="on">💼 CRM المبيعات</button>
-    <button data-tab="posts">📱 CRM المنشورات</button>
-    <button data-tab="plans">📝 خطط الشركات</button>
-    <button data-tab="upload">⬆️ رفع الملفات</button>
-    <button data-tab="download">⬇️ تنزيل الملفات</button>
-    <button data-tab="perf">📊 الأداء والنسب</button>
-    <button data-tab="followups">⏰ المتابعات</button>
+    <button data-tab="dashboard" class="on">📊 لوحة القيادة</button>
+    <button data-tab="sales">💼 الشركات والمبيعات</button>
+    <button data-tab="followups">⏰ مركز المتابعة <span class="nav-badge" id="followBadge"></span></button>
+    <button data-tab="plans">📝 خطط المبيعات</button>
+    <button data-tab="campaigns">📣 الحملات والمصادر</button>
+    <button data-tab="posts">📱 المنشورات</button>
+    <button data-tab="perf">📈 الأداء</button>
+    <button data-tab="upload">⬆️ رفع CSV</button>
+    <button data-tab="download">⬇️ تنزيل</button>
+    <button data-tab="settings">⚙️ الإعدادات</button>
   </nav>
   <div class="tools">
-    <p>البيانات بتتحفظ سحابيًا في Firestore بعد تسجيل الدخول، ومعاها نسخة محلية على الجهاز. نزّل نسخة احتياطية بشكل دوري.</p>
-    <button class="btn t" data-dl="backup">تنزيل نسخة احتياطية</button>
-    <button class="btn" id="bRestore">استرجاع نسخة</button>
-    <button class="btn" id="bSignOut">تسجيل الخروج</button>
-    <input type="file" id="fRestore" accept=".json" hidden>
+    <p>البيانات تُحفظ سحابيًا في Firestore بعد تسجيل الدخول، ومعها نسخة محلية على الجهاز. نزّل نسخة احتياطية دوريًا.</p>
+    <button class="btn t" data-dl="backup" type="button">نسخة احتياطية</button>
+    <button class="btn" id="bRestore" type="button">استرجاع نسخة</button>
+    <button class="btn" id="bSignOut" type="button">تسجيل الخروج</button>
+    <input type="file" id="fRestore" accept=".json,application/json" hidden>
   </div>
 </aside>
+
 <main>
-  <!-- المبيعات -->
-  <section class="panel on" id="tab-sales">
-    <h1>CRM <span>المبيعات</span></h1><div class="sub">سجّل الشركات وتابع كل واحدة في أي مرحلة.</div>
+  <div id="alertBanner" class="alert-banner" role="alert" hidden></div>
+  <div class="status-row"><span id="cloudStatus" class="cloud-status" role="status" aria-live="polite"></span></div>
+
+  <!-- لوحة القيادة -->
+  <section class="panel on" id="tab-dashboard">
+    <h1>لوحة <span>القيادة</span></h1>
+    <div class="sub">نظرة إدارية على الشركات والفرص والتحويلات. كل المؤشرات محسوبة من البيانات المسجلة فقط، وتظهر «بيانات غير كافية» عند عدم صلاحية المقام.</div>
+    <div class="bar2">
+      <select id="dashPreset" aria-label="الفترة الزمنية">
+        <option value="all">كل الفترات</option>
+        <option value="month">هذا الشهر</option>
+        <option value="30">آخر 30 يومًا</option>
+        <option value="90">آخر 90 يومًا</option>
+        <option value="custom">فترة مخصصة</option>
+      </select>
+      <input id="dashFrom" type="date" aria-label="من تاريخ" style="display:none">
+      <input id="dashTo" type="date" aria-label="إلى تاريخ" style="display:none">
+      <button class="btn t" id="dashApply" type="button">تطبيق</button>
+    </div>
+    <div class="stats" id="dashCards"></div>
+    <div class="dl">
+      <div class="card"><b>توزيع الشركات حسب القطاع</b><div id="dashSector"></div></div>
+      <div class="card"><b>توزيع الشركات حسب الدولة</b><div id="dashCountry"></div></div>
+      <div class="card"><b>الشركات حسب مرحلة البيع</b><div id="dashStages"></div></div>
+    </div>
+    <div class="card">
+      <b>معدلات التحويل</b>
+      <div class="conv-grid" id="dashConversions"></div>
+      <p class="note">لا تُحسب النسبة إذا كان المقام صفرًا. الشركات الخاسرة/غير المناسبة بدون سجل مراحل لا تُستخدم في قمع التحويل لأن موقعها السابق غير معروف. المبالغ لا تُجمع بين عملات مختلفة.</p>
+    </div>
+    <div class="card"><b>جودة البيانات</b><div id="dashQuality" class="note"></div></div>
+    <div class="card">
+      <b>أداء الحملات</b>
+      <div class="tw"><table class="compact"><thead><tr><th>الحملة</th><th>الشركات</th><th>تم التواصل</th><th>ردوا</th><th>مهتم</th><th>عروض سعر</th><th>مكتسبة</th><th>معدل الرد</th><th>معدل الاهتمام</th></tr></thead><tbody id="dashCampaigns"></tbody></table></div>
+      <p class="note">معدل الرد = عدد من ردوا ÷ عدد من تم التواصل معهم. معدل الاهتمام = عدد المهتمين ÷ عدد من تم التواصل معهم.</p>
+    </div>
+    <div class="dl">
+      <div class="card"><b>أداء المصادر</b><div class="tw"><table class="compact"><thead><tr><th>المصدر</th><th>الشركات</th><th>مكتسبة</th><th>خاسرة</th><th>معدل الإغلاق</th></tr></thead><tbody id="dashSources"></tbody></table></div></div>
+      <div class="card"><b>أداء القطاعات</b><div class="tw"><table class="compact"><thead><tr><th>القطاع</th><th>الشركات</th><th>مفتوحة</th><th>مكتسبة</th><th>خاسرة</th><th>معدل الإغلاق</th></tr></thead><tbody id="dashSectors"></tbody></table></div></div>
+    </div>
+    <div class="note">التعريفات: «مكتسبة» = المرحلة «تم الإغلاق». «خاسرة» = «خسرنا». «غير مناسب» مستبعد من معدل الإغلاق. قيمة الصفقات المفتوحة تشمل المراحل غير المغلقة فقط، و«Pipeline مرجّح» = قيمة الصفقة × احتمالية الإغلاق، وهو تقدير داخلي وليس توقعًا ماليًا.</div>
+  </section>
+
+  <!-- الشركات والمبيعات -->
+  <section class="panel" id="tab-sales">
+    <h1>الشركات و<span>المبيعات</span></h1>
+    <div class="sub">سجّل الشركات، حلّلها، وحرّك كل فرصة في مراحلها. الألوان: HOT = أولوية عالية، WARM = متوسطة، COLD = منخفضة.</div>
     <div class="stats" id="stats"></div>
     <div class="bar2">
-      <input id="q" placeholder="🔍 ابحث بالاسم أو الرقم أو المجال...">
-      <select id="fst"></select>
-      <button class="btn p" id="addC">+ إضافة شركة</button>
-      <button class="btn t" data-dl="companies">تنزيل CSV</button>
+      <input id="q" placeholder="🔍 ابحث بالاسم أو الرقم أو المجال أو الحملة أو أي ملاحظة…" aria-label="بحث">
+      <select id="fst" aria-label="فلتر المرحلة"></select>
+      <select id="fcls" aria-label="فلتر التصنيف"></select>
+      <select id="fsector" aria-label="فلتر القطاع"></select>
+      <select id="fcountry" aria-label="فلتر الدولة"></select>
+      <select id="fcampaign" aria-label="فلتر الحملة"></select>
+      <select id="fsort" aria-label="ترتيب"></select>
     </div>
-    <div class="table-tools"><strong id="selectedCount">0 شركة محددة</strong><button class="btn d" id="bulkDelete" disabled>حذف المحدد</button><button class="btn" id="clearSelection" disabled>إلغاء التحديد</button></div>
-    <div class="tw"><table><thead><tr><th><input type="checkbox" id="selectAllCompanies" title="تحديد النتائج الظاهرة"></th><th>#</th><th>الشركة</th><th>المسؤول</th><th>الرقم</th><th>المجال</th><th>عدد الموظفين</th><th>المبيعات السنوية التقديرية</th><th>روابط الشركة</th><th>المصدر</th><th>المرحلة</th><th>حالة الرد</th><th>قيمة الصفقة</th><th>ملاحظات</th><th></th></tr></thead><tbody id="tbC"></tbody></table></div>
-  </section>
-  <!-- المتابعات -->
-  <section class="panel" id="tab-followups">
-    <h1>مركز <span>المتابعات</span></h1><div class="sub">الشركات اللي عليها موعد متابعة، مرتبة حسب تاريخ الاستحقاق.</div>
-    <div class="stats" id="followStats"></div>
-    <div class="tw"><table><thead><tr><th>الشركة</th><th>المرحلة</th><th>حالة الرد</th><th>موعد المتابعة</th><th>سبب الخسارة / ملاحظات</th><th>إجراء</th></tr></thead><tbody id="tbFollowups"></tbody></table></div>
-    <div class="note">إضافة أو تعديل موعد المتابعة وسجل التواصل بيتم من ملف الشركة. المواعيد لا ترسل تنبيهات خارج الـCRM حاليًا.</div>
-  </section>
-  <!-- المنشورات -->
-  <section class="panel" id="tab-posts">
-    <h1>CRM <span>المنشورات</span></h1><div class="sub">منشورات فيسبوك وانستجرام: الاسم، الصفحة، اللايكات، الكومنتات ونصها.</div>
-    <div class="stats" id="pStats"></div>
     <div class="bar2">
-      <input id="pq" placeholder="🔍 ابحث في المنشورات أو الصفحات أو الكومنتات...">
-      <select id="pf"><option value="">كل المنصات</option><option>فيسبوك</option><option>انستجرام</option></select>
-      <button class="btn p" id="addP">+ إضافة منشور</button>
-      <button class="btn t" data-dl="posts">تنزيل CSV</button>
+      <button class="btn p" id="addC" type="button">+ إضافة شركة</button>
+      <button class="btn t" data-dl="companies" type="button">تنزيل CSV</button>
     </div>
-    <div class="tw"><table><thead><tr><th>#</th><th>المنصة</th><th>الصفحة</th><th>اسم المنشور</th><th>الايكات</th><th>الكومنتات</th><th>نص الكومنتات</th><th>التاريخ</th><th></th></tr></thead><tbody id="tbP"></tbody></table></div>
+    <div class="table-tools">
+      <strong id="selectedCount">0 شركة محددة</strong>
+      <button class="btn" id="bulkEdit" type="button" disabled>تعديل جماعي</button>
+      <button class="btn d" id="bulkDelete" type="button" disabled>حذف المحدد</button>
+      <button class="btn" id="clearSelection" type="button" disabled>إلغاء التحديد</button>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr>
+          <th><input type="checkbox" id="selectAllCompanies" title="تحديد النتائج الظاهرة" aria-label="تحديد الكل"></th>
+          <th>#</th><th>الشركة</th><th>المسؤول</th><th>الدولة</th><th>التصنيف</th><th>Fit</th>
+          <th>المرحلة</th><th>حالة الرد</th><th>القيمة</th><th>المتابعة</th><th>إجراءات</th>
+        </tr></thead>
+        <tbody id="tbC"></tbody>
+      </table>
+    </div>
+    <div class="note">الـ Fit Score محسوب من 5 مكونات (خدمة 30، تجاري 20، فرصة 20، سوق 15، وصول 15) وقابل للتعديل من ملف الشركة. النتيجة «أولية» عند نقص البيانات ولا تُعتبر حقيقة مؤكدة.</div>
   </section>
-  <!-- الخطط -->
+
+  <!-- مركز المتابعة -->
+  <section class="panel" id="tab-followups">
+    <h1>مركز <span>المتابعة</span></h1>
+    <div class="sub">كل ما يحتاج إجراءً اليوم في مكان واحد. افتح ملف الشركة أو خطتها مباشرة من أي صف.</div>
+    <div class="stats" id="followStats"></div>
+    <div id="fuSections"></div>
+    <div class="note">المتابعات المتأخرة تظهر أيضًا كتنبيه أعلى الشاشة. مواعيد المتابعة والاجتماعات تُدار من ملف الشركة.</div>
+  </section>
+
+  <!-- خطط المبيعات -->
   <section class="panel" id="tab-plans">
-    <h1>خطط <span>الشركات</span></h1><div class="sub">اختار الشركة واحتياجاتها، والخطة تتولد من قوالب جاهزة وتقدر تعدلها.</div>
-    <div class="card">
-      <select id="planCo"></select>
-      <div class="chk" id="needs"></div>
-      <div class="bar2"><button class="btn p" id="genPlan">توليد الخطة</button><button class="btn t" id="savePlan">حفظ الخطة</button><button class="btn" id="copyPlan">نسخ النص</button></div>
-      <textarea id="planTxt" placeholder="الخطة هتظهر هنا..."></textarea>
-    </div>
-  </section>
-  <!-- رفع -->
-  <section class="panel" id="tab-upload">
-    <h1>رفع <span>الملفات</span></h1><div class="sub">استورد بيانات من ملف CSV (لو معاك Excel احفظه الأول كـ CSV).</div>
+    <h1>خطط <span>المبيعات</span></h1>
+    <div class="sub">لكل شركة خطة مستقلة محفوظة بمعرّفها. التوليد يقترح محتوى من قطاع الشركة؛ راجعه وعدّله ثم احفظه. لا وعود بنتائج مالية.</div>
     <div class="card">
       <div class="bar2">
-        <select id="upT"><option value="companies">شركات (المبيعات)</option><option value="posts">منشورات</option></select>
-        <input type="file" id="upF" accept=".csv,.txt">
-        <button class="btn p" id="upGo">استيراد</button>
+        <select id="planCo" aria-label="اختيار الشركة"></select>
+        <button class="btn p" id="genPlan" type="button">توليد الخطة</button>
+        <button class="btn t" id="savePlan" type="button">حفظ الخطة</button>
+        <button class="btn" id="copyPlan" type="button">نسخ النص</button>
+        <span id="planMeta" class="note" style="margin:0"></span>
       </div>
-      <div id="upMsg" class="note"></div>
-      <div class="note">أسماء الأعمدة المقبولة — شركات: الشركة/name/title ، المسؤول ، الرقم/phone ، المجال/category ، المصدر ، المرحلة ، القيمة ، ملاحظات، الموقع الإلكتروني، Facebook، Instagram، LinkedIn، عدد الموظفين، المبيعات السنوية التقديرية، مستوى الثقة، أساس التقدير ومصدره، درجة الملاءمة، الفرصة الملحوظة، زاوية البيع، ملخص البحث، مصدر البحث، حالة الرد، موعد المتابعة، الحملة. منشورات: المنصة ، الصفحة ، اسم المنشور/title ، الايكات/likes ، عدد الكومنتات ، الكومنتات ، الرابط ، التاريخ. الشركات المكررة بالاسم يتم استكمال الخانات الفاضية فيها فقط دون استبدال البيانات الموجودة.</div>
+      <div class="chk" id="needs"></div>
+      <div class="form-grid">
+        <label class="full">1) ملخص الشركة والفرصة البيعية<textarea id="planSummary" rows="3"></textarea></label>
+        <label class="full">2) سبب اختيار الشركة للاستهداف<textarea id="planWhy" rows="3"></textarea></label>
+        <label class="full">3) الخدمة الأنسب لبيعها إليها<textarea id="planService" rows="2"></textarea></label>
+        <label class="full">4) زاوية البيع<textarea id="planAngle" rows="2"></textarea></label>
+        <label class="full">5) هدف التواصل الأول<textarea id="planGoal" rows="2"></textarea></label>
+        <label class="full">6) الرسالة الافتتاحية المخصصة<textarea id="planMessage" rows="4"></textarea></label>
+        <label class="full">7) أسئلة الاكتشاف — سؤال في كل سطر<textarea id="planQuestions" rows="6"></textarea></label>
+        <label class="full">8) طريقة تقديم العرض<textarea id="planPresentation" rows="3"></textarea></label>
+        <label class="full">9) الاعتراضات المتوقعة — «الاعتراض | الرد» في كل سطر<textarea id="planObjections" rows="5"></textarea></label>
+        <label class="full">10) Call to Action<textarea id="planCta" rows="2"></textarea></label>
+      </div>
+      <div class="card sub-card">
+        <b>11) خطة متابعة 14 يومًا</b>
+        <div class="tw" style="background:transparent">
+          <table class="compact" style="min-width:0"><tbody id="planFollowBody"></tbody></table>
+        </div>
+      </div>
+      <b>نص الخطة الكامل</b>
+      <pre id="planPreview" class="plan-preview"></pre>
+      <div class="note">هذه خطة عمل داخلية مبنية على البيانات المسجلة فقط. لا تتضمن وعودًا بنتائج أو حجوزات أو إيرادات.</div>
     </div>
   </section>
-  <!-- تنزيل -->
-  <section class="panel" id="tab-download">
-    <h1>تنزيل <span>الملفات</span></h1><div class="sub">نزّل الداتا والتحليل.</div>
-    <div class="dl">
-      <div class="card"><b>بيانات الشركات</b><p>CSV يفتح في Excel</p><button class="btn t" data-dl="companies">تنزيل</button></div>
-      <div class="card"><b>بيانات المنشورات</b><p>بالكومنتات والنسب</p><button class="btn t" data-dl="posts">تنزيل</button></div>
-      <div class="card"><b>الخطط</b><p>كل الخطط المحفوظة (نص)</p><button class="btn t" data-dl="plans">تنزيل</button></div>
-      <div class="card"><b>تقرير التحليل</b><p>نسب أداء الشركات والمنشورات</p><button class="btn t" data-dl="report">تنزيل</button></div>
-      <div class="card"><b>نسخة احتياطية كاملة</b><p>JSON، ترجّعه على أي جهاز</p><button class="btn p" data-dl="backup">تنزيل</button></div>
+
+  <!-- الحملات -->
+  <section class="panel" id="tab-campaigns">
+    <h1>الحملات <span>والمصادر</span></h1>
+    <div class="sub">كل شركة تُنسب إلى حملة اختيارية. عدّل أسماء الحملات أو أضف حملات جديدة لمقارنة الأداء.</div>
+    <form class="card" id="campaignForm">
+      <div class="form-grid">
+        <label>اسم الحملة *<input id="cName" required placeholder="مثال: حملة العقارات — أكتوبر"></label>
+        <label>المصدر<select id="cSource"></select></label>
+        <label class="full">ملاحظات<textarea id="cNotes" rows="2"></textarea></label>
+      </div>
+      <div class="da"><button class="btn p" type="submit">إضافة حملة</button></div>
+    </form>
+    <datalist id="campaignList"></datalist>
+    <div class="tw">
+      <table>
+        <thead><tr><th>الحملة</th><th>الشركات</th><th>تم التواصل</th><th>ردوا</th><th>مهتم</th><th>عروض سعر</th><th>مكتسبة</th><th>خاسرة</th><th>قيمة المفتوح</th><th>معدل الاهتمام</th><th>إجراءات</th></tr></thead>
+        <tbody id="campaignTable"></tbody>
+      </table>
+    </div>
+    <div class="note">معدل الاهتمام = عدد المهتمين ÷ عدد من تم التواصل معهم. إذا لم يوجد من تم التواصل، تظهر «بيانات غير كافية» بدل نسبة مضللة. حذف حملة مرتبطة بشركات غير مسموح.</div>
+  </section>
+
+  <!-- المنشورات -->
+  <section class="panel" id="tab-posts">
+    <h1>CRM <span>المنشورات</span></h1>
+    <div class="sub">منشورات فيسبوك وانستجرام: الصفحة، اللايكات، الكومنتات ونصها — للحفاظ على وظائف النظام الحالية.</div>
+    <div class="stats" id="pStats"></div>
+    <div class="bar2">
+      <input id="pq" placeholder="🔍 ابحث في المنشورات أو الصفحات أو الكومنتات…" aria-label="بحث المنشورات">
+      <select id="pf" aria-label="المنصة"><option value="">كل المنصات</option><option>فيسبوك</option><option>انستجرام</option></select>
+      <button class="btn p" id="addP" type="button">+ إضافة منشور</button>
+      <button class="btn t" data-dl="posts" type="button">تنزيل CSV</button>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>#</th><th>المنصة</th><th>الصفحة</th><th>اسم المنشور</th><th>الايكات</th><th>الكومنتات</th><th>نص الكومنتات</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+        <tbody id="tbP"></tbody>
+      </table>
     </div>
   </section>
+
   <!-- الأداء -->
   <section class="panel" id="tab-perf">
-    <h1>الأداء <span>والنسب</span></h1><div class="sub">شريط أداء لكل شركة ولكل منشور.</div>
+    <h1>الأداء <span>والنسب</span></h1>
+    <div class="sub">مؤشرات داخلية محسوبة من بياناتك، وليست توقعات أو ضمانات.</div>
     <div class="card"><b>الشركات</b>
       <div class="tw" style="margin-top:10px"><table><thead><tr><th>الشركة</th><th>المرحلة</th><th>اكتمال البيانات</th><th>تقدم الصفقة</th><th>السوشيال</th><th>الإجمالي</th></tr></thead><tbody id="tbPerfC"></tbody></table></div>
     </div>
     <div class="card"><b>المنشورات</b>
       <div class="tw" style="margin-top:10px"><table><thead><tr><th>المنصة</th><th>الصفحة</th><th>المنشور</th><th>ايكات</th><th>كومنتات</th><th>مؤشر التفاعل النسبي</th></tr></thead><tbody id="tbPerfP"></tbody></table></div>
     </div>
-    <div class="dl"><div class="card"><b>قمع المبيعات حسب المرحلة</b><div id="pipelineChart" style="margin-top:12px"></div></div><div class="card"><b>تحويلات مصادر العملاء</b><div class="tw" style="margin-top:10px"><table><thead><tr><th>المصدر</th><th>عدد العملاء</th><th>المغلق</th><th>معدل الإغلاق</th></tr></thead><tbody id="sourcePerf"></tbody></table></div><p class="note">معدل الإغلاق = عدد الشركات المغلقة ÷ كل الشركات المسجلة من نفس المصدر. لا يمثل عائدًا ماليًا أو ربحية.</p></div></div><div class="card"><b>أداء الحملات / قوائم العملاء</b><div class="tw" style="margin-top:10px"><table><thead><tr><th>الحملة</th><th>عدد العملاء</th><th>المغلق</th><th>معدل الإغلاق</th></tr></thead><tbody id="campaignPerf"></tbody></table></div></div>
-    <div class="note">النسب دي مؤشرات داخلية محسوبة من بياناتك، مش توقع أو ضمان. اكتمال البيانات = 10 عناصر أساسية: اسم الشركة، الموقع، المسؤول، الهاتف، المجال، المصدر، وجود رابط اجتماعي واحد على الأقل، عدد الموظفين، تقدير المبيعات، ومصدر التقدير. تقدم الصفقة = موقع المرحلة (خسرنا = 0%). السوشيال = متوسط تفاعل منشورات الصفحة اللي اسمها نفس اسم الشركة. التفاعل = (ايكات + 3×كومنتات) نسبةً لأعلى منشور عندك. الإجمالي: بيانات 30% + صفقة 40% + سوشيال 30% (ولو مفيش منشورات: 40% + 60%).</div>
+    <div class="dl">
+      <div class="card"><b>قمع المبيعات حسب المرحلة</b><div id="pipelineChart" style="margin-top:12px"></div></div>
+      <div class="card"><b>أداء مصادر العملاء</b>
+        <div class="tw" style="margin-top:10px"><table class="compact"><thead><tr><th>المصدر</th><th>عدد الشركات</th><th>مكتسبة</th><th>معدل الإغلاق</th></tr></thead><tbody id="sourcePerf"></tbody></table></div>
+      </div>
+    </div>
+    <div class="card"><b>أداء الحملات / قوائم العملاء</b>
+      <div class="tw" style="margin-top:10px"><table class="compact"><thead><tr><th>الحملة</th><th>عدد الشركات</th><th>مكتسبة</th><th>معدل الإغلاق</th></tr></thead><tbody id="campaignPerf"></tbody></table></div>
+    </div>
+    <div class="note">اكتمال البيانات = 10 عناصر أساسية. تقدم الصفقة = موقع المرحلة (خسرنا = 0%). السوشيال = متوسط تفاعل منشورات الصفحة التي تحمل نفس اسم الشركة. التفاعل = (ايكات + 3×كومنتات) نسبةً لأعلى منشور مسجل. الإجمالي: بيانات 30% + صفقة 40% + سوشيال 30% (وإذا لم توجد منشورات: 40% + 60%).</div>
+  </section>
+
+  <!-- رفع CSV -->
+  <section class="panel" id="tab-upload">
+    <h1>رفع <span>الملفات</span></h1>
+    <div class="sub">استيراد CSV بأسماء أعمدة عربية أو إنجليزية. التحليل أولًا، ثم مراجعة النتائج، ثم الاعتماد. لا حذف ولا استبدال لبيانات موجودة بقيم فارغة.</div>
+    <div class="card">
+      <div class="bar2">
+        <select id="upT" aria-label="نوع البيانات"><option value="companies">شركات (المبيعات)</option><option value="posts">منشورات</option></select>
+        <input type="file" id="upF" accept=".csv,.txt,text/csv">
+        <button class="btn p" id="upGo" type="button">تحليل الملف</button>
+      </div>
+      <div id="upMsg" class="note"></div>
+      <div id="importPreview"></div>
+      <div class="da">
+        <button class="btn p" id="applyImport" type="button" disabled>اعتماد الاستيراد</button>
+        <button class="btn" id="cancelImport" type="button">إلغاء</button>
+      </div>
+      <div class="note">
+        الأعمدة المدعومة — الشركات: name/الشركة، phone/الرقم، contact/المسؤول، sector/القطاع، country/الدولة، employees/عدد الموظفين، annual_revenue_estimate/المبيعات التقديرية، fit_score/درجة الملاءمة، fit_confidence/ثقة التحليل، opportunity_type/نوع الفرصة، observed_opportunity/الفرصة، sales_angle/زاوية البيع، research_summary/ملخص البحث، research_source/مصادر البحث، reply_status/حالة الرد، follow_up_date/موعد المتابعة، lost_reason/سبب الخسارة، campaign/الحملة، وأعمدة مكونات Fit الخمسة.<br>
+        المنشورات: platform/المنصة، page/الصفحة، title/اسم المنشور، likes/اللايكات، comments_count/عدد الكومنتات، comments/الكومنتات، link/الرابط، date/التاريخ.<br>
+        قواعد المطابقة: نفس الاسم + نفس رقم الهاتف = تحديث الحقول الفارغة فقط. نفس الاسم برقم مختلف، أو بدون رقم في أحد الطرفين = «يحتاج مراجعة» ولا يُدمج تلقائيًا. التكرار داخل الملف يُعلَّم للمراجعة.
+      </div>
+    </div>
+  </section>
+
+  <!-- تنزيل -->
+  <section class="panel" id="tab-download">
+    <h1>تنزيل <span>الملفات</span></h1>
+    <div class="sub">تصدير البيانات والتحليلات بصيغة CSV أو نص أو JSON.</div>
+    <div class="dl">
+      <div class="card"><b>بيانات الشركات</b><p>CSV بكل الحقول الجديدة يفتح في Excel</p><button class="btn t" data-dl="companies" type="button">تنزيل</button></div>
+      <div class="card"><b>بيانات المنشورات</b><p>بالكومنتات ومؤشر التفاعل النسبي</p><button class="btn t" data-dl="posts" type="button">تنزيل</button></div>
+      <div class="card"><b>خطط المبيعات</b><p>كل الخطط المحفوظة (نص مستقل لكل شركة)</p><button class="btn t" data-dl="plans" type="button">تنزيل</button></div>
+      <div class="card"><b>تقرير الأداء</b><p>ملخص نصي للشركات والمنشورات</p><button class="btn t" data-dl="report" type="button">تنزيل</button></div>
+      <div class="card"><b>أداء الحملات</b><p>CSV بقمع كل حملة ومعدلاتها</p><button class="btn t" data-dl="campaigns" type="button">تنزيل</button></div>
+      <div class="card"><b>نسخة احتياطية كاملة</b><p>JSON يشمل الشركات والخطط والحملات والإعدادات</p><button class="btn p" data-dl="backup" type="button">تنزيل</button></div>
+    </div>
+  </section>
+
+  <!-- الإعدادات -->
+  <section class="panel" id="tab-settings">
+    <h1>الإعدادات <span>والتشخيص</span></h1>
+    <div class="sub">أوزان تقييم الملاءمة قابلة للتعديل. تغييرها يعيد حساب Fit Score لكل الشركات عند العرض.</div>
+    <div class="card">
+      <b>أوزان Fit Score</b>
+      <div class="form-grid" style="margin-top:10px">
+        <label>ملاءمة الخدمة<input id="wService" type="number" min="0" max="100" step="1"></label>
+        <label>الإمكانية التجارية<input id="wCommercial" type="number" min="0" max="100" step="1"></label>
+        <label>الفرصة / المشكلة<input id="wOpportunity" type="number" min="0" max="100" step="1"></label>
+        <label>ملاءمة السوق<input id="wMarket" type="number" min="0" max="100" step="1"></label>
+        <label>سهولة الوصول<input id="wAccess" type="number" min="0" max="100" step="1"></label>
+      </div>
+      <div class="bar2" style="margin-top:12px">
+        <span id="weightSum" class="note" style="margin:0"></span>
+        <button class="btn p" id="saveWeights" type="button">حفظ الأوزان</button>
+        <button class="btn" id="resetWeights" type="button">استعادة الافتراضي</button>
+      </div>
+      <div class="note">التصنيف: HOT 80–100 · WARM 60–79 · COLD أقل من 60. لا تمنح درجة مرتفعة لمجرد وجود حسابات سوشيال ميديا، وغياب الموقع ليس دليل ضعف. أي تقدير يجب أن يُوسم كتقدير.</div>
+    </div>
+    <div class="card"><b>تشخيص البيانات</b><div id="diagnostics"></div></div>
+    <div class="card">
+      <b>التوافق والأمان</b>
+      <ul class="note" style="padding-right:18px">
+        <li>Firebase Project الحالي وFirestore <code>crmData/main</code> لم يتغيرا.</li>
+        <li>الحقول الجديدة تُضاف بقيم افتراضية آمنة، والسجلات القديمة تُقرأ كما هي.</li>
+        <li>درجات Fit القديمة تبقى ظاهرة حتى تُعاد التقييم بالمعايير الخمسة.</li>
+        <li>لا تُكتب بيانات تجريبية في قاعدة البيانات الحقيقية، والاختبارات تعمل على بيانات منفصلة.</li>
+      </ul>
+    </div>
   </section>
 </main>
-<dialog id="dlg"><h2 id="dT"></h2><form id="frm"><div class="fg" id="dF"></div><div class="da"><button class="btn p" type="submit">حفظ</button><button class="btn" type="button" id="dX">إلغاء</button></div></form></dialog>
-<dialog id="profileDlg" style="width:min(820px,96vw)"><h2>ملف الشركة: <span id="profileName" style="color:var(--y)"></span></h2><div class="da"><button class="btn t" type="button" id="editProfileCompany">تعديل بيانات الشركة</button></div><div id="profileSummary" class="profile-summary"></div><div class="profile-section"><h3>تحليل الشركة وفرصة البيع</h3><div id="profileResearch" class="note"></div></div>
-<div class="profile-section"><h3>جهات الاتصال</h3><div id="profileContacts"></div><div class="fg"><label>الاسم<input id="newContactName"></label><label>المنصب<input id="newContactRole"></label><label>رقم الهاتف<input id="newContactPhone"></label><label>البريد الإلكتروني<input id="newContactEmail" type="email"></label></div><div class="da"><button class="btn t" type="button" id="addContact">إضافة جهة اتصال</button></div></div>
-<div class="profile-section"><h3>سجل التواصل والنشاط</h3><div class="fg"><label>نوع النشاط<select id="activityType"><option>مكالمة</option><option>واتساب</option><option>بريد إلكتروني</option><option>اجتماع</option><option>رد العميل</option><option>ملاحظة داخلية</option></select></label><label>حالة الرد<select id="profileReplyStatus"><option>لم يتم التواصل</option><option>لا يوجد رد</option><option>رد العميل</option><option>مهتم</option><option>محوّل للإدارة</option><option>غير مناسب</option></select></label><label class="full">تفاصيل النشاط<textarea id="activityNote" rows="3"></textarea></label></div><div class="da"><button class="btn p" type="button" id="addActivity">تسجيل النشاط</button></div><div id="activityTimeline"></div></div>
-<div class="profile-section"><h3>المتابعة والنتيجة</h3><div class="fg"><label>موعد المتابعة القادمة<input id="profileFollowUp" type="date"></label><label>سبب خسارة الفرصة<input id="profileLostReason"></label></div><div class="da"><button class="btn p" type="button" id="saveProfileMeta">حفظ بيانات المتابعة</button><button class="btn" type="button" id="closeProfile">إغلاق</button></div></div></dialog>
+
+<div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<!-- نافذة الشركة -->
+<dialog id="companyDlg" class="wide">
+  <form id="companyForm">
+    <h2 id="companyTitle">إضافة شركة</h2>
+    <div id="companyFields"></div>
+    <div id="fitPreview"></div>
+    <div class="da">
+      <button class="btn p" type="submit">حفظ الشركة</button>
+      <button class="btn" id="companyCancel" type="button">إلغاء</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ملف الشركة -->
+<dialog id="profileDlg" class="wide">
+  <h2>ملف الشركة: <span id="profileName" style="color:var(--y)"></span></h2>
+  <div id="profileBadges" class="badges"></div>
+  <div class="da" style="margin-top:0">
+    <button class="btn t" id="editProfileCompany" type="button">تعديل بيانات الشركة</button>
+    <button class="btn" id="openPlanFromProfile" type="button">خطة المبيعات</button>
+  </div>
+
+  <div class="profile-section"><h3>ملخص البيانات</h3><div id="profileSummary" class="profile-summary"></div></div>
+
+  <div class="profile-section"><h3>تقييم الملاءمة — Fit Score</h3><div id="profileFit"></div></div>
+
+  <div class="profile-section"><h3>تحليل الشركة وفرصة البيع</h3><div id="profileResearch"></div></div>
+
+  <div class="profile-section">
+    <h3>المبيعات والمتابعة</h3>
+    <div id="profileSales"></div>
+    <div class="form-grid" style="margin-top:10px">
+      <label>حالة الرد<select id="profileReplyStatus">
+        <option>لم يتم التواصل</option><option>لا يوجد رد</option><option>رد العميل</option>
+        <option>مهتم</option><option>محوّل للإدارة</option><option>غير مناسب</option>
+      </select></label>
+      <label>موعد المتابعة القادمة<input id="profileFollowUp" type="date"></label>
+      <label>موعد الاجتماع<input id="profileMeetingDate" type="date"></label>
+      <label class="full">سبب خسارة الفرصة<input id="profileLostReason"></label>
+    </div>
+    <div class="da"><button class="btn p" id="saveProfileMeta" type="button">حفظ بيانات المتابعة</button></div>
+  </div>
+
+  <div class="profile-section">
+    <h3>جهات الاتصال</h3>
+    <div id="profileContacts"></div>
+    <div class="form-grid">
+      <label>الاسم<input id="newContactName"></label>
+      <label>المنصب<input id="newContactRole"></label>
+      <label>رقم الهاتف<input id="newContactPhone" inputmode="tel"></label>
+      <label>البريد الإلكتروني<input id="newContactEmail" type="email"></label>
+    </div>
+    <div class="da"><button class="btn t" id="addContact" type="button">إضافة جهة اتصال</button></div>
+  </div>
+
+  <div class="profile-section">
+    <h3>سجل التواصل والنشاط</h3>
+    <div class="form-grid">
+      <label>نوع النشاط<select id="activityType">
+        <option>مكالمة</option><option>واتساب</option><option>بريد إلكتروني</option>
+        <option>اجتماع</option><option>رد العميل</option><option>ملاحظة داخلية</option>
+      </select></label>
+      <label class="full">تفاصيل النشاط<textarea id="activityNote" rows="3"></textarea></label>
+    </div>
+    <div class="da"><button class="btn p" id="addActivity" type="button">تسجيل النشاط</button></div>
+    <div id="activityTimeline"></div>
+  </div>
+
+  <div class="da"><button class="btn" id="closeProfile" type="button">إغلاق</button></div>
+</dialog>
+
+<!-- تعديل جماعي -->
+<dialog id="bulkDlg">
+  <h2>تعديل جماعي آمن</h2>
+  <p class="note" style="margin-top:0">سيتم تطبيق القيمة على <b id="bulkCount">0 شركة</b> فقط بعد التأكيد.</p>
+  <div class="form-grid" style="margin-top:12px">
+    <label>الحقل<select id="bulkField"></select></label>
+    <label>القيمة<div id="bulkValueHost"></div></label>
+  </div>
+  <div class="da">
+    <button class="btn p" id="bulkApply" type="button">تطبيق التعديل</button>
+    <button class="btn" id="bulkCancel" type="button">إلغاء</button>
+  </div>
+</dialog>
+
+<!-- نافذة عامة للمنشورات -->
+<dialog id="dlg">
+  <h2 id="dT"></h2>
+  <form id="frm">
+    <div class="form-grid" id="dF"></div>
+    <div class="da">
+      <button class="btn p" type="submit">حفظ</button>
+      <button class="btn" id="dX" type="button">إلغاء</button>
+    </div>
+  </form>
+</dialog>
+
+<noscript><p style="padding:20px">تحتاج JavaScript لتشغيل Digital Reach CRM.</p></noscript>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-<script>
-(function(){
-'use strict';
-var STAGES=['جديد','تم التواصل','مهتم','عرض سعر','تفاوض','تم الإغلاق','خسرنا'];
-var SOURCES=['جوجل ماب','انستجرام','فيسبوك','واتساب','ترشيح','أخرى'];
-var REPLY_STATUSES=['لم يتم التواصل','لا يوجد رد','رد العميل','مهتم','محوّل للإدارة','غير مناسب'];
-var selectedCompanyIds={};var currentProfileId=null;
-var NEEDS=['زيادة المبيعات','ظهور على السوشيال','محتوى ومنشورات','التواصل والردود','عروض وحجوزات'];
-var NEXT={'جديد':'ابعت رسالة تعارف على واتساب خلال 24 ساعة','تم التواصل':'تابع بعد يومين واسأله عن احتياجه الأساسي','مهتم':'حدد معاه مكالمة قصيرة واعرض الحل','عرض سعر':'ابعت عرض السعر وحدد موعد للرد','تفاوض':'اتفق على النقاط المعلقة وحدد موعد التوقيع','تم الإغلاق':'ابدأ التنفيذ وخد رأيه بعد أسبوع','خسرنا':'اسأله عن السبب وارجع له بعد 60 يوم'};
-var STEPS={
-'زيادة المبيعات':['حدد أفضل 3 منتجات/خدمات وسعر كل واحد بوضوح','جهّز رسالة بيع جاهزة واتساب وردود على الاعتراضات الشائعة','حدد هدف مبيعات أسبوعي وتابعه كل يوم'],
-'ظهور على السوشيال':['راجع الصفحة: صورة، وصف، رقم تواصل، زرار الرسائل','ثبّت منشور تعريفي أعلى الصفحة','حدد مواعيد نشر ثابتة (3–4 مرات أسبوعيًا)'],
-'محتوى ومنشورات':['اعمل 12 فكرة منشور (عروض، آراء عملاء، كواليس، نصايح)','جهّز تقويم نشر لـ 30 يوم','كل أسبوع: قارن أعلى وأقل منشور تفاعلًا وكرر النوع الأفضل'],
-'التواصل والردود':['حدد وقت رد أقصاه ساعة على الرسائل والكومنتات','جهّز 5 ردود جاهزة للأسئلة المتكررة','سجّل كل عميل مهتم في الـ CRM مع موعد المتابعة'],
-'عروض وحجوزات':['صمّم عرض واضح بمدة محددة وسعر وشروط','حط زرار حجز/واتساب في كل منشور عرض','تابع الحجوزات يوميًا واسأل كل عميل لم يكمل ليه']};
-var KEY='dr_crm_v1';
-var firebaseConfig={
-  apiKey:"AIzaSyDhZKeWe1ytVMt6Vlm4JExESk9kXq3RFeg",
-  authDomain:"digitalreach-crm.firebaseapp.com",
-  projectId:"digitalreach-crm",
-  storageBucket:"digitalreach-crm.firebasestorage.app",
-  messagingSenderId:"633336135091",
-  appId:"1:633336135091:web:de8f20b2fa143ae6665fc6",
-  measurementId:"G-2M46FMRKYJ"
-};
-firebase.initializeApp(firebaseConfig);
-var auth=firebase.auth();
-var firestore=firebase.firestore();
-var cloudDoc=firestore.collection('crmData').doc('main');
-var cloudReady=false,cloudTimer=null;
-var db=load();
-function load(){var b={companies:[],posts:[],plans:{}};try{var r=localStorage.getItem(KEY);if(r){var p=JSON.parse(r);if(p&&typeof p==='object'){if(Array.isArray(p.companies))b.companies=p.companies;if(Array.isArray(p.posts))b.posts=p.posts;if(p.plans&&typeof p.plans==='object')b.plans=p.plans}}}catch(e){}return b}
-function save(){
-  try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('تعذّر الحفظ المحلي. نزّل نسخة احتياطية.')}
-  if(cloudReady){
-    if(cloudTimer)clearTimeout(cloudTimer);
-    cloudTimer=setTimeout(function(){
-      cloudDoc.set({companies:db.companies,posts:db.posts,plans:db.plans,updatedAt:firebase.firestore.FieldValue.serverTimestamp()})
-        .catch(function(e){console.error('Cloud save failed',e);setAuthMessage('الحفظ السحابي فشل. راجع الاتصال وقواعد Firestore، ونزّل نسخة احتياطية مؤقتًا.')});
-    },400);
-  }
-}
-function setAuthMessage(message){var el=document.getElementById('authMsg');if(el)el.textContent=message||''}
-function showCRM(){document.body.classList.remove('auth-locked');setAuthMessage('')}
-function lockCRM(){cloudReady=false;document.body.classList.add('auth-locked')}
-function $(i){return document.getElementById(i)}
-function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
-function num(v){var n=parseFloat(v);return isNaN(n)?0:n}
-function fmt(n){return Number(n).toLocaleString('en-US')}
-function today(){var d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day}
-function whatsappUrl(company){
-  var phone=String(company.phone||'').replace(/[^0-9]/g,'');
-  if(phone.indexOf('00')===0)phone=phone.slice(2);
-  if(!phone)return '';
-  var message='مساء الخير يا فندم لو سمحت عايز اتواصل مع مسئول المبيعات';
-  return 'https://wa.me/'+phone+'?text='+encodeURIComponent(message);
-}
-function externalUrl(value){
-  var url=String(value||'').trim();
-  if(!url)return '';
-  if(!/^https?:\/\//i.test(url))url='https://'+url;
-  return /^https?:\/\//i.test(url)?url:'';
-}
-function socialButton(url,label){
-  var href=externalUrl(url);
-  return href?'<a class="btn s" target="_blank" rel="noopener noreferrer" href="'+esc(href)+'">'+label+'</a>':'';
-}
-function socialLinks(company){
-  var links=[socialButton(company.website,'الموقع'),socialButton(company.facebook,'Facebook'),socialButton(company.instagram,'Instagram'),socialButton(company.linkedin,'LinkedIn')].filter(Boolean);
-  return links.length?links.join(' '):'<span style="color:var(--m)">—</span>';
-}
-function uid(){return 'x'+Date.now()+Math.floor(Math.random()*100000)}
-function dl(name,txt,type){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:type}));a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(a.href)},1000)}
-function cc(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}
-function csv(head,rows){return '\uFEFF'+[head.map(cc).join(',')].concat(rows.map(function(r){return r.map(cc).join(',')})).join('\r\n')}
-function byId(arr,id){for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i];return null}
-function addCompanyActivity(company,type,note){if(!company)return;if(!Array.isArray(company.activities))company.activities=[];company.activities.push({id:uid(),type:type||'ملاحظة داخلية',note:String(note||''),date:new Date().toLocaleString('ar-EG')});company.lastActivityAt=new Date().toISOString()}
-function opts(a,sel){return a.map(function(s){return '<option'+(s===sel?' selected':'')+'>'+esc(s)+'</option>'}).join('')}
-
-/* ---------- حسابات ---------- */
-function cCount(p){var n=parseInt(p.commentsCount,10);if(!isNaN(n)&&p.commentsCount!=='')return n;return p.comments?String(p.comments).split(/\r?\n/).filter(function(x){return x.trim()}).length:0}
-function eng(p){return num(p.likes)+3*cCount(p)}
-function maxEng(){var m=0;db.posts.forEach(function(p){var e=eng(p);if(e>m)m=e});return m}
-function pScore(p,m){return m?Math.round(eng(p)/m*100):0}
-function complete(c){var f=[c.name,c.website,c.contact,c.phone,c.industry,c.source,(c.facebook||c.instagram||c.linkedin),c.employees,c.annualRevenueEstimate,c.estimateBasis],n=0;f.forEach(function(x){if(x!==''&&x!=null)n++});return Math.round(n/10*100)}
-function pipe(c){if(c.stage==='خسرنا')return 0;var i=STAGES.indexOf(c.stage);return i<0?0:Math.round(i/5*100)}
-function social(c){var m=maxEng(),a=db.posts.filter(function(p){return String(p.page).toLowerCase()===String(c.name).toLowerCase()});if(!a.length)return null;var s=0;a.forEach(function(p){s+=pScore(p,m)});return Math.round(s/a.length)}
-function total(c){var d=complete(c),p=pipe(c),s=social(c);return s===null?Math.round(d*.4+p*.6):Math.round(d*.3+p*.4+s*.3)}
-function color(v){return v<40?'var(--r)':v<70?'var(--y)':'var(--t)'}
-function bar(v){return '<div class="bw"><div class="bb"><i style="width:'+v+'%;background:'+color(v)+'"></i></div><b>'+v+'%</b></div>'}
-
-/* ---------- تبويبات ---------- */
-$('nav').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
-  [].forEach.call($('nav').querySelectorAll('button'),function(x){x.classList.remove('on')});b.classList.add('on');
-  [].forEach.call(document.querySelectorAll('.panel'),function(x){x.classList.remove('on')});$('tab-'+b.getAttribute('data-tab')).classList.add('on');renderAll()});
-
-/* ---------- نموذج عام ---------- */
-var cb=null;
-function form(title,fields,vals,fn){
-  $('dT').textContent=title;
-  $('dF').innerHTML=fields.map(function(f){
-    var inp=f.t==='select'?'<select name="'+f.k+'">'+opts(f.o,'')+'</select>':f.t==='textarea'?'<textarea name="'+f.k+'" rows="'+(f.r||3)+'"></textarea>':'<input name="'+f.k+'" type="'+(f.t||'text')+'"'+(f.req?' required':'')+(f.step?' step="any"':'')+'>';
-    return '<label class="'+(f.full?'full':'')+'">'+f.l+inp+'</label>'}).join('');
-  var el=$('frm').elements;fields.forEach(function(f){el[f.k].value=vals&&vals[f.k]!=null?vals[f.k]:(f.t==='select'?f.o[0]:'')});
-  cb=function(){var o={};fields.forEach(function(f){o[f.k]=el[f.k].value.trim?el[f.k].value.trim():el[f.k].value});fn(o)};
-  $('dlg').showModal()}
-$('frm').addEventListener('submit',function(e){e.preventDefault();if(cb)cb();$('dlg').close()});
-$('dX').addEventListener('click',function(){$('dlg').close()});
-
-var FC=[
-  {k:'name',l:'اسم الشركة *',req:1,full:1},
-  {k:'website',l:'الموقع الإلكتروني',full:1},
-  {k:'contact',l:'اسم المسؤول'},{k:'phone',l:'الرقم'},{k:'industry',l:'المجال'},
-  {k:'employees',l:'عدد الموظفين (رقم أو نطاق)'},
-  {k:'annualRevenueEstimate',l:'المبيعات السنوية التقديرية (بالعملة والنطاق)',full:1},
-  {k:'revenueConfidence',l:'مستوى الثقة في تقدير المبيعات',t:'select',o:['غير محدد','مرتفع','متوسط','منخفض']},
-  {k:'source',l:'المصدر',t:'select',o:SOURCES},{k:'campaign',l:'اسم الحملة / قائمة العملاء'},{k:'stage',l:'المرحلة',t:'select',o:STAGES},
-  {k:'replyStatus',l:'حالة الرد',t:'select',o:REPLY_STATUSES},{k:'followUpDate',l:'موعد المتابعة',t:'date'},
-  {k:'value',l:'قيمة الصفقة',t:'number',step:1},{k:'lostReason',l:'سبب خسارة الفرصة',full:1},
-  {k:'facebook',l:'رابط Facebook',full:1},{k:'instagram',l:'رابط Instagram',full:1},{k:'linkedin',l:'رابط LinkedIn',full:1},
-  {k:'estimateBasis',l:'أساس التقدير ومصدره',t:'textarea',full:1,r:3},
-  {k:'fitScore',l:'درجة ملاءمة الشركة (0 إلى 100)',t:'number',step:1},{k:'fitConfidence',l:'ثقة تقييم الملاءمة',t:'select',o:['غير محدد','مرتفع','متوسط','منخفض']},
-  {k:'observedOpportunity',l:'الفرصة الملحوظة',t:'textarea',full:1,r:3},{k:'salesAngle',l:'زاوية البيع المقترحة',t:'textarea',full:1,r:3},
-  {k:'researchSummary',l:'ملخص البحث',t:'textarea',full:1,r:4},{k:'researchSource',l:'مصدر البحث',full:1},
-  {k:'notes',l:'ملاحظات',t:'textarea',full:1}
-];
-var FP=[{k:'platform',l:'المنصة',t:'select',o:['فيسبوك','انستجرام']},{k:'page',l:'الصفحة / الشركة *',req:1},{k:'title',l:'اسم المنشور *',req:1,full:1},{k:'likes',l:'عدد الايكات',t:'number'},{k:'commentsCount',l:'عدد الكومنتات (اختياري)',t:'number'},{k:'link',l:'رابط المنشور',full:1},{k:'date',l:'التاريخ',t:'date'},{k:'comments',l:'نص الكومنتات (كل كومنت في سطر)',t:'textarea',full:1,r:5}];
-
-/* ---------- المبيعات ---------- */
-function renderSales(){
-  var L=db.companies,open=0,won=0,pv=0,wv=0;
-  L.forEach(function(c){if(c.stage==='تم الإغلاق'){won++;wv+=num(c.value)}else if(c.stage!=='خسرنا'){open++;pv+=num(c.value)}});
-  $('stats').innerHTML=[['إجمالي الشركات',L.length],['صفقات مفتوحة',open],['قيمة المفتوح',fmt(pv)],['تم إغلاقها',won],['قيمة المغلق',fmt(wv)]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
-  var q=$('q').value.trim().toLowerCase(),st=$('fst').value;
-  var F=L.filter(function(c){if(st&&c.stage!==st)return false;return !q||[c.name,c.contact,c.phone,c.industry,c.source,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.estimateBasis,c.replyStatus,c.lostReason,c.campaign].join(' ').toLowerCase().indexOf(q)>-1});
-  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td><input type="checkbox" data-company-select="'+esc(c.id)+'" '+(selectedCompanyIds[c.id]?'checked':'')+'></td><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.contact)+'</td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td>'+esc(c.employees)+'</td><td>'+esc(c.annualRevenueEstimate)+'</td><td><div class="act">'+socialLinks(c)+'</div></td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td><span class="status-pill">'+esc(c.replyStatus||'لم يتم التواصل')+'</span></td><td>'+(c.value?fmt(num(c.value)):'-')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act">'+(c.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl(c))+'">واتساب</a>':'<button class="btn s" disabled>واتساب</button>')+'<button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">الملف</button><button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="15" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>';
-  renderBulkState(F);
-}
-function renderBulkState(visible){
-  var ids=Object.keys(selectedCompanyIds).filter(function(id){return selectedCompanyIds[id]});
-  $('selectedCount').textContent=ids.length+' شركة محددة';$('bulkDelete').disabled=!ids.length;$('clearSelection').disabled=!ids.length;
-  var all=visible&&visible.length>0&&visible.every(function(c){return !!selectedCompanyIds[c.id]});
-  $('selectAllCompanies').checked=!!all;$('selectAllCompanies').indeterminate=!!(visible&&visible.some(function(c){return !!selectedCompanyIds[c.id]})&&!all);
-}
-$('q').addEventListener('input',renderSales);$('fst').addEventListener('change',renderSales);
-$('addC').addEventListener('click',function(){editC(null)});
-function editC(id){var c=id?byId(db.companies,id):null;
-  form(c?'تعديل شركة':'إضافة شركة',FC,c,function(o){if(!o.name)return;o.value=o.value===''?'':num(o.value);o.fitScore=o.fitScore===''?'':Math.max(0,Math.min(100,num(o.fitScore)));
-    if(c){var oldStage=c.stage;for(var k in o)c[k]=o[k];if(oldStage!==c.stage)addCompanyActivity(c,'تغيير المرحلة','تم تغيير المرحلة من '+oldStage+' إلى '+c.stage)}
-    else{o.id=uid();o.created=today();o.contacts=[];o.activities=[];o.replyStatus=o.replyStatus||'لم يتم التواصل';db.companies.push(o);addCompanyActivity(o,'إنشاء الشركة','تمت إضافة الشركة إلى CRM')}
-    save();renderAll()})}
-
-
-/* ---------- ملفات الشركات ---------- */
-function renderProfile(){
-  var c=byId(db.companies,currentProfileId);if(!c)return;
-  if(!Array.isArray(c.contacts))c.contacts=[];if(!Array.isArray(c.activities))c.activities=[];
-  $('profileName').textContent=c.name||'';
-  $('profileSummary').innerHTML='<div><small>المجال</small>'+esc(c.industry||'—')+'</div><div><small>المرحلة</small>'+esc(c.stage||'—')+'</div><div><small>حالة الرد</small>'+esc(c.replyStatus||'لم يتم التواصل')+'</div><div><small>رقم الشركة</small>'+esc(c.phone||'—')+'</div><div><small>المسؤول الرئيسي</small>'+esc(c.contact||'—')+'</div><div><small>روابط الشركة</small>'+socialLinks(c)+'</div>';
-  $('profileResearch').innerHTML='<b>درجة الملاءمة:</b> '+(c.fitScore!==''&&c.fitScore!=null?esc(c.fitScore)+'/100':'غير محددة')+' | <b>الثقة:</b> '+esc(c.fitConfidence||'غير محدد')+'<p><b>الفرصة:</b> '+esc(c.observedOpportunity||'غير مسجلة')+'</p><p><b>زاوية البيع:</b> '+esc(c.salesAngle||'غير مسجلة')+'</p><p><b>ملخص البحث:</b> '+esc(c.researchSummary||'غير مسجل')+'</p><p><b>مصدر البحث:</b> '+esc(c.researchSource||'غير مسجل')+'</p>';
-  $('profileReplyStatus').value=c.replyStatus||'لم يتم التواصل';$('profileFollowUp').value=c.followUpDate||'';$('profileLostReason').value=c.lostReason||'';
-  $('profileContacts').innerHTML=c.contacts.length?c.contacts.map(function(p){return '<div class="contact-row"><span><b>'+esc(p.name||'بدون اسم')+'</b> '+esc(p.role||'')+'<br><span dir="ltr">'+esc(p.phone||'')+'</span> '+esc(p.email||'')+'</span><span class="act">'+(p.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl({phone:p.phone}))+'">واتساب</a>':'')+'<button class="btn d s" data-contact-delete="'+esc(p.id)+'">حذف</button></span></div>'}).join(''):'<div class="note">لسه مفيش جهات اتصال إضافية مسجلة.</div>';
-  var acts=c.activities.slice().reverse();
-  $('activityTimeline').innerHTML=acts.length?acts.map(function(a){return '<div class="timeline-item"><small>'+esc(a.date||'')+' — '+esc(a.type||'نشاط')+'</small><p>'+esc(a.note||'')+'</p></div>'}).join(''):'<div class="note">سجل التواصل لسه فاضي.</div>';
-}
-function openProfile(id){if(!byId(db.companies,id))return;currentProfileId=id;$('newContactName').value='';$('newContactRole').value='';$('newContactPhone').value='';$('newContactEmail').value='';$('activityNote').value='';renderProfile();$('profileDlg').showModal()}
-$('editProfileCompany').addEventListener('click',function(){var id=currentProfileId;$('profileDlg').close();editC(id)});
-$('addContact').addEventListener('click',function(){
-  var c=byId(db.companies,currentProfileId);if(!c)return;
-  var p={id:uid(),name:$('newContactName').value.trim(),role:$('newContactRole').value.trim(),phone:$('newContactPhone').value.trim(),email:$('newContactEmail').value.trim()};
-  if(!p.name&&!p.phone&&!p.email){alert('اكتب اسم أو رقم أو بريد جهة الاتصال.');return}
-  if(!Array.isArray(c.contacts))c.contacts=[];c.contacts.push(p);addCompanyActivity(c,'إضافة جهة اتصال','تمت إضافة جهة اتصال: '+(p.name||p.phone||p.email));
-  $('newContactName').value='';$('newContactRole').value='';$('newContactPhone').value='';$('newContactEmail').value='';
-  save();renderProfile();renderAll();
-});
-$('addActivity').addEventListener('click',function(){
-  var c=byId(db.companies,currentProfileId);if(!c)return;var note=$('activityNote').value.trim();if(!note){alert('اكتب تفاصيل النشاط الأول.');return}
-  addCompanyActivity(c,$('activityType').value,note);c.replyStatus=$('profileReplyStatus').value;$('activityNote').value='';save();renderProfile();renderAll();
-});
-$('saveProfileMeta').addEventListener('click',function(){
-  var c=byId(db.companies,currentProfileId);if(!c)return;
-  c.followUpDate=$('profileFollowUp').value;c.lostReason=$('profileLostReason').value.trim();c.replyStatus=$('profileReplyStatus').value;
-  addCompanyActivity(c,'تحديث بيانات المتابعة','حالة الرد: '+c.replyStatus+' | موعد المتابعة: '+(c.followUpDate||'غير محدد')+(c.lostReason?' | سبب الخسارة: '+c.lostReason:''));
-  save();renderProfile();renderAll();alert('تم حفظ بيانات المتابعة.');
-});
-$('profileContacts').addEventListener('click',function(e){
-  var b=e.target.closest('[data-contact-delete]');if(!b)return;var c=byId(db.companies,currentProfileId);if(!c)return;
-  var id=b.getAttribute('data-contact-delete');if(!confirm('تحذف جهة الاتصال دي؟'))return;
-  c.contacts=(c.contacts||[]).filter(function(p){return p.id!==id});addCompanyActivity(c,'حذف جهة اتصال','تم حذف جهة اتصال من ملف الشركة.');save();renderProfile();renderAll();
-});
-$('closeProfile').addEventListener('click',function(){$('profileDlg').close()});
-
-/* ---------- مركز المتابعات ---------- */
-function renderFollowups(){
-  var t=today(),list=db.companies.filter(function(c){return !!c.followUpDate}).slice().sort(function(a,b){return String(a.followUpDate).localeCompare(String(b.followUpDate))});
-  var overdue=list.filter(function(c){return c.followUpDate<t}).length,due=list.filter(function(c){return c.followUpDate===t}).length,future=list.filter(function(c){return c.followUpDate>t}).length;
-  $('followStats').innerHTML=[['متابعات متأخرة',overdue],['مستحقة اليوم',due],['قادمة',future]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
-  $('tbFollowups').innerHTML=list.length?list.map(function(c){var status=c.followUpDate<t?'متأخرة':c.followUpDate===t?'اليوم':'قادمة';return '<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.stage||'—')+'</td><td>'+esc(c.replyStatus||'لم يتم التواصل')+'</td><td><span class="status-pill">'+esc(c.followUpDate)+' — '+status+'</span></td><td class="nt">'+esc(c.lostReason||c.notes||'—')+'</td><td><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">فتح الملف</button></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">مفيش مواعيد متابعة مسجلة. افتح ملف الشركة وحدد موعد المتابعة القادمة.</td></tr>';
-}
-
-/* ---------- المنشورات ---------- */
-function renderPosts(){
-  var L=db.posts,m=maxEng(),lk=0,cm=0;L.forEach(function(p){lk+=num(p.likes);cm+=cCount(p)});
-  $('pStats').innerHTML=[['عدد المنشورات',L.length],['إجمالي الايكات',fmt(lk)],['إجمالي الكومنتات',fmt(cm)],['متوسط الايكات',L.length?Math.round(lk/L.length):0]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
-  var q=$('pq').value.trim().toLowerCase(),pf=$('pf').value;
-  var F=L.filter(function(p){if(pf&&p.platform!==pf)return false;return !q||[p.page,p.title,p.comments].join(' ').toLowerCase().indexOf(q)>-1});
-  $('tbP').innerHTML=F.length?F.map(function(p,i){var n=cCount(p);return '<tr><td>'+(i+1)+'</td><td>'+esc(p.platform)+'</td><td>'+esc(p.page)+'</td><td><b>'+(p.link?'<a style="color:var(--y)" target="_blank" rel="noopener" href="'+esc(p.link)+'">'+esc(p.title)+'</a>':esc(p.title))+'</b></td><td>'+fmt(num(p.likes))+'</td><td>'+n+'</td><td>'+(p.comments?'<details><summary>عرض ('+n+')</summary><div>'+esc(p.comments)+'</div></details>':'-')+'</td><td>'+esc(p.date)+'</td><td><div class="act"><button class="btn s" data-act="eP" data-id="'+esc(p.id)+'">تعديل</button><button class="btn d" data-act="dP" data-id="'+esc(p.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="9" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش منشورات. دوس "إضافة منشور".')+'</td></tr>'}
-$('pq').addEventListener('input',renderPosts);$('pf').addEventListener('change',renderPosts);
-$('addP').addEventListener('click',function(){editP(null)});
-function editP(id){var p=id?byId(db.posts,id):null;
-  form(p?'تعديل منشور':'إضافة منشور',FP,p,function(o){if(!o.page||!o.title)return;
-    if(p){for(var k in o)p[k]=o[k]}else{o.id=uid();db.posts.push(o)}save();renderAll()})}
-
-/* ---------- أحداث الجداول ---------- */
-document.addEventListener('click',function(e){
-  var b=e.target.closest('[data-act]');if(!b)return;var a=b.getAttribute('data-act'),id=b.getAttribute('data-id');
-  if(a==='eC')editC(id);if(a==='eP')editP(id);if(a==='profileC')openProfile(id);
-  if(a==='dC'){var c=byId(db.companies,id);if(c&&confirm('تمسح "'+c.name+'"؟ مفيش رجوع.')){db.companies=db.companies.filter(function(x){return x.id!==id});delete db.plans[id];delete selectedCompanyIds[id];save();renderAll()}}
-  if(a==='dP'){var p=byId(db.posts,id);if(p&&confirm('تمسح المنشور ده؟ مفيش رجوع.')){db.posts=db.posts.filter(function(x){return x.id!==id});save();renderAll()}}});
-document.addEventListener('change',function(e){
-  var box=e.target.closest('[data-company-select]');
-  if(box){var id=box.getAttribute('data-company-select');if(box.checked)selectedCompanyIds[id]=true;else delete selectedCompanyIds[id];renderBulkState();return}
-  if(e.target.id==='selectAllCompanies'){
-    var q=$('q').value.trim().toLowerCase(),st=$('fst').value;
-    db.companies.filter(function(c){if(st&&c.stage!==st)return false;return !q||[c.name,c.contact,c.phone,c.industry,c.source,c.campaign,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.estimateBasis,c.replyStatus,c.lostReason].join(' ').toLowerCase().indexOf(q)>-1}).forEach(function(c){if(e.target.checked)selectedCompanyIds[c.id]=true;else delete selectedCompanyIds[c.id]});
-    renderSales();return;
-  }
-  var s=e.target.closest('[data-stg]');if(s){var c=byId(db.companies,s.getAttribute('data-stg'));if(c){var old=c.stage;c.stage=s.value;if(old!==c.stage)addCompanyActivity(c,'تغيير المرحلة','تم تغيير المرحلة من '+old+' إلى '+c.stage);save();renderAll()}}
-});
-$('bulkDelete').addEventListener('click',function(){
-  var ids=Object.keys(selectedCompanyIds).filter(function(id){return selectedCompanyIds[id]});if(!ids.length)return;
-  if(!confirm('هتحذف '+ids.length+' شركة والخطط المرتبطة بها. العملية لا يمكن التراجع عنها. نزّل نسخة احتياطية قبل المتابعة.'))return;
-  db.companies=db.companies.filter(function(c){if(ids.indexOf(c.id)>-1){delete db.plans[c.id];return false}return true});
-  selectedCompanyIds={};save();renderAll();
-});
-$('clearSelection').addEventListener('click',function(){selectedCompanyIds={};renderSales()});
-
-/* ---------- الخطط ---------- */
-$('needs').innerHTML=NEEDS.map(function(n,i){return '<label><input type="checkbox" value="'+esc(n)+'">'+esc(n)+'</label>'}).join('');
-function curCo(){return byId(db.companies,$('planCo').value)}
-function renderPlanSel(){var cur=$('planCo').value;
-  $('planCo').innerHTML=db.companies.length?db.companies.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>'}).join(''):'<option value="">— ضيف شركة الأول —</option>';
-  if(cur&&byId(db.companies,cur))$('planCo').value=cur;loadPlan()}
-function loadPlan(){var c=curCo(),pl=c&&db.plans[c.id];
-  [].forEach.call($('needs').querySelectorAll('input'),function(i){i.checked=!!(pl&&pl.needs.indexOf(i.value)>-1)});$('planTxt').value=pl?pl.text:''}
-$('planCo').addEventListener('change',loadPlan);
-function selNeeds(){return [].filter.call($('needs').querySelectorAll('input'),function(i){return i.checked}).map(function(i){return i.value})}
-function makePlan(c,needs){
-  var L=['خطة شركة: '+c.name,'المجال: '+(c.industry||'غير محدد'),'المرحلة الحالية في المبيعات: '+c.stage,'الاحتياجات: '+(needs.length?needs.join('، '):'غير محددة'),'',
-    'الخطوة التالية في البيع: '+NEXT[c.stage]];
-  var sp=social(c);if(sp!==null){var n=db.posts.filter(function(p){return String(p.page).toLowerCase()===String(c.name).toLowerCase()}).length;L.push('السوشيال: '+n+' منشور مسجل، متوسط مؤشر التفاعل النسبي '+sp+'%')}
-  needs.forEach(function(n){L.push('','▪ '+n);STEPS[n].forEach(function(s,i){L.push('   '+(i+1)+'. '+s)})});
-  L.push('','جدول 30 يوم:','الأسبوع 1: مراجعة الوضع وتجهيز المواد','الأسبوع 2: التنفيذ والنشر والتواصل','الأسبوع 3: متابعة النتائج وتعديل ما لا يعمل','الأسبوع 4: تقييم الأرقام وتحديد خطة الشهر التالي');
-  return L.join('\n')}
-$('genPlan').addEventListener('click',function(){var c=curCo();if(!c){alert('اختار شركة الأول');return}var n=selNeeds();if(!n.length){alert('اختار احتياج واحد على الأقل');return}$('planTxt').value=makePlan(c,n)});
-$('savePlan').addEventListener('click',function(){var c=curCo();if(!c)return;db.plans[c.id]={needs:selNeeds(),text:$('planTxt').value,updated:today()};save();alert('تم حفظ الخطة')});
-$('copyPlan').addEventListener('click',function(){var t=$('planTxt');t.select();try{document.execCommand('copy')}catch(e){}});
-
-/* ---------- رفع CSV ---------- */
-function parseCSV(t){t=t.replace(/^\uFEFF/,'');var first=t.split(/\r?\n/)[0]||'',d=',';
-  if((first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length)d=';';if((first.match(/\t/g)||[]).length>(first.match(/,/g)||[]).length)d='\t';
-  var rows=[],row=[],f='',q=false;
-  for(var i=0;i<t.length;i++){var ch=t[i];
-    if(q){if(ch==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=ch}
-    else if(ch==='"')q=true;else if(ch===d){row.push(f);f=''}
-    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;row.push(f);f='';if(row.some(function(x){return x.trim()}))rows.push(row);row=[]}
-    else f+=ch}
-  row.push(f);if(row.some(function(x){return x.trim()}))rows.push(row);return rows}
-var MAPC={
-  name:['name','title','company','الشركة','اسم الشركة','الاسم'],
-  website:['website','company website','website url','الموقع الإلكتروني','الموقع','الموقع الالكتروني'],
-  contact:['contact','المسؤول','اسم المسؤول'],
-  phone:['phone','phone number','mobile','telephone','الرقم','رقم','الموبايل','الهاتف'],
-  industry:['industry','category','المجال','النشاط'],
-  source:['source','المصدر'],campaign:['campaign','campaign name','اسم الحملة','الحملة','قائمة العملاء'],stage:['stage','المرحلة'],value:['value','القيمة','قيمة الصفقة'],notes:['notes','ملاحظات','address','العنوان'],
-  facebook:['facebook','facebook url','فيسبوك','رابط فيسبوك'],
-  instagram:['instagram','instagram url','انستجرام','إنستجرام','انستغرام','رابط انستجرام','رابط انستغرام'],
-  linkedin:['linkedin','linkedin url','لينكدان','لينكدإن','رابط لينكدان','رابط لينكدإن'],
-  employees:['employees','employee_count','headcount','عدد الموظفين','العمالة','الموظفين'],
-  annualRevenueEstimate:['annual_revenue_estimate','estimated_revenue','annual_revenue','المبيعات السنوية التقديرية','المبيعات التقديرية','حجم المبيعات التقديري'],
-  revenueConfidence:['revenue_confidence','confidence','مستوى الثقة','ثقة التقدير'],
-  estimateBasis:['estimate_basis','revenue_basis','أساس التقدير','مصدر التقدير','أساس التقدير ومصدره'],
-  fitScore:['fit_score','درجة الملاءمة','درجة ملاءمة الشركة'],fitConfidence:['fit_confidence','ثقة تقييم الملاءمة'],observedOpportunity:['observed_opportunity','الفرصة الملحوظة','فرصة البيع'],salesAngle:['sales_angle','زاوية البيع','زاوية البيع المقترحة'],researchSummary:['research_summary','ملخص البحث','ملخص التحليل'],researchSource:['research_source','مصدر البحث','مصادر البحث'],
-  replyStatus:['reply_status','reply status','حالة الرد'],followUpDate:['follow_up_date','follow up date','موعد المتابعة'],lostReason:['lost_reason','سبب الخسارة','سبب خسارة الفرصة']
-};
-var MAPP={platform:['platform','المنصة'],page:['page','company','الصفحة','الشركة'],title:['title','post','caption','اسم المنشور','المنشور'],likes:['likes','الايكات','لايكات','الإعجابات'],commentsCount:['comments_count','comments count','عدد الكومنتات','عدد التعليقات'],comments:['comments','الكومنتات','التعليقات'],link:['link','url','الرابط'],date:['date','التاريخ']};
-$('upGo').addEventListener('click',function(){
-  var f=$('upF').files[0];if(!f){$('upMsg').textContent='اختار ملف الأول.';return}
-  var r=new FileReader();r.onload=function(){
-    var rows=parseCSV(String(r.result));if(rows.length<2){$('upMsg').textContent='الملف فاضي أو مفيش فيه صفوف بيانات.';return}
-    var tgt=$('upT').value,M=tgt==='companies'?MAPC:MAPP,head=rows[0].map(function(h){return h.trim().toLowerCase()}),idx={};
-    for(var k in M){for(var j=0;j<head.length;j++){if(M[k].indexOf(head[j])>-1){idx[k]=j;break}}}
-    var need=tgt==='companies'?'name':'title';if(idx[need]===undefined){$('upMsg').textContent='مفيش عمود '+(tgt==='companies'?'اسم الشركة':'اسم المنشور')+' في الملف. راجع أسماء الأعمدة.';return}
-    var added=0,updated=0,skipped=0;
-    rows.slice(1).forEach(function(r){var o={};for(var k in idx)o[k]=(r[idx[k]]||'').trim();
-      if(tgt==='companies'){
-        if(!o.name)return;
-        if(o.fitScore!=='')o.fitScore=Math.max(0,Math.min(100,num(o.fitScore)));
-        var dup=null;
-        for(var ci=0;ci<db.companies.length;ci++){
-          if(String(db.companies[ci].name||'').trim().toLowerCase()===o.name.trim().toLowerCase()){dup=db.companies[ci];break}
-        }
-        if(dup){
-          var changed=false;
-          for(var field in o){
-            if(field==='name'||o[field]==='')continue;
-            if(dup[field]===''||dup[field]==null){
-              dup[field]=field==='value'?num(o[field]):o[field];
-              changed=true;
-            }
-          }
-          if(changed)updated++;else skipped++;
-          return;
-        }
-        if(STAGES.indexOf(o.stage)<0)o.stage='جديد';if(!o.source)o.source='أخرى';if(REPLY_STATUSES.indexOf(o.replyStatus)<0)o.replyStatus='لم يتم التواصل';o.value=o.value?num(o.value):'';o.id=uid();o.created=today();o.contacts=[];o.activities=[];addCompanyActivity(o,'استيراد','تم استيراد الشركة من ملف CSV.');db.companies.push(o)
-      }else{
-        if(!o.title)return;
-        if(o.platform!=='فيسبوك'&&o.platform!=='انستجرام'){var s=(o.platform||'').toLowerCase();o.platform=s.indexOf('insta')>-1||s.indexOf('انستجرام')>-1?'انستجرام':'فيسبوك'}
-        o.page=o.page||'';o.id=uid();db.posts.push(o)
-      }
-      added++});
-    save();renderAll();
-    $('upMsg').textContent=tgt==='companies'
-      ?'تم استيراد '+added+' شركة جديدة، وتحديث '+updated+' شركة في الخانات الفاضية فقط، وتخطي '+skipped+' صف بدون بيانات جديدة.'
-      :'تم استيراد '+added+' منشور، وتخطي '+skipped+' صف بدون بيانات جديدة.';
-    $('upF').value=''};
-  r.readAsText(f,'UTF-8')});
-
-/* ---------- الأداء ---------- */
-function renderPerf(){var m=maxEng();
-  $('tbPerfC').innerHTML=db.companies.length?db.companies.map(function(c){var s=social(c);return '<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.stage)+'</td><td>'+bar(complete(c))+'</td><td>'+bar(pipe(c))+'</td><td>'+(s===null?'<span style="color:var(--m)">مفيش منشورات</span>':bar(s))+'</td><td>'+bar(total(c))+'</td></tr>'}).join(''):'<tr><td colspan="6" class="empty">مفيش شركات.</td></tr>';
-  var P=db.posts.slice().sort(function(a,b){return eng(b)-eng(a)});
-  $('tbPerfP').innerHTML=P.length?P.map(function(p){return '<tr><td>'+esc(p.platform)+'</td><td>'+esc(p.page)+'</td><td>'+esc(p.title)+'</td><td>'+fmt(num(p.likes))+'</td><td>'+cCount(p)+'</td><td>'+bar(pScore(p,m))+'</td></tr>'}).join(''):'<tr><td colspan="6" class="empty">مفيش منشورات.</td></tr>';
-  var stageCounts=STAGES.map(function(stage){return {name:stage,count:db.companies.filter(function(c){return c.stage===stage}).length}});
-  var base=Math.max(1,db.companies.length);
-  $('pipelineChart').innerHTML=stageCounts.map(function(s){var pct=Math.round(s.count/base*100);return '<div style="display:grid;grid-template-columns:100px 1fr 38px;gap:8px;align-items:center;margin:8px 0;font-size:13px"><span>'+esc(s.name)+'</span><div class="bb"><i style="display:block;width:'+pct+'%;height:100%;background:var(--t);border-radius:6px"></i></div><b>'+s.count+'</b></div>'}).join('');
-  var src=SOURCES.map(function(source){var all=db.companies.filter(function(c){return (c.source||'أخرى')===source}),wins=all.filter(function(c){return c.stage==='تم الإغلاق'}).length;return {source:source,total:all.length,wins:wins,rate:all.length?Math.round(wins/all.length*100):0}}).filter(function(x){return x.total>0});
-  $('sourcePerf').innerHTML=src.length?src.map(function(x){return '<tr><td>'+esc(x.source)+'</td><td>'+x.total+'</td><td>'+x.wins+'</td><td>'+x.rate+'%</td></tr>'}).join(''):'<tr><td colspan="4" class="empty">مفيش بيانات مصادر كفاية.</td></tr>';
-  var campaigns={};db.companies.forEach(function(c){var name=String(c.campaign||'').trim();if(!name)return;if(!campaigns[name])campaigns[name]={total:0,wins:0};campaigns[name].total++;if(c.stage==='تم الإغلاق')campaigns[name].wins++});
-  var campRows=Object.keys(campaigns).map(function(name){var x=campaigns[name];return {name:name,total:x.total,wins:x.wins,rate:Math.round(x.wins/x.total*100)}}).sort(function(a,b){return b.total-a.total});
-  $('campaignPerf').innerHTML=campRows.length?campRows.map(function(x){return '<tr><td>'+esc(x.name)+'</td><td>'+x.total+'</td><td>'+x.wins+'</td><td>'+x.rate+'%</td></tr>'}).join(''):'<tr><td colspan="4" class="empty">سجّل اسم الحملة في ملف الشركة لعرض التحليل.</td></tr>';
-}
-
-/* ---------- تنزيل ---------- */
-function report(){var m=maxEng(),L=['تقرير Digital Reach — '+today(),'عدد الشركات: '+db.companies.length+' | عدد المنشورات: '+db.posts.length,'','== الشركات =='];
-  db.companies.forEach(function(c){var s=social(c);L.push(c.name+' | '+c.stage+' | بيانات '+complete(c)+'% | صفقة '+pipe(c)+'% | سوشيال '+(s===null?'—':s+'%')+' | إجمالي '+total(c)+'%')});
-  L.push('','== المنشورات (الأعلى تفاعلًا أولًا) ==');
-  db.posts.slice().sort(function(a,b){return eng(b)-eng(a)}).forEach(function(p){L.push('['+p.platform+'] '+p.page+' — '+p.title+' | ايكات '+num(p.likes)+' | كومنتات '+cCount(p)+' | مؤشر تفاعل نسبي '+pScore(p,m)+'%')});
-  L.push('','ملحوظة: النسب مؤشرات داخلية مش ضمان نتائج.');return L.join('\n')}
-document.addEventListener('click',function(e){var b=e.target.closest('[data-dl]');if(!b)return;var k=b.getAttribute('data-dl'),d=today();
-  if(k==='companies')dl('sales-crm-'+d+'.csv',csv(['الشركة','المسؤول','الرقم','المجال','المصدر','المرحلة','القيمة','ملاحظات','الموقع الإلكتروني','فيسبوك','انستجرام','لينكدان','عدد الموظفين','المبيعات السنوية التقديرية','مستوى الثقة','أساس التقدير ومصدره','درجة الملاءمة','ثقة الملاءمة','الفرصة الملحوظة','زاوية البيع','ملخص البحث','مصدر البحث','حالة الرد','موعد المتابعة','سبب الخسارة','الحملة','تاريخ الإضافة','اكتمال البيانات %','تقدم الصفقة %','الإجمالي %'],db.companies.map(function(c){return [c.name,c.contact,c.phone,c.industry,c.source,c.stage,c.value,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.revenueConfidence,c.estimateBasis,c.fitScore,c.fitConfidence,c.observedOpportunity,c.salesAngle,c.researchSummary,c.researchSource,c.replyStatus,c.followUpDate,c.lostReason,c.campaign,c.created,complete(c),pipe(c),total(c)]})),'text/csv;charset=utf-8');
-  if(k==='posts'){var m=maxEng();dl('posts-crm-'+d+'.csv',csv(['المنصة','الصفحة','اسم المنشور','الايكات','عدد الكومنتات','نص الكومنتات','الرابط','التاريخ','نسبة التفاعل %'],db.posts.map(function(p){return [p.platform,p.page,p.title,p.likes,cCount(p),p.comments,p.link,p.date,pScore(p,m)]})),'text/csv;charset=utf-8')}
-  if(k==='plans'){var t=[];db.companies.forEach(function(c){if(db.plans[c.id]&&db.plans[c.id].text)t.push(db.plans[c.id].text)});if(!t.length){alert('مفيش خطط محفوظة');return}dl('plans-'+d+'.txt',t.join('\n\n==============================\n\n'),'text/plain;charset=utf-8')}
-  if(k==='report')dl('report-'+d+'.txt',report(),'text/plain;charset=utf-8');
-  if(k==='backup')dl('digital-reach-backup-'+d+'.json',JSON.stringify(db,null,2),'application/json')});
-$('bRestore').addEventListener('click',function(){$('fRestore').click()});
-$('fRestore').addEventListener('change',function(){var f=this.files[0],inp=this;if(!f)return;var r=new FileReader();
-  r.onload=function(){try{var p=JSON.parse(r.result);if(!p||!Array.isArray(p.companies))throw 0;
-    if(confirm('هيتم استبدال البيانات الحالية بالنسخة دي. متأكد؟')){db={companies:p.companies,posts:Array.isArray(p.posts)?p.posts:[],plans:p.plans&&typeof p.plans==='object'?p.plans:{}};save();renderAll()}}
-    catch(e){alert('الفايل ده مش نسخة احتياطية صحيحة.')}inp.value=''};r.readAsText(f)});
-
-/* ---------- تشغيل ---------- */
-function renderAll(){renderSales();renderPosts();renderPlanSel();renderPerf();renderFollowups()}
-$('fst').innerHTML='<option value="">كل المراحل</option>'+opts(STAGES,'');
-renderAll();
-
-$('loginForm').addEventListener('submit',function(e){
-  e.preventDefault();
-  var email=$('loginEmail').value.trim().toLowerCase(),password=$('loginPassword').value;
-  $('loginBtn').disabled=true;setAuthMessage('جاري تسجيل الدخول...');
-  auth.signInWithEmailAndPassword(email,password).catch(function(err){
-    $('loginBtn').disabled=false;
-    var msg=err&&err.code==='auth/unauthorized-domain'?'الدومين غير مضاف في Firebase Authentication > Settings > Authorized domains.':
-      err&&err.code==='auth/invalid-credential'?'الإيميل أو كلمة المرور غير صحيحة.':'تعذّر تسجيل الدخول: '+(err.message||'راجع إعدادات Firebase.');
-    setAuthMessage(msg);
-  });
-});
-$('bSignOut').addEventListener('click',function(){cloudReady=false;auth.signOut().then(lockCRM).catch(function(){setAuthMessage('تعذّر تسجيل الخروج.')})});
-auth.onAuthStateChanged(async function(user){
-  lockCRM();
-  $('loginBtn').disabled=false;
-  if(!user){setAuthMessage('');return}
-  if(String(user.email||'').toLowerCase()!=='goory.met@gmail.com'){
-    await auth.signOut();setAuthMessage('الحساب ده مش مصرح له بالدخول.');return;
-  }
-  setAuthMessage('جاري تحميل بيانات CRM...');
-  try{
-    var snap=await cloudDoc.get();
-    if(snap.exists){
-      var remote=snap.data()||{};
-      db={companies:Array.isArray(remote.companies)?remote.companies:[],posts:Array.isArray(remote.posts)?remote.posts:[],plans:remote.plans&&typeof remote.plans==='object'?remote.plans:{}};
-      try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}
-    }else{
-      await cloudDoc.set({companies:db.companies,posts:db.posts,plans:db.plans,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
-    }
-    cloudReady=true;showCRM();renderAll();
-  }catch(err){
-    console.error('Cloud load failed',err);
-    setAuthMessage('تعذّر تحميل البيانات من Firestore. تأكد من نشر قواعد الحماية والاتصال بالإنترنت.');
-  }
-});
-})();
-</script>
+<script src="crm-core.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
