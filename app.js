@@ -47,7 +47,9 @@
   }
   function opts(list, selected, blankLabel) {
     var html = blankLabel != null ? '<option value="">' + esc(blankLabel) + '</option>' : '';
-    return html + list.map(function (s) {
+    var values = Array.isArray(list) ? list.slice() : [];
+    if (selected != null && String(selected) !== '' && values.indexOf(String(selected)) < 0) values.push(String(selected));
+    return html + values.map(function (s) {
       return '<option value="' + esc(s) + '"' + (s === selected ? ' selected' : '') + '>' + esc(s) + '</option>';
     }).join('');
   }
@@ -131,6 +133,14 @@
     }
   }
 
+  var FIRESTORE_DOCUMENT_LIMIT_BYTES = 1048572;
+  var FIRESTORE_SAFE_LIMIT_BYTES = 900 * 1024;
+  function utf8ByteLength(value) {
+    var s = String(value == null ? '' : value);
+    if (typeof TextEncoder !== 'undefined') return new TextEncoder().encode(s).length;
+    if (typeof Blob !== 'undefined') return new Blob([s]).size;
+    return unescape(encodeURIComponent(s)).length;
+  }
   function cloudPayload() {
     var payload = {
       companies: db.companies,
@@ -145,6 +155,11 @@
     });
     return payload;
   }
+  function cloudPayloadSize(payload) {
+    var safePayload = Object.assign({}, payload);
+    delete safePayload.updatedAt;
+    return utf8ByteLength(JSON.stringify(safePayload));
+  }
 
   function save() {
     try {
@@ -153,10 +168,20 @@
       toast('تعذّر الحفظ المحلي. نزّل نسخة احتياطية فورًا.', 'err');
     }
     if (!cloudReady || !cloudDoc) return;
+    var payload = cloudPayload();
+    var payloadBytes = cloudPayloadSize(payload);
+    if (payloadBytes >= FIRESTORE_SAFE_LIMIT_BYTES || payloadBytes >= FIRESTORE_DOCUMENT_LIMIT_BYTES) {
+      var message = 'تم إيقاف الحفظ السحابي لحماية البيانات: حجم بيانات CRM حوالي ' +
+        Math.round(payloadBytes / 1024) + ' KB، واقترب من حد Firestore البالغ 1 MiB. البيانات الجديدة محفوظة محليًا فقط. نزّل نسخة احتياطية، ويلزم فصل الشركات والخطط إلى مستندات مستقلة قبل متابعة الحفظ.';
+      setCloudStatus('حجم البيانات تجاوز حد الأمان — الحفظ السحابي متوقف.', 'err');
+      toast(message, 'err');
+      console.error(message);
+      return;
+    }
     setCloudStatus('جاري الحفظ السحابي…', 'busy');
     if (cloudTimer) clearTimeout(cloudTimer);
     cloudTimer = setTimeout(function () {
-      cloudDoc.set(cloudPayload()).then(function () {
+      cloudDoc.set(payload).then(function () {
         setCloudStatus('محفوظ سحابيًا · ' + new Date().toLocaleTimeString('ar-EG'), 'ok');
       }).catch(function (e) {
         console.error('Cloud save failed', e);
@@ -233,7 +258,7 @@
         { k: 'replyStatus', l: 'حالة الرد', t: 'select', o: C.REPLY_STATUSES },
         { k: 'value', l: 'قيمة الصفقة', t: 'number' },
         { k: 'probability', l: 'احتمالية الإغلاق %', t: 'number', min: 0, max: 100 },
-        { k: 'source', l: 'المصدر', t: 'select', o: C.SOURCES },
+        { k: 'source', l: 'المصدر', list: 'sourceList' },
         { k: 'campaign', l: 'الحملة / قائمة العملاء', list: 'campaignList' },
         { k: 'owner', l: 'الشخص المسؤول عن المتابعة' },
         { k: 'followUpDate', l: 'موعد المتابعة القادمة', t: 'date' },
@@ -1633,7 +1658,12 @@
           db = C.normalizeDb(remote);
           try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { /* ignore quota */ }
         } else {
-          await cloudDoc.set(cloudPayload());
+          var initialPayload = cloudPayload();
+          var initialBytes = cloudPayloadSize(initialPayload);
+          if (initialBytes >= FIRESTORE_SAFE_LIMIT_BYTES) {
+            throw new Error('مستند CRM قريب من حد Firestore؛ تم إيقاف إنشاء مستند جديد لحماية البيانات.');
+          }
+          await cloudDoc.set(initialPayload);
         }
         cloudReady = true;
         hydrateSettings();
@@ -1782,6 +1812,12 @@
     /* Campaigns */
     $('campaignForm').addEventListener('submit', addCampaign);
     $('cSource').innerHTML = opts(C.SOURCES, 'أخرى');
+    var sourceList = $('sourceList');
+    if (sourceList) {
+      var allSources = C.SOURCES.concat(db.companies.map(function (c) { return c.source; }).filter(Boolean));
+      var uniqueSources = allSources.filter(function (s, i) { return allSources.indexOf(s) === i; });
+      sourceList.innerHTML = uniqueSources.map(function (s) { return '<option value="' + esc(s) + '"></option>'; }).join('');
+    }
 
     /* Settings */
     ['wService', 'wCommercial', 'wOpportunity', 'wMarket', 'wAccess'].forEach(function (id) {
@@ -1872,7 +1908,8 @@
     savePlan: savePlan,
     applyPendingImport: applyPendingImport,
     fitFor: fitFor,
-    today: today
+    today: today,
+    cloudPayloadSize: cloudPayloadSize
   };
 
   init();

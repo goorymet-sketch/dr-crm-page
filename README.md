@@ -148,6 +148,12 @@ Rules:
 
 Exports include companies (all new fields), posts, plans, a performance report, campaign performance and a full JSON backup.
 
+## Firestore document-size safety
+
+The compatibility layer still reads and writes the legacy `crmData/main` document. Before each client write, it measures the UTF-8 JSON payload and blocks cloud writes at a conservative 900 KiB threshold (Firestore's hard document limit is 1 MiB). A blocked write is clearly reported; the browser's local copy remains available.
+
+This safeguard is not a sharded-storage migration. Moving companies and plans into subcollections requires a reversible migration and matching Firestore security-rule changes. This branch does not alter production data or security rules.
+
 ## Running locally
 
 The page is static. Serve the folder with any static server, for example:

@@ -138,6 +138,42 @@ function setField(window, form, name, value) {
   return el;
 }
 
+test('legacy custom source and statuses remain editable and unchanged', async () => {
+  const legacy = {
+    companies: [{
+      id: 'custom-company', name: 'شركة بمصدر مخصص',
+      source: 'Clay Research', stage: 'Qualified by Partner',
+      replyStatus: 'LinkedIn replied', country: 'الإمارات'
+    }],
+    posts: [], plans: {}
+  };
+  const ctx = await boot({ legacy });
+  const { document, app, window } = ctx;
+  assert.equal(app.getDb().companies[0].source, 'Clay Research');
+  app.openCompanyForm('custom-company');
+  const form = document.getElementById('companyForm');
+  assert.equal(form.elements.namedItem('source').value, 'Clay Research');
+  assert.equal(form.elements.namedItem('source').getAttribute('list'), 'sourceList');
+  assert.equal(form.elements.namedItem('stage').value, 'Qualified by Partner');
+  assert.equal(form.elements.namedItem('replyStatus').value, 'LinkedIn replied');
+  submit(window, form);
+  const saved = app.getDb().companies[0];
+  assert.equal(saved.source, 'Clay Research');
+  assert.equal(saved.stage, 'Qualified by Partner');
+  assert.equal(saved.replyStatus, 'LinkedIn replied');
+  assert.equal(ctx.errors.length, 0, ctx.errors.join(' | '));
+  window.close();
+});
+
+test('Firestore payload byte-size helper counts UTF-8 bytes', async () => {
+  const ctx = await boot();
+  const { window, app } = ctx;
+  const payload = { companies: [{ name: 'ش'.repeat(1000) }], updatedAt: 'ignored' };
+  const copy = { companies: payload.companies };
+  assert.equal(app.cloudPayloadSize(payload), Buffer.byteLength(JSON.stringify(copy), 'utf8'));
+  window.close();
+});
+
 test('app boots, authenticates, loads legacy data and renders without console errors', async () => {
   const ctx = await boot();
   const { document, window, app } = ctx;

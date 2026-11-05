@@ -336,6 +336,57 @@ test('similar names are treated as different entities unless name and phone matc
   assert.equal(plan.items[0].action, 'new');
 });
 
+test('custom source, stage and reply-status values survive legacy normalisation and CSV import', () => {
+  const legacy = C.normalizeCompany({
+    id: 'custom-source', name: 'شركة مصدر مخصص',
+    source: 'Clay Research', stage: 'مؤهل من Clay', replyStatus: 'رد من LinkedIn'
+  });
+  assert.equal(legacy.source, 'Clay Research');
+  assert.equal(legacy.stage, 'مؤهل من Clay');
+  assert.equal(legacy.replyStatus, 'رد من LinkedIn');
+  const rows = C.parseCSV([
+    'الشركة,المصدر,المرحلة,حالة الرد',
+    'شركة استيراد,Clay Research,مؤهل من Clay,رد من LinkedIn'
+  ].join('\n'));
+  const item = C.buildImportPlan(rows, []).items[0];
+  assert.equal(item.data.source, 'Clay Research');
+  assert.equal(item.data.stage, 'مؤهل من Clay');
+  assert.equal(item.data.replyStatus, 'رد من LinkedIn');
+});
+
+test('international phone normalisation keeps calling codes and applies country to local Gulf numbers', () => {
+  assert.notEqual(C.normPhone('966501234567'), C.normPhone('971501234567'));
+  assert.equal(C.normPhone('0501234567', 'السعودية'), '966501234567');
+  assert.equal(C.normPhone('0501234567', 'الإمارات'), '971501234567');
+  assert.equal(C.normPhone('+971 50 123 4567', 'الإمارات'), '971501234567');
+  assert.equal(C.normPhone('501234567', 'الإمارات'), '971501234567');
+});
+
+test('same company name with country-code conflict in one CSV requires review', () => {
+  const rows = C.parseCSV([
+    'الشركة,الرقم',
+    'شركة الخليج,966501234567',
+    'شركة الخليج,971501234567'
+  ].join('\n'));
+  const plan = C.buildImportPlan(rows, []);
+  assert.equal(plan.counts.new, 1);
+  assert.equal(plan.counts.review, 1);
+  assert.equal(plan.items[1].action, 'review');
+});
+
+test('same company name with a missing or different phone in one CSV requires review', () => {
+  [
+    ['شركة الخليج,966501234567', 'شركة الخليج,971501234567'],
+    ['شركة الخليج,966501234567', 'شركة الخليج,']
+  ].forEach((records) => {
+    const rows = C.parseCSV(['الشركة,الرقم'].concat(records).join('\n'));
+    const plan = C.buildImportPlan(rows, []);
+    assert.equal(plan.counts.new, 1);
+    assert.equal(plan.counts.review, 1);
+    assert.equal(plan.items[1].action, 'review');
+  });
+});
+
 test('duplicate rows inside the same file are flagged for review', () => {
   const rows = C.parseCSV([
     'الشركة,الرقم',

@@ -84,11 +84,25 @@
 
   function digits(value) { return text(value).replace(/\D/g, ''); }
 
-  function normPhone(value) {
+  function normPhone(value, country) {
     var d = digits(value);
     d = d.replace(/^00/, '');
-    if (d.length > 9) d = d.slice(-9);
-    if (d.charAt(0) === '0') d = d.slice(1);
+    if (!d) return '';
+    var c = normHeader(country || '');
+    var callingCodes = [
+      { code: '966', match: /سعود|saudi|ksa/ },
+      { code: '971', match: /امارات|uae|emirat|دبي|ابوظبي|ابو ظبي/ },
+      { code: '974', match: /قطر|qatar/ },
+      { code: '965', match: /كويت|kuwait/ },
+      { code: '973', match: /بحرين|bahrain/ },
+      { code: '968', match: /عمان|oman/ }
+    ];
+    var codeMatch = callingCodes.filter(function (x) { return x.match.test(c); })[0];
+    var alreadyInternational = callingCodes.some(function (x) { return d.indexOf(x.code) === 0; });
+    if (!alreadyInternational && codeMatch) {
+      if (d.charAt(0) === '0') d = codeMatch.code + d.slice(1);
+      else if (d.length === 9 && d.charAt(0) === '5') d = codeMatch.code + d;
+    }
     return d;
   }
 
@@ -444,13 +458,13 @@
     var c = raw && typeof raw === 'object' ? raw : {};
     if (!hasText(c.id)) c.id = uid();
     c.name = text(c.name);
-    c.stage = oneOf(c.stage, STAGE_KEYS, 'جديد');
-    c.replyStatus = oneOf(c.replyStatus, REPLY_STATUSES, 'لم يتم التواصل');
-    c.source = oneOf(c.source, SOURCES, 'أخرى');
-    c.opportunityType = oneOf(c.opportunityType, OPPORTUNITY_TYPES, inferOpportunityType(c));
-    c.priority = oneOf(c.priority, PRIORITIES, 'متوسطة');
-    c.revenueConfidence = oneOf(c.revenueConfidence, CONFIDENCE_LEVELS, 'غير محدد');
-    c.fitConfidence = oneOf(c.fitConfidence, CONFIDENCE_LEVELS, 'غير محدد');
+    c.stage = hasText(c.stage) ? text(c.stage) : 'جديد';
+    c.replyStatus = hasText(c.replyStatus) ? text(c.replyStatus) : 'لم يتم التواصل';
+    c.source = hasText(c.source) ? text(c.source) : 'أخرى';
+    c.opportunityType = hasText(c.opportunityType) ? text(c.opportunityType) : inferOpportunityType(c);
+    c.priority = hasText(c.priority) ? text(c.priority) : 'متوسطة';
+    c.revenueConfidence = hasText(c.revenueConfidence) ? text(c.revenueConfidence) : 'غير محدد';
+    c.fitConfidence = hasText(c.fitConfidence) ? text(c.fitConfidence) : 'غير محدد';
     c.classificationOverride = oneOf(c.classificationOverride, CLASSIFICATIONS.concat(['']), '');
     c.sector = hasText(c.sector) ? c.sector : inferSector(c.industry);
     if (!Array.isArray(c.contacts)) c.contacts = [];
@@ -1147,9 +1161,7 @@
   function normalizeImportedValue(key, value) {
     var v = text(value).trim();
     if (!v) return '';
-    if (key === 'stage') return isStage(v) ? v : '';
-    if (key === 'replyStatus') return REPLY_STATUSES.indexOf(v) > -1 ? v : '';
-    if (key === 'source') return SOURCES.indexOf(v) > -1 ? v : (v ? 'أخرى' : '');
+    if (key === 'stage' || key === 'replyStatus' || key === 'source') return v;
     if (key === 'opportunityType') return OPPORTUNITY_TYPES.indexOf(v) > -1 ? v : '';
     if (key === 'priority') return PRIORITIES.indexOf(v) > -1 ? v : '';
     if (key === 'revenueConfidence' || key === 'fitConfidence') return CONFIDENCE_LEVELS.indexOf(v) > -1 ? v : '';
@@ -1209,11 +1221,12 @@
       result.error = 'مفيش عمود اسم الشركة في الملف. الأعمدة المقبولة: الشركة / name / title.';
       return result;
     }
-    var seenInFile = {};
+    var seenInFile = Object.create(null);
+    var seenNamesInFile = Object.create(null);
     rows.slice(1).forEach(function (cells, idx) {
       var data = rowToCompanyData(cells, headerMap);
       if (!hasText(data.name)) { result.counts.skipped++; return; }
-      var key = normName(data.name) + '|' + normPhone(data.phone);
+      var key = normName(data.name) + '|' + normPhone(data.phone, data.country);
       var base = { rowNumber: idx + 2, data: data, name: data.name, phone: text(data.phone) };
       if (seenInFile[key]) {
         result.items.push(Object.assign(base, { action: 'review', reason: 'السطر مكرر داخل نفس الملف — راجعه قبل الاستيراد.', matchId: seenInFile[key] }));
@@ -1221,12 +1234,22 @@
         return;
       }
       var nameKey = normName(data.name);
+      if (seenNamesInFile[nameKey]) {
+        result.items.push(Object.assign(base, {
+          action: 'review',
+          reason: 'اسم الشركة متكرر داخل الملف مع رقم مختلف أو ناقص — راجع قبل الإضافة أو الدمج.',
+          matchId: seenNamesInFile[nameKey].matchId || ''
+        }));
+        result.counts.review++;
+        return;
+      }
       var candidates = list.filter(function (c) { return normName(c.name) === nameKey; });
       if (!candidates.length) {
         var newItem = Object.assign(base, { action: 'new', reason: 'شركة جديدة' });
         result.items.push(newItem);
         result.counts.new++;
         seenInFile[key] = 'new:' + (idx + 2);
+        seenNamesInFile[nameKey] = { phone: normPhone(data.phone, data.country), matchId: 'new:' + (idx + 2) };
         return;
       }
       if (candidates.length > 1) {
@@ -1236,8 +1259,9 @@
       }
       var existing = candidates[0];
       seenInFile[key] = existing.id;
-      var p1 = normPhone(data.phone);
-      var p2 = normPhone(existing.phone);
+      seenNamesInFile[nameKey] = { phone: normPhone(existing.phone, existing.country), matchId: existing.id };
+      var p1 = normPhone(data.phone, data.country);
+      var p2 = normPhone(existing.phone, existing.country);
       var sameName = true;
       if (p1 && p2 && p1 === p2) sameName = true;
       if (p1 && p2 && p1 !== p2) {
