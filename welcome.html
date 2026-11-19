@@ -162,7 +162,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
       <div class="tw" style="margin-top:10px"><table><thead><tr><th>المنصة</th><th>الصفحة</th><th>المنشور</th><th>ايكات</th><th>كومنتات</th><th>مؤشر التفاعل النسبي</th></tr></thead><tbody id="tbPerfP"></tbody></table></div>
     </div>
     <div class="dl"><div class="card"><b>قمع المبيعات حسب المرحلة</b><div id="pipelineChart" style="margin-top:12px"></div></div><div class="card"><b>تحويلات مصادر العملاء</b><div class="tw" style="margin-top:10px"><table><thead><tr><th>المصدر</th><th>عدد العملاء</th><th>المغلق</th><th>معدل الإغلاق</th></tr></thead><tbody id="sourcePerf"></tbody></table></div><p class="note">معدل الإغلاق = عدد الشركات المغلقة ÷ كل الشركات المسجلة من نفس المصدر. لا يمثل عائدًا ماليًا أو ربحية.</p></div></div><div class="card"><b>أداء الحملات / قوائم العملاء</b><div class="tw" style="margin-top:10px"><table><thead><tr><th>الحملة</th><th>عدد العملاء</th><th>المغلق</th><th>معدل الإغلاق</th></tr></thead><tbody id="campaignPerf"></tbody></table></div></div>
-    <div class="note">النسب دي مؤشرات داخلية محسوبة من بياناتك، مش توقع أو ضمان. اكتمال البيانات = 10 عناصر أساسية: اسم الشركة، الموقع، المسؤول، الهاتف، المجال، المصدر، وجود رابط اجتماعي واحد على الأقل، عدد الموظفين، تقدير المبيعات، ومصدر التقدير. تقدم الصفقة = موقع المرحلة (خسرنا = 0%). السوشيال = متوسط تفاعل منشورات الصفحة اللي اسمها نفس اسم الشركة. التفاعل = (ايكات + 3×كومنتات) نسبةً لأعلى منشور عندك. الإجمالي: بيانات 30% + صفقة 40% + سوشيال 30% (ولو مفيش منشورات: 40% + 60%).</div>
+    <div class="note">النسب بتتحدث تلقائيًا من بيانات الشركات والمنشورات الحالية: اكتمال البيانات = 10 حقول مستخدمة في نموذج الشركة، تقدم الصفقة = ترتيب المرحلة الحالية بين المراحل المسجلة (وخسرنا = 0%)، والسوشيال = متوسط تفاعل منشورات الصفحة المطابقة لاسم الشركة. التفاعل = (ايكات + 3×كومنتات) نسبةً لأعلى منشور. الإجمالي: بيانات 30% + صفقة 40% + سوشيال 30% (ولو مفيش منشورات: 40% + 60%).</div>
   </section>
 </main>
 <dialog id="dlg"><h2 id="dT"></h2><form id="frm"><div class="fg" id="dF"></div><div class="da"><button class="btn p" type="submit">حفظ</button><button class="btn" type="button" id="dX">إلغاء</button></div></form></dialog>
@@ -259,8 +259,8 @@ function cCount(p){var n=parseInt(p.commentsCount,10);if(!isNaN(n)&&p.commentsCo
 function eng(p){return num(p.likes)+3*cCount(p)}
 function maxEng(){var m=0;db.posts.forEach(function(p){var e=eng(p);if(e>m)m=e});return m}
 function pScore(p,m){return m?Math.round(eng(p)/m*100):0}
-function complete(c){var f=[c.name,c.website,c.contact,c.phone,c.industry,c.source,(c.facebook||c.instagram||c.linkedin),c.employees,c.annualRevenueEstimate,c.estimateBasis],n=0;f.forEach(function(x){if(x!==''&&x!=null)n++});return Math.round(n/10*100)}
-function pipe(c){if(c.stage==='خسرنا')return 0;var i=STAGES.indexOf(c.stage);return i<0?0:Math.round(i/5*100)}
+function complete(c){var f=[c.name,c.website,c.contact,c.phone,c.industry,c.source,c.stage,c.replyStatus,(c.facebook||c.instagram||c.linkedin),c.notes],n=0;f.forEach(function(x){if(x!==''&&x!=null)n++});return Math.round(n/f.length*100)}
+function pipe(c){if(c.stage==='خسرنا')return 0;var stages=Array.from(new Set(db.companies.map(function(x){return x.stage}).filter(Boolean)));if(!stages.length)stages=STAGES;var i=stages.indexOf(c.stage);return i<0?0:Math.round(i/Math.max(1,stages.length-1)*100)}
 function social(c){var m=maxEng(),a=db.posts.filter(function(p){return String(p.page).toLowerCase()===String(c.name).toLowerCase()});if(!a.length)return null;var s=0;a.forEach(function(p){s+=pScore(p,m)});return Math.round(s/a.length)}
 function total(c){var d=complete(c),p=pipe(c),s=social(c);return s===null?Math.round(d*.4+p*.6):Math.round(d*.3+p*.4+s*.3)}
 function color(v){return v<40?'var(--r)':v<70?'var(--y)':'var(--t)'}
@@ -321,7 +321,7 @@ $('q').addEventListener('input',renderSales);$('fst').addEventListener('change',
 $('addC').addEventListener('click',function(){editC(null)});
 function editC(id){var c=id?byId(db.companies,id):null;
   form(c?'تعديل شركة':'إضافة شركة',FC,c,function(o){if(!o.name)return;o.value=o.value===''?'':num(o.value);o.fitScore=o.fitScore===''?'':Math.max(0,Math.min(100,num(o.fitScore)));
-    if(c){var oldStage=c.stage;for(var k in o)c[k]=o[k];if(oldStage!==c.stage)addCompanyActivity(c,'تغيير المرحلة','تم تغيير المرحلة من '+oldStage+' إلى '+c.stage)}
+    if(c){var changes=[];for(var k in o){var before=c[k]==null?'':String(c[k]),after=o[k]==null?'':String(o[k]);if(before!==after){changes.push((FC.filter(function(f){return f.k===k})[0]||{}).l||k);c[k]=o[k]}}if(changes.length)addCompanyActivity(c,'تعديل بيانات الشركة','تم تعديل: '+changes.join('، '))}
     else{o.id=uid();o.created=today();o.contacts=[];o.activities=[];o.replyStatus=o.replyStatus||'لم يتم التواصل';db.companies.push(o);addCompanyActivity(o,'إنشاء الشركة','تمت إضافة الشركة إلى CRM')}
     save();renderAll()})}
 
@@ -371,10 +371,11 @@ $('closeProfile').addEventListener('click',function(){$('profileDlg').close()});
 
 /* ---------- مركز المتابعات ---------- */
 function renderFollowups(){
-  var t=today(),list=db.companies.filter(function(c){return !!c.followUpDate}).slice().sort(function(a,b){return String(a.followUpDate).localeCompare(String(b.followUpDate))});
-  var overdue=list.filter(function(c){return c.followUpDate<t}).length,due=list.filter(function(c){return c.followUpDate===t}).length,future=list.filter(function(c){return c.followUpDate>t}).length;
-  $('followStats').innerHTML=[['متابعات متأخرة',overdue],['مستحقة اليوم',due],['قادمة',future]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
-  $('tbFollowups').innerHTML=list.length?list.map(function(c){var status=c.followUpDate<t?'متأخرة':c.followUpDate===t?'اليوم':'قادمة';return '<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.stage||'—')+'</td><td>'+esc(c.replyStatus||'لم يتم التواصل')+'</td><td><span class="status-pill">'+esc(c.followUpDate)+' — '+status+'</span></td><td class="nt">'+esc(c.lostReason||c.notes||'—')+'</td><td><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">فتح الملف</button></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">مفيش مواعيد متابعة مسجلة. افتح ملف الشركة وحدد موعد المتابعة القادمة.</td></tr>';
+  var t=today(),list=db.companies.filter(function(c){return !!c.followUpDate||!!(c.activities&&c.activities.length)||!!c.lastActivityAt});
+  list.sort(function(a,b){var ad=a.followUpDate||'9999-99-99',bd=b.followUpDate||'9999-99-99';if(ad!==bd)return ad.localeCompare(bd);return String(b.lastActivityAt||'').localeCompare(String(a.lastActivityAt||''))});
+  var overdue=list.filter(function(c){return c.followUpDate&&c.followUpDate<t}).length,due=list.filter(function(c){return c.followUpDate===t}).length,future=list.filter(function(c){return c.followUpDate>t}).length,activity=list.filter(function(c){return !c.followUpDate}).length;
+  $('followStats').innerHTML=[['متابعات متأخرة',overdue],['مستحقة اليوم',due],['قادمة',future],['شركات عليها تحديثات',activity]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
+  $('tbFollowups').innerHTML=list.length?list.map(function(c){var status=c.followUpDate?(c.followUpDate<t?'متأخرة':c.followUpDate===t?'اليوم':'قادمة'):'تم تحديث الشركة';var last=c.activities&&c.activities.length?c.activities[c.activities.length-1]:null;var note=last?(last.type+': '+last.note):(c.lostReason||c.notes||'—');return '<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.stage||'—')+'</td><td>'+esc(c.replyStatus||'لم يتم التواصل')+'</td><td><span class="status-pill">'+(c.followUpDate?esc(c.followUpDate)+' — '+status:status)+'</span></td><td class="nt">'+esc(note)+'</td><td><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">فتح الملف</button></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">مفيش تحديثات أو مواعيد متابعة مسجلة.</td></tr>';
 }
 
 /* ---------- المنشورات ---------- */
@@ -510,10 +511,10 @@ function renderPerf(){var m=maxEng();
   $('tbPerfC').innerHTML=db.companies.length?db.companies.map(function(c){var s=social(c);return '<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.stage)+'</td><td>'+bar(complete(c))+'</td><td>'+bar(pipe(c))+'</td><td>'+(s===null?'<span style="color:var(--m)">مفيش منشورات</span>':bar(s))+'</td><td>'+bar(total(c))+'</td></tr>'}).join(''):'<tr><td colspan="6" class="empty">مفيش شركات.</td></tr>';
   var P=db.posts.slice().sort(function(a,b){return eng(b)-eng(a)});
   $('tbPerfP').innerHTML=P.length?P.map(function(p){return '<tr><td>'+esc(p.platform)+'</td><td>'+esc(p.page)+'</td><td>'+esc(p.title)+'</td><td>'+fmt(num(p.likes))+'</td><td>'+cCount(p)+'</td><td>'+bar(pScore(p,m))+'</td></tr>'}).join(''):'<tr><td colspan="6" class="empty">مفيش منشورات.</td></tr>';
-  var stageCounts=STAGES.map(function(stage){return {name:stage,count:db.companies.filter(function(c){return c.stage===stage}).length}});
+  var stageList=Array.from(new Set(db.companies.map(function(c){return c.stage}).filter(Boolean)));var stageCounts=stageList.map(function(stage){return {name:stage,count:db.companies.filter(function(c){return c.stage===stage}).length}});
   var base=Math.max(1,db.companies.length);
   $('pipelineChart').innerHTML=stageCounts.map(function(s){var pct=Math.round(s.count/base*100);return '<div style="display:grid;grid-template-columns:100px 1fr 38px;gap:8px;align-items:center;margin:8px 0;font-size:13px"><span>'+esc(s.name)+'</span><div class="bb"><i style="display:block;width:'+pct+'%;height:100%;background:var(--t);border-radius:6px"></i></div><b>'+s.count+'</b></div>'}).join('');
-  var src=SOURCES.map(function(source){var all=db.companies.filter(function(c){return (c.source||'أخرى')===source}),wins=all.filter(function(c){return c.stage==='تم الإغلاق'}).length;return {source:source,total:all.length,wins:wins,rate:all.length?Math.round(wins/all.length*100):0}}).filter(function(x){return x.total>0});
+  var sourceList=Array.from(new Set(db.companies.map(function(c){return String(c.source||'أخرى').trim()}).filter(Boolean)));var src=sourceList.map(function(source){var all=db.companies.filter(function(c){return String(c.source||'أخرى').trim()===source}),wins=all.filter(function(c){return c.stage==='تم الإغلاق'}).length;return {source:source,total:all.length,wins:wins,rate:all.length?Math.round(wins/all.length*100):0}}).filter(function(x){return x.total>0});
   $('sourcePerf').innerHTML=src.length?src.map(function(x){return '<tr><td>'+esc(x.source)+'</td><td>'+x.total+'</td><td>'+x.wins+'</td><td>'+x.rate+'%</td></tr>'}).join(''):'<tr><td colspan="4" class="empty">مفيش بيانات مصادر كفاية.</td></tr>';
   var campaigns={};db.companies.forEach(function(c){var name=String(c.campaign||'').trim();if(!name)return;if(!campaigns[name])campaigns[name]={total:0,wins:0};campaigns[name].total++;if(c.stage==='تم الإغلاق')campaigns[name].wins++});
   var campRows=Object.keys(campaigns).map(function(name){var x=campaigns[name];return {name:name,total:x.total,wins:x.wins,rate:Math.round(x.wins/x.total*100)}}).sort(function(a,b){return b.total-a.total});
@@ -539,7 +540,7 @@ $('fRestore').addEventListener('change',function(){var f=this.files[0],inp=this;
     catch(e){alert('الفايل ده مش نسخة احتياطية صحيحة.')}inp.value=''};r.readAsText(f)});
 
 /* ---------- تشغيل ---------- */
-function renderHome(){var total=db.companies.length,contacted=db.companies.filter(function(c){return c.stage&&c.stage!=='جديد'}).length,replied=db.companies.filter(function(c){return c.responseStatus==='بيرد'||c.replyStatus==='رد العميل'||c.replyStatus==='مهتم'}).length;var cr=total?Math.round(contacted/total*100):0,rr=contacted?Math.round(replied/contacted*100):0;$('homeStats').innerHTML=[['عدد الشركات',total],['نسبة التواصل',cr+'%'],['نسبة الرد',rr+'%']].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><div>'+x[1]+'</div></div>'}).join('')}
+function renderHome(){var total=db.companies.length,contacted=db.companies.filter(function(c){return c.stage&&c.stage!=='جديد'||(c.replyStatus&&c.replyStatus!=='لم يتم التواصل')}).length,replied=db.companies.filter(function(c){return c.responseStatus==='بيرد'||c.replyStatus==='رد العميل'||c.replyStatus==='مهتم'}).length;var cr=total?Math.round(contacted/total*100):0,rr=contacted?Math.round(replied/contacted*100):0;$('homeStats').innerHTML=[['عدد الشركات',total],['نسبة التواصل',cr+'%'],['نسبة الرد',rr+'%']].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><div>'+x[1]+'</div></div>'}).join('')}
 function renderAll(){renderHome();renderSales();renderPosts();renderPlanSel();renderPerf();renderFollowups()}
 $('fst').innerHTML='<option value="">كل المراحل</option>'+opts(STAGES,'');
 renderAll();
