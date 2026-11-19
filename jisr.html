@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jisr CRM</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f4f6f8;color:#1b2a35}
+header{background:#0f6b54;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header b{font-size:20px}
+header a{color:#d6f5ea;font-size:13px}
+nav{display:flex;gap:6px;padding:10px 14px;background:#fff;border-bottom:1px solid #dde3e8;flex-wrap:wrap}
+nav button{border:0;background:#eef2f5;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:14px}
+nav button.on{background:#0f6b54;color:#fff}
+main{padding:16px;max-width:1100px;margin:0 auto}
+.card{background:#fff;border:1px solid #dde3e8;border-radius:12px;padding:14px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.kpi{background:#fff;border:1px solid #dde3e8;border-radius:12px;padding:12px;text-align:center}
+.kpi strong{display:block;font-size:26px;color:#0f6b54}
+.kpi small{color:#5b6b76}
+.bar{background:#e6ecef;border-radius:6px;height:10px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:#0f6b54}
+.row{display:flex;justify-content:space-between;font-size:13px;margin-top:10px}
+label{display:block;font-size:12px;color:#5b6b76;margin:8px 0 3px}
+input,select,textarea{width:100%;padding:8px;border:1px solid #cdd6dc;border-radius:8px;font:inherit}
+textarea{min-height:60px}
+.f2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 12px}
+.btn{border:0;background:#0f6b54;color:#fff;padding:9px 16px;border-radius:8px;cursor:pointer;font-size:14px;margin-top:10px}
+.btn.g{background:#e6ecef;color:#1b2a35}
+.btn.r{background:#b3261e}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px;border-bottom:1px solid #e6ecef;text-align:right;vertical-align:top}
+th{background:#f0f4f6}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;background:#e1f3ec;color:#0f6b54;font-size:12px}
+.over{color:#b3261e;font-weight:bold}
+#login{max-width:340px;margin:60px auto}
+body.locked main,body.locked nav{display:none}
+body:not(.locked) #login{display:none}
+#msg{font-size:13px;color:#b3261e;margin-top:8px;min-height:18px}
+.hid{display:none}
+</style>
+</head>
+<body class="locked">
+<header><b>Jisr CRM</b><span><a href="welcome.html">العودة إلى Digital Reach CRM</a> &nbsp; <button class="btn g" id="out" style="margin:0;padding:6px 12px">تسجيل الخروج</button></span></header>
+
+<section id="login" class="card">
+  <h3>تسجيل الدخول</h3>
+  <form id="lf">
+    <label>الإيميل</label><input id="em" type="email" required autocomplete="username">
+    <label>كلمة المرور</label><input id="pw" type="password" required autocomplete="current-password">
+    <button class="btn" id="lb" type="submit">دخول</button>
+  </form>
+  <div id="msg" role="status"></div>
+</section>
+
+<nav id="nav">
+  <button data-t="board" class="on">لوحة النتائج</button>
+  <button data-t="leads">الجهات (شركات سياحة / فنادق)</button>
+  <button data-t="deals">الصفقات والعمولات</button>
+  <button data-t="backup">نسخة احتياطية</button>
+</nav>
+
+<main>
+  <div id="t-board">
+    <div class="grid" id="kpis"></div>
+    <div class="card" style="margin-top:14px"><b>القمع: كام جهة وصلت لكل مستوى</b><div id="funnel"></div></div>
+    <div class="card"><b>متابعات النهارده أو المتأخرة</b><div id="due"></div></div>
+  </div>
+
+  <div id="t-leads" class="hid">
+    <div class="card">
+      <b id="lfTitle">إضافة جهة</b>
+      <form id="leadForm">
+        <div class="f2">
+          <div><label>الاسم *</label><input id="l_name" required></div>
+          <div><label>النوع</label><select id="l_type"></select></div>
+          <div><label>الشخص المسؤول</label><input id="l_person"></div>
+          <div><label>واتساب / تليفون</label><input id="l_phone" dir="ltr"></div>
+          <div><label>الإيميل</label><input id="l_email" dir="ltr"></div>
+          <div><label>المصدر</label><input id="l_source" placeholder="جوجل، فيسبوك، توصية..."></div>
+          <div><label>المستوى</label><select id="l_level"></select></div>
+          <div><label>موعد المتابعة</label><input id="l_follow" type="date"></div>
+        </div>
+        <label>ملاحظات / نص آخر رد</label><textarea id="l_notes"></textarea>
+        <button class="btn" type="submit">حفظ</button>
+        <button class="btn g" type="button" id="lCancel">إلغاء</button>
+      </form>
+    </div>
+    <div class="card">
+      <div class="f2">
+        <div><label>بحث</label><input id="q" placeholder="اسم أو ملاحظة"></div>
+        <div><label>فلتر المستوى</label><select id="fLevel"></select></div>
+        <div><label>فلتر النوع</label><select id="fType"></select></div>
+      </div>
+      <div style="overflow:auto;margin-top:10px"><table><thead><tr><th>الاسم</th><th>النوع</th><th>التواصل</th><th>المستوى</th><th>المتابعة</th><th>آخر تحديث</th><th></th></tr></thead><tbody id="tbL"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="t-deals" class="hid">
+    <div class="card">
+      <b>إضافة صفقة</b>
+      <form id="dealForm">
+        <div class="f2">
+          <div><label>شركة السياحة / العميل *</label><input id="d_client" required></div>
+          <div><label>الفندق *</label><input id="d_hotel" required></div>
+          <div><label>عدد الغرف</label><input id="d_rooms" type="number" min="0" value="0"></div>
+          <div><label>عدد الليالي</label><input id="d_nights" type="number" min="0" value="0"></div>
+          <div><label>عمولة لكل غرفة-ليلة (بالدولار)</label><input id="d_rate" type="number" min="0" step="0.01" value="0"></div>
+          <div><label>الحالة</label><select id="d_status"></select></div>
+          <div><label>تاريخ الوصول</label><input id="d_date" type="date"></div>
+        </div>
+        <label>ملاحظات (شروط الدفع، موعد استحقاق العمولة)</label><textarea id="d_notes"></textarea>
+        <button class="btn" type="submit">حفظ الصفقة</button>
+      </form>
+    </div>
+    <div class="card">
+      <div class="grid" id="dealKpis"></div>
+      <div style="overflow:auto;margin-top:10px"><table><thead><tr><th>العميل</th><th>الفندق</th><th>غرف × ليالي</th><th>العمولة المتوقعة</th><th>الحالة</th><th>الوصول</th><th></th></tr></thead><tbody id="tbD"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="t-backup" class="hid">
+    <div class="card">
+      <p>البيانات بتتحفظ في Firestore بعد الدخول (مستند crmData/jisr) ومعاها نسخة محلية على الجهاز.</p>
+      <button class="btn" id="bDl">تنزيل نسخة احتياطية</button>
+      <button class="btn g" id="bRs">استرجاع نسخة</button>
+      <input type="file" id="fRs" accept=".json" hidden>
+      <div id="bmsg" style="margin-top:8px;font-size:13px"></div>
+    </div>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+var KEY='jisr_crm_v1';
+var ALLOWED='goory.met@gmail.com';
+var LEVELS=['','رسالة اتبعتت','رد','محادثة فيها تفاصيل جروبات','اجتماع أو مكالمة','طلب عرض سعر لجروب حقيقي','أول صفقة','أول عمولة اتدفعت','رفض واضح'];
+var TYPES=['شركة سياحة','DMC','فندق','أخرى'];
+var DEAL_STATUS=['عرض سعر مبعوت','مؤكدة','وصل الجروب','اتعمل check-out','العمولة اتدفعت','اتلغت'];
+var firebaseConfig={
+  apiKey:"AIzaSyDhZKeWe1ytVMt6Vlm4JExESk9kXq3RFeg",
+  authDomain:"digitalreach-crm.firebaseapp.com",
+  projectId:"digitalreach-crm",
+  storageBucket:"digitalreach-crm.firebasestorage.app",
+  messagingSenderId:"633336135091",
+  appId:"1:633336135091:web:de8f20b2fa143ae6665fc6",
+  measurementId:"G-2M46FMRKYJ"
+};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth(),fs=firebase.firestore();
+var cloudDoc=fs.collection('crmData').doc('jisr');
+var ready=false,timer=null,editId=null;
+var db=load();
+
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function today(){return new Date().toISOString().slice(0,10)}
+function uid(){return 'j'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function norm(p){var b={leads:[],deals:[]};if(p&&typeof p==='object'){if(Array.isArray(p.leads))b.leads=p.leads;if(Array.isArray(p.deals))b.deals=p.deals}return b}
+function load(){try{var r=localStorage.getItem(KEY);if(r)return norm(JSON.parse(r))}catch(e){}return norm(null)}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('تعذّر الحفظ المحلي. نزّل نسخة احتياطية.')}
+  if(ready){
+    if(timer)clearTimeout(timer);
+    timer=setTimeout(function(){
+      cloudDoc.set({leads:db.leads,deals:db.deals,updatedAt:firebase.firestore.FieldValue.serverTimestamp()})
+        .catch(function(e){console.error(e);alert('الحفظ السحابي فشل. غالبًا قواعد Firestore مش بتسمح بالمستند crmData/jisr. البيانات محفوظة محليًا، نزّل نسخة احتياطية.')});
+    },400);
+  }
+}
+function opts(sel,arr,first){sel.innerHTML=(first!=null?'<option value="">'+first+'</option>':'')+arr.map(function(x,i){return x===''?'':'<option value="'+(first!=null?x:i)+'">'+esc(x)+'</option>'}).join('')}
+function fillSelects(){
+  opts($('l_type'),TYPES);
+  $('l_level').innerHTML=LEVELS.map(function(x,i){return i===0?'':'<option value="'+i+'">'+i+' - '+esc(x)+'</option>'}).join('');
+  $('fLevel').innerHTML='<option value="">كل المستويات</option>'+LEVELS.map(function(x,i){return i===0?'':'<option value="'+i+'">'+i+' - '+esc(x)+'</option>'}).join('');
+  $('fType').innerHTML='<option value="">كل الأنواع</option>'+TYPES.map(function(x){return '<option>'+esc(x)+'</option>'}).join('');
+  $('d_status').innerHTML=DEAL_STATUS.map(function(x){return '<option>'+esc(x)+'</option>'}).join('');
+}
+function tabs(){
+  Array.prototype.forEach.call($('nav').children,function(b){
+    b.addEventListener('click',function(){
+      Array.prototype.forEach.call($('nav').children,function(x){x.classList.toggle('on',x===b)});
+      ['board','leads','deals','backup'].forEach(function(t){$('t-'+t).classList.toggle('hid',t!==b.getAttribute('data-t'))});
+    });
+  });
+}
+function lvlName(n){return n+' - '+LEVELS[n]}
+function renderBoard(){
+  var L=db.leads,counts={},i;
+  for(i=1;i<=8;i++)counts[i]=0;
+  L.forEach(function(l){counts[l.level]=(counts[l.level]||0)+1});
+  var reached=function(n){return L.filter(function(l){return l.level>=n&&l.level<=7}).length};
+  var replied=reached(2),total=L.length;
+  var rate=total?Math.round(replied/total*100):0;
+  $('kpis').innerHTML=
+    '<div class="kpi"><strong>'+total+'</strong><small>إجمالي الجهات</small></div>'+
+    '<div class="kpi"><strong>'+reached(1)+'</strong><small>رسائل اتبعتت</small></div>'+
+    '<div class="kpi"><strong>'+replied+'</strong><small>ردوا ('+rate+'%)</small></div>'+
+    '<div class="kpi"><strong>'+reached(4)+'</strong><small>اجتماعات / مكالمات</small></div>'+
+    '<div class="kpi"><strong>'+reached(5)+'</strong><small>طلبات أسعار</small></div>'+
+    '<div class="kpi"><strong>'+reached(6)+'</strong><small>صفقات</small></div>'+
+    '<div class="kpi"><strong>'+counts[8]+'</strong><small>رفض واضح</small></div>';
+  var max=Math.max(1,total),h='';
+  for(i=1;i<=7;i++){var n=reached(i);h+='<div class="row"><span>'+esc(lvlName(i))+'</span><span>'+n+'</span></div><div class="bar"><i style="width:'+Math.round(n/max*100)+'%"></i></div>'}
+  $('funnel').innerHTML=h;
+  var t=today(),due=L.filter(function(l){return l.follow&&l.follow<=t&&l.level<7&&l.level!==8}).sort(function(a,b){return a.follow<b.follow?-1:1});
+  $('due').innerHTML=due.length?'<table><tbody>'+due.map(function(l){return '<tr><td>'+esc(l.name)+'</td><td dir="ltr">'+esc(l.phone)+'</td><td class="'+(l.follow<t?'over':'')+'">'+esc(l.follow)+'</td><td>'+esc(lvlName(l.level))+'</td></tr>'}).join('')+'</tbody></table>':'<p style="color:#5b6b76">مفيش متابعات مستحقة.</p>';
+}
+function renderLeads(){
+  var q=$('q').value.trim().toLowerCase(),fl=$('fLevel').value,ft=$('fType').value;
+  var F=db.leads.filter(function(l){
+    if(fl&&String(l.level)!==fl)return false;
+    if(ft&&l.type!==ft)return false;
+    return !q||[l.name,l.person,l.phone,l.email,l.source,l.notes].join(' ').toLowerCase().indexOf(q)>=0;
+  });
+  $('tbL').innerHTML=F.length?F.map(function(l){
+    return '<tr><td><b>'+esc(l.name)+'</b><br><small>'+esc(l.person)+'</small></td><td>'+esc(l.type)+'</td><td dir="ltr">'+esc(l.phone)+'<br>'+esc(l.email)+'</td><td><span class="tag">'+esc(lvlName(l.level))+'</span></td><td>'+esc(l.follow)+'</td><td>'+esc(l.updated)+'</td><td><button class="btn g" data-edit="'+esc(l.id)+'" style="margin:0">تعديل</button> <button class="btn r" data-del="'+esc(l.id)+'" style="margin:0">حذف</button></td></tr>';
+  }).join(''):'<tr><td colspan="7" style="color:#5b6b76">مفيش جهات لسه.</td></tr>';
+}
+function money(n){return '$'+(Math.round(n*100)/100).toLocaleString('en-US')}
+function dealComm(d){return (Number(d.rooms)||0)*(Number(d.nights)||0)*(Number(d.rate)||0)}
+function renderDeals(){
+  var D=db.deals,exp=0,paid=0;
+  D.forEach(function(d){if(d.status==='اتلغت')return;if(d.status==='العمولة اتدفعت')paid+=dealComm(d);else exp+=dealComm(d)});
+  $('dealKpis').innerHTML='<div class="kpi"><strong>'+D.length+'</strong><small>عدد الصفقات</small></div><div class="kpi"><strong>'+money(exp)+'</strong><small>عمولة متوقعة (لسه)</small></div><div class="kpi"><strong>'+money(paid)+'</strong><small>عمولة اتدفعت</small></div>';
+  $('tbD').innerHTML=D.length?D.map(function(d){
+    return '<tr><td>'+esc(d.client)+'</td><td>'+esc(d.hotel)+'</td><td>'+esc(d.rooms)+' × '+esc(d.nights)+'</td><td>'+money(dealComm(d))+'</td><td><select data-st="'+esc(d.id)+'">'+DEAL_STATUS.map(function(s){return '<option'+(s===d.status?' selected':'')+'>'+esc(s)+'</option>'}).join('')+'</select></td><td>'+esc(d.date)+'</td><td><button class="btn r" data-ddel="'+esc(d.id)+'" style="margin:0">حذف</button></td></tr>';
+  }).join(''):'<tr><td colspan="7" style="color:#5b6b76">مفيش صفقات لسه.</td></tr>';
+}
+function renderAll(){renderBoard();renderLeads();renderDeals()}
+
+function resetLeadForm(){editId=null;$('leadForm').reset();$('l_level').value='1';$('lfTitle').textContent='إضافة جهة'}
+$('leadForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  var o={name:$('l_name').value.trim(),type:TYPES[$('l_type').value]||TYPES[0],person:$('l_person').value.trim(),phone:$('l_phone').value.trim(),email:$('l_email').value.trim(),source:$('l_source').value.trim(),level:Number($('l_level').value)||1,follow:$('l_follow').value,notes:$('l_notes').value.trim(),updated:today()};
+  if(!o.name)return;
+  if(editId){var l=db.leads.filter(function(x){return x.id===editId})[0];if(l)Object.keys(o).forEach(function(k){l[k]=o[k]})}
+  else{o.id=uid();o.created=today();db.leads.push(o)}
+  save();resetLeadForm();renderAll();
+});
+$('lCancel').addEventListener('click',resetLeadForm);
+['q','fLevel','fType'].forEach(function(id){$(id).addEventListener('input',renderLeads)});
+$('tbL').addEventListener('click',function(e){
+  var ed=e.target.getAttribute('data-edit'),dl=e.target.getAttribute('data-del');
+  if(ed){var l=db.leads.filter(function(x){return x.id===ed})[0];if(!l)return;editId=ed;
+    $('l_name').value=l.name;$('l_type').value=Math.max(0,TYPES.indexOf(l.type));$('l_person').value=l.person||'';$('l_phone').value=l.phone||'';$('l_email').value=l.email||'';$('l_source').value=l.source||'';$('l_level').value=l.level;$('l_follow').value=l.follow||'';$('l_notes').value=l.notes||'';
+    $('lfTitle').textContent='تعديل: '+l.name;window.scrollTo(0,0)}
+  if(dl){var x=db.leads.filter(function(y){return y.id===dl})[0];if(x&&confirm('تحذف "'+x.name+'" نهائيًا؟')){db.leads=db.leads.filter(function(y){return y.id!==dl});save();renderAll()}}
+});
+$('dealForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  db.deals.push({id:uid(),client:$('d_client').value.trim(),hotel:$('d_hotel').value.trim(),rooms:Number($('d_rooms').value)||0,nights:Number($('d_nights').value)||0,rate:Number($('d_rate').value)||0,status:$('d_status').value,date:$('d_date').value,notes:$('d_notes').value.trim(),created:today()});
+  save();$('dealForm').reset();renderAll();
+});
+$('tbD').addEventListener('click',function(e){
+  var id=e.target.getAttribute('data-ddel');
+  if(id&&confirm('تحذف الصفقة نهائيًا؟')){db.deals=db.deals.filter(function(d){return d.id!==id});save();renderAll()}
+});
+$('tbD').addEventListener('change',function(e){
+  var id=e.target.getAttribute('data-st');
+  if(id){var d=db.deals.filter(function(x){return x.id===id})[0];if(d){d.status=e.target.value;save();renderAll()}}
+});
+$('bDl').addEventListener('click',function(){
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}));a.download='jisr-crm-backup-'+today()+'.json';a.click();
+});
+$('bRs').addEventListener('click',function(){$('fRs').click()});
+$('fRs').addEventListener('change',function(){
+  var f=this.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){try{var p=JSON.parse(r.result);if(!confirm('الاسترجاع هيستبدل البيانات الحالية. تكمل؟'))return;db=norm(p);save();renderAll();$('bmsg').textContent='تم الاسترجاع.'}catch(e){$('bmsg').textContent='الملف مش صالح.'}};
+  r.readAsText(f);this.value='';
+});
+
+function setMsg(m){$('msg').textContent=m||''}
+$('lf').addEventListener('submit',function(e){
+  e.preventDefault();$('lb').disabled=true;setMsg('جاري تسجيل الدخول...');
+  auth.signInWithEmailAndPassword($('em').value.trim().toLowerCase(),$('pw').value).catch(function(err){
+    $('lb').disabled=false;
+    setMsg(err&&err.code==='auth/invalid-credential'?'الإيميل أو كلمة المرور غير صحيحة.':err&&err.code==='auth/unauthorized-domain'?'الدومين غير مضاف في Firebase Authentication > Authorized domains.':'تعذّر تسجيل الدخول: '+(err.message||''));
+  });
+});
+$('out').addEventListener('click',function(){ready=false;auth.signOut()});
+auth.onAuthStateChanged(async function(user){
+  ready=false;document.body.classList.add('locked');$('lb').disabled=false;
+  if(!user){setMsg('');return}
+  if(String(user.email||'').toLowerCase()!==ALLOWED){await auth.signOut();setMsg('الحساب ده مش مصرح له بالدخول.');return}
+  setMsg('جاري تحميل البيانات...');
+  try{
+    var snap=await cloudDoc.get();
+    if(snap.exists){db=norm(snap.data());try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
+    else{await cloudDoc.set({leads:db.leads,deals:db.deals,updatedAt:firebase.firestore.FieldValue.serverTimestamp()})}
+    ready=true;setMsg('');document.body.classList.remove('locked');renderAll();
+  }catch(err){
+    console.error(err);
+    setMsg('تعذّر الوصول لمستند crmData/jisr في Firestore. غالبًا لازم تعدّل قواعد الحماية (التعليمات في رسالتي).');
+  }
+});
+
+fillSelects();tabs();resetLeadForm();renderAll();
+})();
+</script>
+</body>
+</html>
