@@ -102,7 +102,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
   </section>
   <!-- المتابعات -->
   <section class="panel" id="tab-followups">
-    <h1>مركز <span>المتابعات</span></h1><div class="sub">الشركات اللي عليها موعد متابعة، مرتبة حسب تاريخ الاستحقاق.</div>
+    <h1>مركز <span>المتابعات</span></h1><div class="sub">كل الشركات المسجلة. أي تعديل أو نشاط جديد يظهر هنا، مع حالة وموعد المتابعة.</div>
     <div class="stats" id="followStats"></div>
     <div class="tw"><table><thead><tr><th>الشركة</th><th>المرحلة</th><th>حالة الرد</th><th>موعد المتابعة</th><th>سبب الخسارة / ملاحظات</th><th>إجراء</th></tr></thead><tbody id="tbFollowups"></tbody></table></div>
     <div class="note">إضافة أو تعديل موعد المتابعة وسجل التواصل بيتم من ملف الشركة. المواعيد لا ترسل تنبيهات خارج الـCRM حاليًا.</div>
@@ -372,11 +372,11 @@ $('closeProfile').addEventListener('click',function(){$('profileDlg').close()});
 
 /* ---------- مركز المتابعات ---------- */
 function renderFollowups(){
-  var t=today(),list=db.companies.filter(function(c){return !!c.followUpDate||!!(c.activities&&c.activities.length)||!!c.lastActivityAt});
+  var t=today(),list=db.companies.slice();
   list.sort(function(a,b){var ad=a.followUpDate||'9999-99-99',bd=b.followUpDate||'9999-99-99';if(ad!==bd)return ad.localeCompare(bd);return String(b.lastActivityAt||'').localeCompare(String(a.lastActivityAt||''))});
-  var overdue=list.filter(function(c){return c.followUpDate&&c.followUpDate<t}).length,due=list.filter(function(c){return c.followUpDate===t}).length,future=list.filter(function(c){return c.followUpDate>t}).length,activity=list.filter(function(c){return !c.followUpDate}).length;
-  $('followStats').innerHTML=[['متابعات متأخرة',overdue],['مستحقة اليوم',due],['قادمة',future],['شركات عليها تحديثات',activity]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
-  $('tbFollowups').innerHTML=list.length?list.map(function(c){var status=c.followUpDate?(c.followUpDate<t?'متأخرة':c.followUpDate===t?'اليوم':'قادمة'):'تم تحديث الشركة';var last=c.activities&&c.activities.length?c.activities[c.activities.length-1]:null;var note=last?(last.type+': '+last.note):(c.lostReason||c.notes||'—');return '<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.stage||'—')+'</td><td>'+esc(c.replyStatus||'لم يتم التواصل')+'</td><td><span class="status-pill">'+(c.followUpDate?esc(c.followUpDate)+' — '+status:status)+'</span></td><td class="nt">'+esc(note)+'</td><td><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">فتح الملف</button></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">مفيش تحديثات أو مواعيد متابعة مسجلة.</td></tr>';
+  var overdue=list.filter(function(c){return c.followUpDate&&c.followUpDate<t}).length,due=list.filter(function(c){return c.followUpDate===t}).length,future=list.filter(function(c){return c.followUpDate>t}).length,noDate=list.filter(function(c){return !c.followUpDate}).length;
+  $('followStats').innerHTML=[['متابعات متأخرة',overdue],['مستحقة اليوم',due],['قادمة',future],['بدون موعد متابعة',noDate]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
+  $('tbFollowups').innerHTML=list.length?list.map(function(c){var status=c.followUpDate?(c.followUpDate<t?'متأخرة':c.followUpDate===t?'اليوم':'قادمة'):'لم يحدد موعد';var last=c.activities&&c.activities.length?c.activities[c.activities.length-1]:null;var note=last?(last.type+': '+last.note):(c.lostReason||c.notes||'لا يوجد سجل تعديل سابق');var updated=last&&last.date?last.date:'—';return '<tr><td><b>'+esc(c.name)+'</b><div class="note">آخر تحديث: '+esc(updated)+'</div></td><td>'+esc(c.stage||'—')+'</td><td>'+esc(c.replyStatus||'لم يتم التواصل')+'</td><td><span class="status-pill">'+(c.followUpDate?esc(c.followUpDate)+' — '+status:status)+'</span></td><td class="nt">'+esc(note)+'</td><td><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">فتح الملف</button></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">لسه مفيش شركات مسجلة.</td></tr>';
 }
 
 /* ---------- المنشورات ---------- */
