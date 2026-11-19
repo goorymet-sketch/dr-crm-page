@@ -51,6 +51,19 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
 .contact-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#1b1348;border-radius:10px;padding:9px 11px;margin:6px 0;font-size:13px;flex-wrap:wrap}
 .timeline-item{border-right:3px solid var(--t);padding:4px 12px 12px;margin:10px 0;background:rgba(255,255,255,.025);border-radius:0 9px 9px 0}.timeline-item small{color:var(--m);display:block;margin-bottom:4px}.timeline-item p{white-space:pre-wrap;line-height:1.7}
 .status-pill{display:inline-block;border-radius:20px;padding:3px 9px;background:rgba(88,190,198,.14);color:var(--t);font-size:12px;white-space:nowrap}
+
+/* ---------- Follow-up dashboard redesign ---------- */
+.follow-dashboard{--fd-bg:#090a12;--fd-card:#171821;--fd-card2:#20212b;--fd-muted:#9699aa;--fd-line:rgba(255,255,255,.08);background:var(--fd-bg);border:1px solid rgba(255,255,255,.055);border-radius:22px;padding:22px;min-height:calc(100vh - 48px);color:#f7f7fb}
+.follow-dashboard h1{font-size:29px;letter-spacing:-.5px}.follow-dashboard h1 span{color:#8ca9ff}.follow-dashboard .sub{color:var(--fd-muted);margin:5px 0 0}
+.follow-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}.follow-eyebrow{font-size:10px;letter-spacing:2px;color:#8d9fd7;margin-bottom:7px}.follow-head-tag{font-size:10px;letter-spacing:1px;color:#a8baff;background:rgba(119,151,255,.12);border:1px solid rgba(119,151,255,.2);padding:8px 12px;border-radius:20px}
+.follow-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}.follow-kpi{background:var(--fd-card);border:1px solid var(--fd-line);border-radius:16px;padding:16px;min-height:112px;position:relative;overflow:hidden}.follow-kpi small{display:block;color:var(--fd-muted);font-size:12px}.follow-kpi strong{display:block;font-size:29px;line-height:1.5;margin-top:6px}.follow-kpi em{font-style:normal;font-size:11px;color:#aebfff}.follow-kpi:after{content:"";position:absolute;width:70px;height:70px;border-radius:50%;background:var(--kpi-glow,rgba(120,150,255,.12));left:-22px;bottom:-35px}
+.follow-overview{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;margin-bottom:14px}.follow-chart-card,.follow-focus-card,.follow-list-card{background:var(--fd-card);border:1px solid var(--fd-line);border-radius:16px;padding:17px}.follow-card-head,.follow-list-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.follow-card-head b,.follow-list-head b{display:block;font-size:15px}.follow-card-head small,.follow-list-head small{display:block;color:var(--fd-muted);font-size:11px;margin-top:3px}.follow-dot{width:9px;height:9px;border-radius:50%;background:#8daaff;box-shadow:0 0 14px #8daaff}
+.follow-stage-chart{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 24px;margin-top:20px}.follow-stage-row{min-width:0}.follow-stage-label{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-bottom:7px}.follow-stage-label span:last-child{color:#c5c8d6}.follow-stage-track{height:8px;background:#292b37;border-radius:8px;overflow:hidden}.follow-stage-track i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#6789f5,#9bb3ff)}
+.follow-focus-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:16px}.follow-focus-item{background:var(--fd-card2);border-radius:12px;padding:12px}.follow-focus-item strong{display:block;font-size:22px}.follow-focus-item span{font-size:11px;color:var(--fd-muted)}
+.follow-list-card{padding:0;overflow:hidden}.follow-list-head{padding:17px;border-bottom:1px solid var(--fd-line)}.follow-controls{display:flex;gap:8px;flex-wrap:wrap}.follow-controls input{width:230px;max-width:100%;background:#10111a;border-color:var(--fd-line);border-radius:10px}.follow-controls select{background:#10111a;border-color:var(--fd-line);border-radius:10px}.follow-table-wrap{border-radius:0;background:transparent}.follow-table{min-width:850px}.follow-table th{background:#20212b;color:#aebfff;font-size:10px;letter-spacing:.3px}.follow-table td{font-size:12px;border-bottom-color:var(--fd-line)}.follow-table td:first-child b{font-size:13px}.follow-table .note{margin-top:2px;font-size:10px;color:var(--fd-muted)}.follow-table .btn{background:#303448;border:1px solid rgba(255,255,255,.08);border-radius:8px;font-size:11px}.follow-table .status-pill{background:rgba(125,153,255,.13);color:#afc0ff}.follow-status{display:inline-block;padding:4px 8px;border-radius:20px;font-size:10px;white-space:nowrap}.follow-status.overdue{background:rgba(255,104,116,.13);color:#ff929b}.follow-status.today{background:rgba(255,190,90,.14);color:#ffd18a}.follow-status.future{background:rgba(100,218,164,.12);color:#8ce0b6}.follow-status.none{background:rgba(255,255,255,.08);color:#c2c4ce}
+@media(max-width:1000px){.follow-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.follow-overview{grid-template-columns:1fr}}
+@media(max-width:600px){.follow-dashboard{padding:14px;border-radius:14px}.follow-head{align-items:flex-start}.follow-head-tag{display:none}.follow-dashboard h1{font-size:23px}.follow-kpis{gap:8px}.follow-kpi{padding:12px;min-height:95px}.follow-kpi strong{font-size:24px}.follow-stage-chart{grid-template-columns:1fr}.follow-list-head{align-items:flex-start;flex-direction:column}.follow-controls{width:100%}.follow-controls input,.follow-controls select{width:100%}}
+
 @media(max-width:800px){body{flex-direction:column}.side{width:100%;height:auto;position:static}.nav{display:flex;flex-wrap:wrap;gap:4px}.nav button{width:auto;margin:0}main{padding:14px}}
 </style>
 </head>
@@ -101,11 +114,18 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
     <div class="tw"><table><thead><tr><th><input type="checkbox" id="selectAllCompanies" title="تحديد النتائج الظاهرة"></th><th>#</th><th>الشركة</th><th>المسؤول</th><th>الرقم</th><th>المجال</th><th>روابط الشركة</th><th>المصدر</th><th>المرحلة</th><th>قيمة الصفقة</th><th>ملاحظات</th><th></th></tr></thead><tbody id="tbC"></tbody></table></div>
   </section>
   <!-- المتابعات -->
-  <section class="panel" id="tab-followups">
-    <h1>مركز <span>المتابعات</span></h1><div class="sub">كل الشركات المسجلة. أي تعديل أو نشاط جديد يظهر هنا، مع حالة وموعد المتابعة.</div>
-    <div class="stats" id="followStats"></div>
-    <div class="tw"><table><thead><tr><th>الشركة</th><th>المرحلة</th><th>حالة الرد</th><th>موعد المتابعة</th><th>سبب الخسارة / ملاحظات</th><th>إجراء</th></tr></thead><tbody id="tbFollowups"></tbody></table></div>
-    <div class="note">إضافة أو تعديل موعد المتابعة وسجل التواصل بيتم من ملف الشركة. المواعيد لا ترسل تنبيهات خارج الـCRM حاليًا.</div>
+  <section class="panel follow-dashboard" id="tab-followups">
+    <div class="follow-head"><div><div class="follow-eyebrow">DIGITAL REACH / WORKSPACE</div><h1>مركز <span>المتابعات</span></h1><div class="sub">نظرة تشغيلية على العملاء ومواعيد التواصل والخطوات المطلوبة.</div></div><div class="follow-head-tag">LIVE CRM DATA</div></div>
+    <div class="follow-kpis" id="followStats"></div>
+    <div class="follow-overview">
+      <div class="follow-chart-card"><div class="follow-card-head"><div><b>توزيع مراحل العملاء</b><small>حسب المرحلة الحالية في الـCRM</small></div><span class="follow-dot"></span></div><div id="followStageChart" class="follow-stage-chart"></div></div>
+      <div class="follow-focus-card"><div class="follow-card-head"><div><b>ملخص المتابعة</b><small>الأولوية حسب موعد المتابعة</small></div></div><div id="followFocus" class="follow-focus-list"></div></div>
+    </div>
+    <div class="follow-list-card">
+      <div class="follow-list-head"><div><b>قائمة العملاء</b><small id="followResultCount">كل الشركات المسجلة</small></div><div class="follow-controls"><input id="followSearch" type="search" placeholder="ابحث عن شركة أو مسؤول أو رقم..."><select id="followFilter"><option value="">كل الحالات</option><option value="overdue">متأخرة</option><option value="today">مستحقة اليوم</option><option value="future">قادمة</option><option value="none">بدون موعد</option></select></div></div>
+      <div class="tw follow-table-wrap"><table class="follow-table"><thead><tr><th>الشركة / المسؤول</th><th>المرحلة</th><th>حالة الرد</th><th>موعد المتابعة</th><th>آخر نشاط</th><th>ملاحظات</th><th>الإجراء</th></tr></thead><tbody id="tbFollowups"></tbody></table></div>
+      <div class="note">المواعيد وسجل التواصل بيتحدّثوا من ملف الشركة. المركز بيعرض كل الشركات، حتى لو مفيش موعد متابعة محدد.</div>
+    </div>
   </section>
   <!-- المنشورات -->
   <section class="panel" id="tab-posts">
@@ -372,12 +392,21 @@ $('closeProfile').addEventListener('click',function(){$('profileDlg').close()});
 
 /* ---------- مركز المتابعات ---------- */
 function renderFollowups(){
-  var t=today(),list=db.companies.slice();
+  var t=today(),list=db.companies.slice(),q=($('followSearch')&&$('followSearch').value||'').trim().toLowerCase(),filter=$('followFilter')&&$('followFilter').value||'';
+  function kind(c){return !c.followUpDate?'none':c.followUpDate<t?'overdue':c.followUpDate===t?'today':'future'}
   list.sort(function(a,b){var ad=a.followUpDate||'9999-99-99',bd=b.followUpDate||'9999-99-99';if(ad!==bd)return ad.localeCompare(bd);return String(b.lastActivityAt||'').localeCompare(String(a.lastActivityAt||''))});
-  var overdue=list.filter(function(c){return c.followUpDate&&c.followUpDate<t}).length,due=list.filter(function(c){return c.followUpDate===t}).length,future=list.filter(function(c){return c.followUpDate>t}).length,noDate=list.filter(function(c){return !c.followUpDate}).length;
-  $('followStats').innerHTML=[['متابعات متأخرة',overdue],['مستحقة اليوم',due],['قادمة',future],['بدون موعد متابعة',noDate]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
-  $('tbFollowups').innerHTML=list.length?list.map(function(c){var status=c.followUpDate?(c.followUpDate<t?'متأخرة':c.followUpDate===t?'اليوم':'قادمة'):'لم يحدد موعد';var last=c.activities&&c.activities.length?c.activities[c.activities.length-1]:null;var note=last?(last.type+': '+last.note):(c.lostReason||c.notes||'لا يوجد سجل تعديل سابق');var updated=last&&last.date?last.date:'—';return '<tr><td><b>'+esc(c.name)+'</b><div class="note">آخر تحديث: '+esc(updated)+'</div></td><td>'+esc(c.stage||'—')+'</td><td>'+esc(c.replyStatus||'لم يتم التواصل')+'</td><td><span class="status-pill">'+(c.followUpDate?esc(c.followUpDate)+' — '+status:status)+'</span></td><td class="nt">'+esc(note)+'</td><td><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">فتح الملف</button></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">لسه مفيش شركات مسجلة.</td></tr>';
+  var overdue=list.filter(function(c){return kind(c)==='overdue'}).length,due=list.filter(function(c){return kind(c)==='today'}).length,future=list.filter(function(c){return kind(c)==='future'}).length,noDate=list.filter(function(c){return kind(c)==='none'}).length,total=list.length;
+  $('followStats').innerHTML=[['إجمالي الشركات',total,'كل العملاء المسجلين','#7897ff'],['متأخرة',overdue,'تحتاج متابعة الآن','#ff7885'],['مستحقة اليوم',due,'موعدها النهارده','#ffc36f'],['متابعات قادمة',future,'مواعيد مستقبلية','#66d6a0']].map(function(x){return '<div class="follow-kpi" style="--kpi-glow:'+x[3]+'22"><small>'+x[0]+'</small><strong>'+fmt(x[1])+'</strong><em>'+x[2]+'</em></div>'}).join('');
+  var stages=Array.from(new Set(list.map(function(c){return c.stage||'غير محدد'}))),maxStage=1;
+  var stageData=stages.map(function(stage){var count=list.filter(function(c){return (c.stage||'غير محدد')===stage}).length;if(count>maxStage)maxStage=count;return {name:stage,count:count}});
+  $('followStageChart').innerHTML=stageData.length?stageData.map(function(x){return '<div class="follow-stage-row"><div class="follow-stage-label"><span>'+esc(x.name)+'</span><span>'+x.count+' شركة</span></div><div class="follow-stage-track"><i style="width:'+Math.round(x.count/maxStage*100)+'%"></i></div></div>'}).join(''):'<div class="empty">لا توجد بيانات حتى الآن.</div>';
+  $('followFocus').innerHTML=[['متأخرة',overdue],['مستحقة اليوم',due],['قادمة',future],['بدون موعد',noDate]].map(function(x){return '<div class="follow-focus-item"><strong>'+fmt(x[1])+'</strong><span>'+x[0]+'</span></div>'}).join('');
+  var visible=list.filter(function(c){if(filter&&kind(c)!==filter)return false;return !q||[c.name,c.contact,c.phone,c.industry,c.stage,c.replyStatus,c.notes,c.lostReason].join(' ').toLowerCase().indexOf(q)>-1});
+  $('followResultCount').textContent=visible.length+' من '+total+' شركة';
+  $('tbFollowups').innerHTML=visible.length?visible.map(function(c){var k=kind(c),status=k==='overdue'?'متأخرة':k==='today'?'اليوم':k==='future'?'قادمة':'بدون موعد',last=c.activities&&c.activities.length?c.activities[c.activities.length-1]:null,note=last?(last.type+': '+last.note):(c.lostReason||c.notes||'—'),updated=last&&last.date?last.date:'لا يوجد نشاط';return '<tr><td><b>'+esc(c.name)+'</b><div class="note">'+esc(c.contact||'مسؤول غير محدد')+(c.phone?' · '+esc(c.phone):'')+'</div></td><td>'+esc(c.stage||'—')+'</td><td>'+esc(c.replyStatus||'لم يتم التواصل')+'</td><td><span class="follow-status '+k+'">'+(c.followUpDate?esc(c.followUpDate)+' · ':'')+status+'</span></td><td>'+esc(updated)+'</td><td class="nt">'+esc(note)+'</td><td><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">فتح الملف ↗</button></td></tr>'}).join(''):'<tr><td colspan="7" class="empty">مفيش شركات مطابقة للبحث أو الفلتر.</td></tr>';
 }
+$('followSearch').addEventListener('input',renderFollowups);
+$('followFilter').addEventListener('change',renderFollowups);
 
 /* ---------- المنشورات ---------- */
 function renderPosts(){
