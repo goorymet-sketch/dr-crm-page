@@ -123,7 +123,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
       <button class="btn t" data-dl="companies">تنزيل CSV</button>
     </div>
     <div class="table-tools"><strong id="selectedCount">0 شركة محددة</strong><button class="btn d" id="bulkDelete" disabled>حذف المحدد</button><button class="btn" id="clearSelection" disabled>إلغاء التحديد</button></div>
-    <div class="tw"><table><thead><tr><th><input type="checkbox" id="selectAllCompanies" title="تحديد النتائج الظاهرة"></th><th>#</th><th>الشركة</th><th>المسؤول</th><th>الرقم</th><th>المجال</th><th>روابط الشركة</th><th>المصدر</th><th>المرحلة</th><th>قيمة الصفقة</th><th>ملاحظات</th><th></th></tr></thead><tbody id="tbC"></tbody></table></div>
+    <div class="tw"><table><thead><tr><th><input type="checkbox" id="selectAllCompanies" title="تحديد النتائج الظاهرة"></th><th>#</th><th>الشركة</th><th>الرقم</th><th>المجال</th><th>روابط الشركة</th><th>المصدر</th><th>المرحلة</th><th>ملاحظات</th><th></th></tr></thead><tbody id="tbC"></tbody></table></div>
   </section>
   <!-- المتابعات -->
   <section class="panel follow-dashboard" id="tab-followups">
@@ -297,7 +297,7 @@ function cCount(p){var n=parseInt(p.commentsCount,10);if(!isNaN(n)&&p.commentsCo
 function eng(p){return num(p.likes)+3*cCount(p)}
 function maxEng(){var m=0;db.posts.forEach(function(p){var e=eng(p);if(e>m)m=e});return m}
 function pScore(p,m){return m?Math.round(eng(p)/m*100):0}
-function complete(c){var f=[c.name,c.website,c.contact,c.phone,c.industry,c.source,c.stage,c.replyStatus,(c.facebook||c.instagram||c.linkedin),c.notes],n=0;f.forEach(function(x){if(x!==''&&x!=null)n++});return Math.round(n/f.length*100)}
+function complete(c){var f=[c.name,c.website,c.phone,c.industry,c.source,c.stage,c.replyStatus,c.whatsappStatus,(c.facebook||c.instagram||c.linkedin),c.notes],n=0;f.forEach(function(x){if(x!==''&&x!=null)n++});return Math.round(n/f.length*100)}
 function pipe(c){if(c.stage==='خسرنا')return 0;var stages=Array.from(new Set(db.companies.map(function(x){return x.stage}).filter(Boolean)));if(!stages.length)stages=STAGES;var i=stages.indexOf(c.stage);return i<0?0:Math.round(i/Math.max(1,stages.length-1)*100)}
 function social(c){var m=maxEng(),a=db.posts.filter(function(p){return String(p.page).toLowerCase()===String(c.name).toLowerCase()});if(!a.length)return null;var s=0;a.forEach(function(p){s+=pScore(p,m)});return Math.round(s/a.length)}
 function total(c){var d=complete(c),p=pipe(c),s=social(c);return s===null?Math.round(d*.4+p*.6):Math.round(d*.3+p*.4+s*.3)}
@@ -326,10 +326,10 @@ $('dX').addEventListener('click',function(){$('dlg').close()});
 var FC=[
   {k:'name',l:'اسم الشركة *',req:1,full:1},
   {k:'website',l:'الموقع الإلكتروني',full:1},
-  {k:'contact',l:'اسم المسؤول'},{k:'phone',l:'الرقم'},{k:'industry',l:'المجال'},
+  {k:'phone',l:'الرقم'},{k:'industry',l:'المجال'},
   {k:'source',l:'المصدر',t:'select',o:SOURCES},{k:'campaign',l:'اسم الحملة / قائمة العملاء'},{k:'stage',l:'المرحلة',t:'select',o:STAGES},
-  {k:'replyStatus',l:'حالة الرد',t:'select',o:REPLY_STATUSES},{k:'followUpDate',l:'موعد المتابعة',t:'date'},
-  {k:'value',l:'قيمة الصفقة',t:'number',step:1},{k:'lostReason',l:'سبب خسارة الفرصة',full:1},
+  {k:'replyStatus',l:'حالة الرد',t:'select',o:REPLY_STATUSES},{k:'whatsappStatus',l:'هل يوجد واتساب؟',t:'select',o:['عنده واتساب','معندهوش واتساب']},{k:'followUpDate',l:'موعد المتابعة',t:'date'},
+  {k:'lostReason',l:'سبب خسارة الفرصة',full:1},
   {k:'facebook',l:'رابط Facebook',full:1},{k:'instagram',l:'رابط Instagram',full:1},{k:'linkedin',l:'رابط LinkedIn',full:1},
   {k:'estimateBasis',l:'أساس التقدير ومصدره',t:'textarea',full:1,r:3},
   {k:'fitScore',l:'درجة ملاءمة الشركة (0 إلى 100)',t:'number',step:1},{k:'fitConfidence',l:'ثقة تقييم الملاءمة',t:'select',o:['غير محدد','مرتفع','متوسط','منخفض']},
@@ -341,12 +341,12 @@ var FP=[{k:'platform',l:'المنصة',t:'select',o:['فيسبوك','انستج�
 
 /* ---------- المبيعات ---------- */
 function renderSales(){
-  var L=db.companies,open=0,won=0,pv=0,wv=0;
-  L.forEach(function(c){if(c.stage==='تم الإغلاق'){won++;wv+=num(c.value)}else if(c.stage!=='خسرنا'){open++;pv+=num(c.value)}});
-  $('stats').innerHTML=[['إجمالي الشركات',L.length],['صفقات مفتوحة',open],['قيمة المفتوح',fmt(pv)],['تم إغلاقها',won],['قيمة المغلق',fmt(wv)]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
+  var L=db.companies,open=0,won=0,interested=0,noWhatsApp=0;
+  L.forEach(function(c){if(c.stage==='تم الإغلاق')won++;else if(c.stage!=='خسرنا')open++;if(c.stage==='مهتم')interested++;if(c.whatsappStatus==='معندهوش واتساب')noWhatsApp++});
+  $('stats').innerHTML=[['إجمالي الشركات',L.length],['صفقات مفتوحة',open],['عملاء مهتمون',interested],['تم إغلاقها',won],['بدون واتساب',noWhatsApp]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
   var q=$('q').value.trim().toLowerCase(),st=$('fst').value;
-  var F=L.filter(function(c){if(st&&c.stage!==st)return false;return !q||[c.name,c.contact,c.phone,c.industry,c.source,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.estimateBasis,c.replyStatus,c.lostReason,c.campaign].join(' ').toLowerCase().indexOf(q)>-1});
-  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td><input type="checkbox" data-company-select="'+esc(c.id)+'" '+(selectedCompanyIds[c.id]?'checked':'')+'></td><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.contact)+'</td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td><div class="act">'+socialLinks(c)+'</div></td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td>'+(c.value?fmt(num(c.value)):'-')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act">'+(c.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl(c))+'">واتساب</a>':'<button class="btn s" disabled>واتساب</button>')+'<button class="btn s" data-act="notesC" data-id="'+esc(c.id)+'">ملاحظات</button><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">الملف</button><button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="12" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>';
+  var F=L.filter(function(c){if(st&&c.stage!==st)return false;return !q||[c.name,c.phone,c.industry,c.source,c.whatsappStatus,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.estimateBasis,c.replyStatus,c.lostReason,c.campaign].join(' ').toLowerCase().indexOf(q)>-1});
+  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td><input type="checkbox" data-company-select="'+esc(c.id)+'" '+(selectedCompanyIds[c.id]?'checked':'')+'></td><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td><div class="act">'+socialLinks(c)+'</div></td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td>'+esc(c.whatsappStatus||'غير محدد')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act">'+(c.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl(c))+'">واتساب</a>':'<button class="btn s" disabled>واتساب</button>')+'<button class="btn s" data-act="notesC" data-id="'+esc(c.id)+'">ملاحظات</button><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">الملف</button><button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="11" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>';
   renderBulkState(F);
 }
 function renderBulkState(visible){
@@ -576,7 +576,7 @@ function report(){var m=maxEng(),L=['تقرير Digital Reach — '+today(),'ع�
   db.posts.slice().sort(function(a,b){return eng(b)-eng(a)}).forEach(function(p){L.push('['+p.platform+'] '+p.page+' — '+p.title+' | ايكات '+num(p.likes)+' | كومنتات '+cCount(p)+' | مؤشر تفاعل نسبي '+pScore(p,m)+'%')});
   L.push('','ملحوظة: النسب مؤشرات داخلية مش ضمان نتائج.');return L.join('\n')}
 document.addEventListener('click',function(e){var b=e.target.closest('[data-dl]');if(!b)return;var k=b.getAttribute('data-dl'),d=today();
-  if(k==='companies')dl('sales-crm-'+d+'.csv',csv(['الشركة','المسؤول','الرقم','المجال','المصدر','المرحلة','القيمة','ملاحظات','الموقع الإلكتروني','فيسبوك','انستجرام','لينكدان','عدد الموظفين','المبيعات السنوية التقديرية','مستوى الثقة','أساس التقدير ومصدره','درجة الملاءمة','ثقة الملاءمة','الفرصة الملحوظة','زاوية البيع','ملخص البحث','مصدر البحث','حالة الرد','موعد المتابعة','سبب الخسارة','الحملة','تاريخ الإضافة','اكتمال البيانات %','تقدم الصفقة %','الإجمالي %'],db.companies.map(function(c){return [c.name,c.contact,c.phone,c.industry,c.source,c.stage,c.value,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.revenueConfidence,c.estimateBasis,c.fitScore,c.fitConfidence,c.observedOpportunity,c.salesAngle,c.researchSummary,c.researchSource,c.replyStatus,c.followUpDate,c.lostReason,c.campaign,c.created,complete(c),pipe(c),total(c)]})),'text/csv;charset=utf-8');
+  if(k==='companies')dl('sales-crm-'+d+'.csv',csv(['الشركة','الرقم','المجال','المصدر','المرحلة','واتساب','ملاحظات','الموقع الإلكتروني','فيسبوك','انستجرام','لينكدان','عدد الموظفين','المبيعات السنوية التقديرية','مستوى الثقة','أساس التقدير ومصدره','درجة الملاءمة','ثقة الملاءمة','الفرصة الملحوظة','زاوية البيع','ملخص البحث','مصدر البحث','حالة الرد','موعد المتابعة','سبب الخسارة','الحملة','تاريخ الإضافة','اكتمال البيانات %','تقدم الصفقة %','الإجمالي %'],db.companies.map(function(c){return [c.name,c.phone,c.industry,c.source,c.stage,c.whatsappStatus,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.revenueConfidence,c.estimateBasis,c.fitScore,c.fitConfidence,c.observedOpportunity,c.salesAngle,c.researchSummary,c.researchSource,c.replyStatus,c.followUpDate,c.lostReason,c.campaign,c.created,complete(c),pipe(c),total(c)]})),'text/csv;charset=utf-8');
   if(k==='posts'){var m=maxEng();dl('posts-crm-'+d+'.csv',csv(['المنصة','الصفحة','اسم المنشور','الايكات','عدد الكومنتات','نص الكومنتات','الرابط','التاريخ','نسبة التفاعل %'],db.posts.map(function(p){return [p.platform,p.page,p.title,p.likes,cCount(p),p.comments,p.link,p.date,pScore(p,m)]})),'text/csv;charset=utf-8')}
   if(k==='plans'){var t=[];db.companies.forEach(function(c){if(db.plans[c.id]&&db.plans[c.id].text)t.push(db.plans[c.id].text)});if(!t.length){alert('مفيش خطط محفوظة');return}dl('plans-'+d+'.txt',t.join('\n\n==============================\n\n'),'text/plain;charset=utf-8')}
   if(k==='report')dl('report-'+d+'.txt',report(),'text/plain;charset=utf-8');
