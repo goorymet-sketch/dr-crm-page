@@ -71,7 +71,6 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
     <button data-tab="home" class="on">🏠 الرئيسية</button>
     <button data-tab="sales">💼 الشركات</button>
     <button data-tab="posts">📱 CRM المنشورات</button>
-    <button data-tab="followups">⏰ تذكير ومتابعة العملاء</button>
     <button data-tab="upload">⬆️ رفع الملفات</button>
     <button data-tab="download">⬇️ تنزيل الملفات</button>
     <button data-tab="followups">⏰ تذكير ومتابعة العملاء</button>
@@ -271,6 +270,7 @@ function bar(v){return '<div class="bw"><div class="bb"><i style="width:'+v+'%;b
 $('nav').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
   [].forEach.call($('nav').querySelectorAll('button'),function(x){x.classList.remove('on')});b.classList.add('on');
   [].forEach.call(document.querySelectorAll('.panel'),function(x){x.classList.remove('on')});$('tab-'+b.getAttribute('data-tab')).classList.add('on');renderAll()});
+document.addEventListener('click',function(e){var go=e.target.closest('[data-tab-go]');if(go){var target=go.getAttribute('data-tab-go');var navButton=$('nav').querySelector('[data-tab="'+target+'"]');if(navButton)navButton.click()}});
 
 /* ---------- نموذج عام ---------- */
 var cb=null;
@@ -289,9 +289,6 @@ var FC=[
   {k:'name',l:'اسم الشركة *',req:1,full:1},
   {k:'website',l:'الموقع الإلكتروني',full:1},
   {k:'contact',l:'اسم المسؤول'},{k:'phone',l:'الرقم'},{k:'industry',l:'المجال'},
-  {k:'employees',l:'عدد الموظفين (رقم أو نطاق)'},
-  {k:'annualRevenueEstimate',l:'المبيعات السنوية التقديرية (بالعملة والنطاق)',full:1},
-  {k:'revenueConfidence',l:'مستوى الثقة في تقدير المبيعات',t:'select',o:['غير محدد','مرتفع','متوسط','منخفض']},
   {k:'source',l:'المصدر',t:'select',o:SOURCES},{k:'campaign',l:'اسم الحملة / قائمة العملاء'},{k:'stage',l:'المرحلة',t:'select',o:STAGES},
   {k:'replyStatus',l:'حالة الرد',t:'select',o:REPLY_STATUSES},{k:'followUpDate',l:'موعد المتابعة',t:'date'},
   {k:'value',l:'قيمة الصفقة',t:'number',step:1},{k:'lostReason',l:'سبب خسارة الفرصة',full:1},
@@ -311,7 +308,7 @@ function renderSales(){
   $('stats').innerHTML=[['إجمالي الشركات',L.length],['صفقات مفتوحة',open],['قيمة المفتوح',fmt(pv)],['تم إغلاقها',won],['قيمة المغلق',fmt(wv)]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
   var q=$('q').value.trim().toLowerCase(),st=$('fst').value;
   var F=L.filter(function(c){if(st&&c.stage!==st)return false;return !q||[c.name,c.contact,c.phone,c.industry,c.source,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.estimateBasis,c.replyStatus,c.lostReason,c.campaign].join(' ').toLowerCase().indexOf(q)>-1});
-  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td><input type="checkbox" data-company-select="'+esc(c.id)+'" '+(selectedCompanyIds[c.id]?'checked':'')+'></td><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.contact)+'</td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td><div class="act">'+socialLinks(c)+'</div></td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td>'+(c.value?fmt(num(c.value)):'-')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act">'+(c.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl(c))+'">واتساب</a>':'<button class="btn s" disabled>واتساب</button>')+'<button class="btn s" data-act="notesC" data-id="'+esc(c.id)+'">ملاحظات</button><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">الملف</button><button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="15" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>';
+  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td><input type="checkbox" data-company-select="'+esc(c.id)+'" '+(selectedCompanyIds[c.id]?'checked':'')+'></td><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.contact)+'</td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td><div class="act">'+socialLinks(c)+'</div></td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td>'+(c.value?fmt(num(c.value)):'-')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act">'+(c.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl(c))+'">واتساب</a>':'<button class="btn s" disabled>واتساب</button>')+'<button class="btn s" data-act="notesC" data-id="'+esc(c.id)+'">ملاحظات</button><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">الملف</button><button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="12" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>';
   renderBulkState(F);
 }
 function renderBulkState(visible){
