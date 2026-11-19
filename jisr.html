@@ -70,6 +70,14 @@ body:not(.locked) #login{display:none}
 
   <div id="t-leads" class="hid">
     <div class="card">
+      <b>رفع ملف مرة واحدة (Excel أو CSV)</b>
+      <p style="font-size:13px;color:#5b6b76;margin:6px 0">الصف الأول لازم يكون عناوين الأعمدة. الأعمدة المعروفة: الاسم، النوع، المسؤول، تليفون/واتساب، الإيميل، المصدر، المستوى (رقم من 0 لـ 8)، المتابعة (تاريخ بالشكل 2026-11-25)، ملاحظات. الاسم هو الوحيد المطلوب. أي عمود تاني بيتجاهل.</p>
+      <button class="btn" type="button" id="bImp">اختيار ملف</button>
+      <button class="btn g" type="button" id="bTpl">تنزيل قالب جاهز</button>
+      <input type="file" id="fImp" accept=".csv,.xlsx,.xls" hidden>
+      <div id="impPrev" style="margin-top:10px;font-size:13px"></div>
+    </div>
+    <div class="card">
       <b id="lfTitle">إضافة جهة</b>
       <form id="leadForm">
         <div class="f2">
@@ -131,6 +139,7 @@ body:not(.locked) #login{display:none}
   </div>
 </main>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -138,7 +147,7 @@ body:not(.locked) #login{display:none}
 (function(){
 var KEY='jisr_crm_v1';
 var ALLOWED='goory.met@gmail.com';
-var LEVELS=['','رسالة اتبعتت','رد','محادثة فيها تفاصيل جروبات','اجتماع أو مكالمة','طلب عرض سعر لجروب حقيقي','أول صفقة','أول عمولة اتدفعت','رفض واضح'];
+var LEVELS=['لسه ما اتبعتلوش','رسالة اتبعتت','رد','محادثة فيها تفاصيل جروبات','اجتماع أو مكالمة','طلب عرض سعر لجروب حقيقي','أول صفقة','أول عمولة اتدفعت','رفض واضح'];
 var TYPES=['شركة سياحة','DMC','فندق','أخرى'];
 var DEAL_STATUS=['عرض سعر مبعوت','مؤكدة','وصل الجروب','اتعمل check-out','العمولة اتدفعت','اتلغت'];
 var firebaseConfig={
@@ -175,8 +184,8 @@ function save(){
 function opts(sel,arr,first){sel.innerHTML=(first!=null?'<option value="">'+first+'</option>':'')+arr.map(function(x,i){return x===''?'':'<option value="'+(first!=null?x:i)+'">'+esc(x)+'</option>'}).join('')}
 function fillSelects(){
   opts($('l_type'),TYPES);
-  $('l_level').innerHTML=LEVELS.map(function(x,i){return i===0?'':'<option value="'+i+'">'+i+' - '+esc(x)+'</option>'}).join('');
-  $('fLevel').innerHTML='<option value="">كل المستويات</option>'+LEVELS.map(function(x,i){return i===0?'':'<option value="'+i+'">'+i+' - '+esc(x)+'</option>'}).join('');
+  $('l_level').innerHTML=LEVELS.map(function(x,i){return '<option value="'+i+'">'+i+' - '+esc(x)+'</option>'}).join('');
+  $('fLevel').innerHTML='<option value="">كل المستويات</option>'+LEVELS.map(function(x,i){return '<option value="'+i+'">'+i+' - '+esc(x)+'</option>'}).join('');
   $('fType').innerHTML='<option value="">كل الأنواع</option>'+TYPES.map(function(x){return '<option>'+esc(x)+'</option>'}).join('');
   $('d_status').innerHTML=DEAL_STATUS.map(function(x){return '<option>'+esc(x)+'</option>'}).join('');
 }
@@ -236,7 +245,7 @@ function renderAll(){renderBoard();renderLeads();renderDeals()}
 function resetLeadForm(){editId=null;$('leadForm').reset();$('l_level').value='1';$('lfTitle').textContent='إضافة جهة'}
 $('leadForm').addEventListener('submit',function(e){
   e.preventDefault();
-  var o={name:$('l_name').value.trim(),type:TYPES[$('l_type').value]||TYPES[0],person:$('l_person').value.trim(),phone:$('l_phone').value.trim(),email:$('l_email').value.trim(),source:$('l_source').value.trim(),level:Number($('l_level').value)||1,follow:$('l_follow').value,notes:$('l_notes').value.trim(),updated:today()};
+  var o={name:$('l_name').value.trim(),type:TYPES[$('l_type').value]||TYPES[0],person:$('l_person').value.trim(),phone:$('l_phone').value.trim(),email:$('l_email').value.trim(),source:$('l_source').value.trim(),level:(isNaN(Number($('l_level').value))?0:Number($('l_level').value)),follow:$('l_follow').value,notes:$('l_notes').value.trim(),updated:today()};
   if(!o.name)return;
   if(editId){var l=db.leads.filter(function(x){return x.id===editId})[0];if(l)Object.keys(o).forEach(function(k){l[k]=o[k]})}
   else{o.id=uid();o.created=today();db.leads.push(o)}
@@ -272,6 +281,77 @@ $('fRs').addEventListener('change',function(){
   var f=this.files[0];if(!f)return;var r=new FileReader();
   r.onload=function(){try{var p=JSON.parse(r.result);if(!confirm('الاسترجاع هيستبدل البيانات الحالية. تكمل؟'))return;db=norm(p);save();renderAll();$('bmsg').textContent='تم الاسترجاع.'}catch(e){$('bmsg').textContent='الملف مش صالح.'}};
   r.readAsText(f);this.value='';
+});
+
+var HEAD={name:['الاسم','اسم الشركة','الشركة','name','company'],type:['النوع','type'],person:['المسؤول','الشخص المسؤول','الشخص','contact','person'],phone:['تليفون','واتساب','رقم','الهاتف','موبايل','phone','whatsapp','mobile'],email:['الإيميل','ايميل','الايميل','email'],source:['المصدر','source'],level:['المستوى','level'],follow:['المتابعة','موعد المتابعة','follow','followup'],notes:['ملاحظات','notes']};
+var pending=[];
+function fixDate(v){
+  v=String(v==null?'':v).trim();if(!v)return '';
+  var m=v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);
+  m=v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);if(m)return m[3]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2);
+  return '';
+}
+function leadKey(name,phone){var d=String(phone||'').replace(/\D/g,'');return d.length>=7?'p'+d:'n'+String(name||'').trim().toLowerCase()}
+function guessType(v){
+  v=String(v||'').trim();if(TYPES.indexOf(v)>=0)return v;
+  var l=v.toLowerCase();if(l.indexOf('فندق')>=0||l.indexOf('hotel')>=0)return 'فندق';if(l.indexOf('dmc')>=0)return 'DMC';return 'شركة سياحة';
+}
+function parseRows(rows){
+  var res={items:[],dup:0,noName:0,badDate:0,cols:[]};
+  if(!rows.length)return res;
+  var hdr=rows[0].map(function(h){return String(h).trim().toLowerCase()}),idx={};
+  Object.keys(HEAD).forEach(function(k){
+    for(var i=0;i<hdr.length;i++){if(HEAD[k].map(function(x){return x.toLowerCase()}).indexOf(hdr[i])>=0){idx[k]=i;res.cols.push(k);break}}
+  });
+  if(idx.name===undefined)return res;
+  var seen={};db.leads.forEach(function(l){seen[leadKey(l.name,l.phone)]=1});
+  for(var r=1;r<rows.length;r++){
+    var row=rows[r],g=function(k){return idx[k]===undefined?'':String(row[idx[k]]==null?'':row[idx[k]]).trim()};
+    var name=g('name');if(!name){if(row.join('').trim())res.noName++;continue}
+    var o={id:uid(),name:name,type:guessType(g('type')),person:g('person'),phone:g('phone'),email:g('email'),source:g('source'),notes:g('notes'),created:today(),updated:today()};
+    var lv=Number(g('level'));o.level=(g('level')!==''&&lv>=0&&lv<=8)?Math.floor(lv):0;
+    var fu=g('follow');o.follow=fixDate(fu);if(fu&&!o.follow)res.badDate++;
+    var key=leadKey(o.name,o.phone);if(seen[key]){res.dup++;continue}
+    seen[key]=1;res.items.push(o);
+  }
+  return res;
+}
+function showPreview(res){
+  var el=$('impPrev');pending=res.items;
+  if(res.cols.indexOf('name')<0){el.innerHTML='<span class="over">ما لقيتش عمود "الاسم" في الصف الأول. نزّل القالب الجاهز واستخدم عناوينه.</span>';return}
+  var h='<p>جاهز للاستيراد: <b>'+res.items.length+'</b> جهة جديدة. مكررين اتجاهلوا: '+res.dup+'. صفوف من غير اسم اتجاهلت: '+res.noName+(res.badDate?'. تواريخ متابعة مش مفهومة اتفضت: '+res.badDate:'')+'.</p>';
+  if(res.items.length){
+    h+='<table><thead><tr><th>الاسم</th><th>النوع</th><th>تليفون</th><th>المستوى</th></tr></thead><tbody>'+res.items.slice(0,5).map(function(o){return '<tr><td>'+esc(o.name)+'</td><td>'+esc(o.type)+'</td><td dir="ltr">'+esc(o.phone)+'</td><td>'+esc(lvlName(o.level))+'</td></tr>'}).join('')+'</tbody></table>';
+    if(res.items.length>5)h+='<p style="color:#5b6b76">... وباقي '+(res.items.length-5)+' جهة.</p>';
+    h+='<button class="btn" type="button" id="bGo">استيراد '+res.items.length+' جهة</button> <button class="btn g" type="button" id="bNo">إلغاء</button>';
+  }
+  el.innerHTML=h;
+}
+$('bImp').addEventListener('click',function(){$('fImp').click()});
+$('fImp').addEventListener('change',function(){
+  var f=this.files[0];this.value='';if(!f)return;
+  if(typeof XLSX==='undefined'){$('impPrev').innerHTML='<span class="over">مكتبة قراءة Excel ما اتحملتش. راجع الإنترنت واعمل refresh.</span>';return}
+  var isCsv=/\.csv$/i.test(f.name),r=new FileReader();
+  r.onerror=function(){$('impPrev').textContent='تعذّر قراءة الملف.'};
+  r.onload=function(){
+    try{
+      var wb=isCsv?XLSX.read(String(r.result).replace(/^﻿/,''),{type:'string',raw:true}):XLSX.read(new Uint8Array(r.result),{type:'array',cellDates:true});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      showPreview(parseRows(XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false,dateNF:'yyyy-mm-dd'})));
+    }catch(e){console.error(e);$('impPrev').innerHTML='<span class="over">الملف مش مفهوم. استخدم القالب الجاهز.</span>'}
+  };
+  if(isCsv)r.readAsText(f,'UTF-8');else r.readAsArrayBuffer(f);
+});
+$('impPrev').addEventListener('click',function(e){
+  if(e.target.id==='bGo'&&pending.length){
+    var n=pending.length;db.leads=db.leads.concat(pending);pending=[];save();renderAll();
+    $('impPrev').innerHTML='<span style="color:#0f6b54">تم استيراد '+n+' جهة.</span>';
+  }
+  if(e.target.id==='bNo'){pending=[];$('impPrev').innerHTML=''}
+});
+$('bTpl').addEventListener('click',function(){
+  var csv='﻿'+'الاسم,النوع,المسؤول,تليفون,الإيميل,المصدر,المستوى,المتابعة,ملاحظات\r\n'+'شركة المثال للسياحة,شركة سياحة,أحمد,201001234567,example@mail.com,جوجل,0,2026-11-25,ملاحظة اختيارية\r\n';
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='jisr-leads-template.csv';a.click();
 });
 
 function setMsg(m){$('msg').textContent=m||''}
