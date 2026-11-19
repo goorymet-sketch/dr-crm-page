@@ -494,12 +494,12 @@ function parseCSV(t){t=t.replace(/^\uFEFF/,'');var first=t.split(/\r?\n/)[0]||''
     else f+=ch}
   row.push(f);if(row.some(function(x){return x.trim()}))rows.push(row);return rows}
 var MAPC={
-  name:['name','title','company','الشركة','اسم الشركة','الاسم'],
-  website:['website','company website','website url','الموقع الإلكتروني','الموقع','الموقع الالكتروني'],
+  name:['name','title','company','company_name','business_name','business name','الشركة','اسم الشركة','الاسم'],
+  website:['website','company website','website url','business_website','business_domain','domain','الموقع الإلكتروني','الموقع','الموقع الالكتروني'],
   contact:['contact','المسؤول','اسم المسؤول'],
-  phone:['phone','phone number','mobile','telephone','الرقم','رقم','الموبايل','الهاتف'],
-  industry:['industry','category','المجال','النشاط'],
-  source:['source','المصدر'],campaign:['campaign','campaign name','اسم الحملة','الحملة','قائمة العملاء'],stage:['stage','المرحلة'],value:['value','القيمة','قيمة الصفقة'],notes:['notes','ملاحظات','address','العنوان'],
+  phone:['phone','phone number','mobile','telephone','business_phone','الرقم','رقم','الموبايل','الهاتف'],
+  industry:['industry','category','business_naics_description','business_sic_code_description','المجال','النشاط'],
+  source:['source','المصدر'],campaign:['campaign','campaign name','اسم الحملة','الحملة','قائمة العملاء'],stage:['stage','المرحلة'],value:['value','القيمة','قيمة الصفقة'],notes:['notes','business_business_description','business_description','description','ملاحظات','address','العنوان'],
   facebook:['facebook','facebook url','فيسبوك','رابط فيسبوك'],
   instagram:['instagram','instagram url','انستجرام','إنستجرام','انستغرام','رابط انستجرام','رابط انستغرام'],
   linkedin:['linkedin','linkedin url','لينكدان','لينكدإن','رابط لينكدان','رابط لينكدإن'],
