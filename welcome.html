@@ -68,13 +68,13 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
 <aside class="side">
   <div class="logo"><b>Digital <span>Reach</span></b><small>CRM</small></div>
   <nav class="nav" id="nav">
-    <button data-tab="sales" class="on">💼 CRM المبيعات</button>
+    <button data-tab="home" class="on">🏠 الرئيسية</button>
+    <button data-tab="sales">💼 الشركات</button>
     <button data-tab="posts">📱 CRM المنشورات</button>
-    <button data-tab="plans">📝 خطط الشركات</button>
+    <button data-tab="followups">⏰ تذكير ومتابعة العملاء</button>
     <button data-tab="upload">⬆️ رفع الملفات</button>
     <button data-tab="download">⬇️ تنزيل الملفات</button>
-    <button data-tab="perf">📊 الأداء والنسب</button>
-    <button data-tab="followups">⏰ المتابعات</button>
+    <button data-tab="followups">⏰ تذكير ومتابعة العملاء</button>
   </nav>
   <div class="tools">
     <p>البيانات بتتحفظ سحابيًا في Firestore بعد تسجيل الدخول، ومعاها نسخة محلية على الجهاز. نزّل نسخة احتياطية بشكل دوري.</p>
@@ -85,8 +85,10 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
   </div>
 </aside>
 <main>
+  <!-- الرئيسية -->
+  <section class="panel on" id="tab-home"><h1>الرئيسية <span>Digital Reach</span></h1><div class="sub">ملخص التواصل مع الشركات.</div><div class="stats" id="homeStats"></div><button class="btn p" type="button" data-tab-go="sales">عرض الشركات</button></section>
   <!-- المبيعات -->
-  <section class="panel on" id="tab-sales">
+  <section class="panel" id="tab-sales">
     <h1>CRM <span>المبيعات</span></h1><div class="sub">سجّل الشركات وتابع كل واحدة في أي مرحلة.</div>
     <div class="stats" id="stats"></div>
     <div class="bar2">
@@ -96,7 +98,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
       <button class="btn t" data-dl="companies">تنزيل CSV</button>
     </div>
     <div class="table-tools"><strong id="selectedCount">0 شركة محددة</strong><button class="btn d" id="bulkDelete" disabled>حذف المحدد</button><button class="btn" id="clearSelection" disabled>إلغاء التحديد</button></div>
-    <div class="tw"><table><thead><tr><th><input type="checkbox" id="selectAllCompanies" title="تحديد النتائج الظاهرة"></th><th>#</th><th>الشركة</th><th>المسؤول</th><th>الرقم</th><th>المجال</th><th>عدد الموظفين</th><th>المبيعات السنوية التقديرية</th><th>روابط الشركة</th><th>المصدر</th><th>المرحلة</th><th>حالة الرد</th><th>قيمة الصفقة</th><th>ملاحظات</th><th></th></tr></thead><tbody id="tbC"></tbody></table></div>
+    <div class="tw"><table><thead><tr><th><input type="checkbox" id="selectAllCompanies" title="تحديد النتائج الظاهرة"></th><th>#</th><th>الشركة</th><th>المسؤول</th><th>الرقم</th><th>المجال</th><th>روابط الشركة</th><th>المصدر</th><th>المرحلة</th><th>قيمة الصفقة</th><th>ملاحظات</th><th></th></tr></thead><tbody id="tbC"></tbody></table></div>
   </section>
   <!-- المتابعات -->
   <section class="panel" id="tab-followups">
@@ -165,6 +167,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}dialog h2{margin-bottom:12px;font-siz
   </section>
 </main>
 <dialog id="dlg"><h2 id="dT"></h2><form id="frm"><div class="fg" id="dF"></div><div class="da"><button class="btn p" type="submit">حفظ</button><button class="btn" type="button" id="dX">إلغاء</button></div></form></dialog>
+<dialog id="notesDlg"><h2>ملاحظات الشركة</h2><div class="fg"><label>واتساب<select id="noteWhatsapp"><option value="">غير محدد</option><option value="عنده واتساب">عنده واتساب</option><option value="معندهوش واتساب">معندهوش واتساب</option></select></label><label>الرد<select id="noteResponse"><option value="">غير محدد</option><option value="بيرد">بيرد</option><option value="مش بيرد">مش بيرد</option></select></label><label class="full">ملاحظات حرة<textarea id="noteFree" rows="5"></textarea></label></div><div class="da"><button class="btn p" type="button" id="saveCompanyNotes">حفظ</button><button class="btn" type="button" id="closeCompanyNotes">إغلاق</button></div></dialog>
 <dialog id="profileDlg" style="width:min(820px,96vw)"><h2>ملف الشركة: <span id="profileName" style="color:var(--y)"></span></h2><div class="da"><button class="btn t" type="button" id="editProfileCompany">تعديل بيانات الشركة</button></div><div id="profileSummary" class="profile-summary"></div><div class="profile-section"><h3>تحليل الشركة وفرصة البيع</h3><div id="profileResearch" class="note"></div></div>
 <div class="profile-section"><h3>جهات الاتصال</h3><div id="profileContacts"></div><div class="fg"><label>الاسم<input id="newContactName"></label><label>المنصب<input id="newContactRole"></label><label>رقم الهاتف<input id="newContactPhone"></label><label>البريد الإلكتروني<input id="newContactEmail" type="email"></label></div><div class="da"><button class="btn t" type="button" id="addContact">إضافة جهة اتصال</button></div></div>
 <div class="profile-section"><h3>سجل التواصل والنشاط</h3><div class="fg"><label>نوع النشاط<select id="activityType"><option>مكالمة</option><option>واتساب</option><option>بريد إلكتروني</option><option>اجتماع</option><option>رد العميل</option><option>ملاحظة داخلية</option></select></label><label>حالة الرد<select id="profileReplyStatus"><option>لم يتم التواصل</option><option>لا يوجد رد</option><option>رد العميل</option><option>مهتم</option><option>محوّل للإدارة</option><option>غير مناسب</option></select></label><label class="full">تفاصيل النشاط<textarea id="activityNote" rows="3"></textarea></label></div><div class="da"><button class="btn p" type="button" id="addActivity">تسجيل النشاط</button></div><div id="activityTimeline"></div></div>
@@ -308,7 +311,7 @@ function renderSales(){
   $('stats').innerHTML=[['إجمالي الشركات',L.length],['صفقات مفتوحة',open],['قيمة المفتوح',fmt(pv)],['تم إغلاقها',won],['قيمة المغلق',fmt(wv)]].map(function(s){return '<div class="stat"><small>'+s[0]+'</small><div>'+s[1]+'</div></div>'}).join('');
   var q=$('q').value.trim().toLowerCase(),st=$('fst').value;
   var F=L.filter(function(c){if(st&&c.stage!==st)return false;return !q||[c.name,c.contact,c.phone,c.industry,c.source,c.notes,c.website,c.facebook,c.instagram,c.linkedin,c.employees,c.annualRevenueEstimate,c.estimateBasis,c.replyStatus,c.lostReason,c.campaign].join(' ').toLowerCase().indexOf(q)>-1});
-  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td><input type="checkbox" data-company-select="'+esc(c.id)+'" '+(selectedCompanyIds[c.id]?'checked':'')+'></td><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.contact)+'</td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td>'+esc(c.employees)+'</td><td>'+esc(c.annualRevenueEstimate)+'</td><td><div class="act">'+socialLinks(c)+'</div></td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td><span class="status-pill">'+esc(c.replyStatus||'لم يتم التواصل')+'</span></td><td>'+(c.value?fmt(num(c.value)):'-')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act">'+(c.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl(c))+'">واتساب</a>':'<button class="btn s" disabled>واتساب</button>')+'<button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">الملف</button><button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="15" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>';
+  $('tbC').innerHTML=F.length?F.map(function(c,i){return '<tr><td><input type="checkbox" data-company-select="'+esc(c.id)+'" '+(selectedCompanyIds[c.id]?'checked':'')+'></td><td>'+(i+1)+'</td><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.contact)+'</td><td dir="ltr" style="text-align:right">'+esc(c.phone)+'</td><td>'+esc(c.industry)+'</td><td><div class="act">'+socialLinks(c)+'</div></td><td>'+esc(c.source)+'</td><td><select data-stg="'+esc(c.id)+'">'+opts(STAGES,c.stage)+'</select></td><td>'+(c.value?fmt(num(c.value)):'-')+'</td><td class="nt">'+esc(c.notes)+'</td><td><div class="act">'+(c.phone?'<a class="btn t s" target="_blank" rel="noopener" href="'+esc(whatsappUrl(c))+'">واتساب</a>':'<button class="btn s" disabled>واتساب</button>')+'<button class="btn s" data-act="notesC" data-id="'+esc(c.id)+'">ملاحظات</button><button class="btn s" data-act="profileC" data-id="'+esc(c.id)+'">الملف</button><button class="btn s" data-act="eC" data-id="'+esc(c.id)+'">تعديل</button><button class="btn d" data-act="dC" data-id="'+esc(c.id)+'">حذف</button></div></td></tr>'}).join(''):'<tr><td colspan="15" class="empty">'+(L.length?'مفيش نتائج.':'لسه مفيش شركات. دوس "إضافة شركة".')+'</td></tr>';
   renderBulkState(F);
 }
 function renderBulkState(visible){
@@ -338,6 +341,10 @@ function renderProfile(){
   var acts=c.activities.slice().reverse();
   $('activityTimeline').innerHTML=acts.length?acts.map(function(a){return '<div class="timeline-item"><small>'+esc(a.date||'')+' — '+esc(a.type||'نشاط')+'</small><p>'+esc(a.note||'')+'</p></div>'}).join(''):'<div class="note">سجل التواصل لسه فاضي.</div>';
 }
+var notesCompanyId=null;
+function openCompanyNotes(id){var c=byId(db.companies,id);if(!c)return;notesCompanyId=id;$('noteWhatsapp').value=c.whatsappStatus||'';$('noteResponse').value=c.responseStatus||'';$('noteFree').value=c.notes||'';$('notesDlg').showModal()}
+$('saveCompanyNotes').addEventListener('click',function(){var c=byId(db.companies,notesCompanyId);if(!c)return;c.whatsappStatus=$('noteWhatsapp').value;c.responseStatus=$('noteResponse').value;c.notes=$('noteFree').value.trim();addCompanyActivity(c,'تحديث الملاحظات','واتساب: '+(c.whatsappStatus||'غير محدد')+' | الرد: '+(c.responseStatus||'غير محدد'));save();$('notesDlg').close();renderAll()});
+$('closeCompanyNotes').addEventListener('click',function(){$('notesDlg').close()});
 function openProfile(id){if(!byId(db.companies,id))return;currentProfileId=id;$('newContactName').value='';$('newContactRole').value='';$('newContactPhone').value='';$('newContactEmail').value='';$('activityNote').value='';renderProfile();$('profileDlg').showModal()}
 $('editProfileCompany').addEventListener('click',function(){var id=currentProfileId;$('profileDlg').close();editC(id)});
 $('addContact').addEventListener('click',function(){
@@ -389,7 +396,7 @@ function editP(id){var p=id?byId(db.posts,id):null;
 /* ---------- أحداث الجداول ---------- */
 document.addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;var a=b.getAttribute('data-act'),id=b.getAttribute('data-id');
-  if(a==='eC')editC(id);if(a==='eP')editP(id);if(a==='profileC')openProfile(id);
+  if(a==='eC')editC(id);if(a==='eP')editP(id);if(a==='profileC')openProfile(id);if(a==='notesC')openCompanyNotes(id);
   if(a==='dC'){var c=byId(db.companies,id);if(c&&confirm('تمسح "'+c.name+'"؟ مفيش رجوع.')){db.companies=db.companies.filter(function(x){return x.id!==id});delete db.plans[id];delete selectedCompanyIds[id];save();renderAll()}}
   if(a==='dP'){var p=byId(db.posts,id);if(p&&confirm('تمسح المنشور ده؟ مفيش رجوع.')){db.posts=db.posts.filter(function(x){return x.id!==id});save();renderAll()}}});
 document.addEventListener('change',function(e){
@@ -535,7 +542,8 @@ $('fRestore').addEventListener('change',function(){var f=this.files[0],inp=this;
     catch(e){alert('الفايل ده مش نسخة احتياطية صحيحة.')}inp.value=''};r.readAsText(f)});
 
 /* ---------- تشغيل ---------- */
-function renderAll(){renderSales();renderPosts();renderPlanSel();renderPerf();renderFollowups()}
+function renderHome(){var total=db.companies.length,contacted=db.companies.filter(function(c){return c.stage&&c.stage!=='جديد'}).length,replied=db.companies.filter(function(c){return c.responseStatus==='بيرد'||c.replyStatus==='رد العميل'||c.replyStatus==='مهتم'}).length;var cr=total?Math.round(contacted/total*100):0,rr=contacted?Math.round(replied/contacted*100):0;$('homeStats').innerHTML=[['عدد الشركات',total],['نسبة التواصل',cr+'%'],['نسبة الرد',rr+'%']].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><div>'+x[1]+'</div></div>'}).join('')}
+function renderAll(){renderHome();renderSales();renderPosts();renderPlanSel();renderPerf();renderFollowups()}
 $('fst').innerHTML='<option value="">كل المراحل</option>'+opts(STAGES,'');
 renderAll();
 
