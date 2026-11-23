@@ -6,8 +6,10 @@
 - يبعت ملخص الصبح الساعة 9
 - بيحفظ اللي اتبعت في crmData/simpleNotify علشان مايكررش
 
-Secrets المطلوبة في GitHub:
+Secrets في GitHub (تليجرام أو واتساب أو الاتنين):
   TELEGRAM_BOT_TOKEN        توكن البوت من BotFather
+  CALLMEBOT_PHONE           رقمك بكود الدولة (مثال +201000504083)
+  CALLMEBOT_APIKEY          الكود اللي CallMeBot بعتهولك على واتساب
   FIREBASE_SERVICE_ACCOUNT  محتوى ملف JSON بتاع Service account من Firebase
 """
 import html
@@ -156,18 +158,33 @@ def find_chat_id(token):
     return None
 
 
+# ---------------- واتساب (CallMeBot — مجاني للاستخدام الشخصي) ----------------
+def to_whatsapp_text(t):
+    t = re.sub(r'<a href="([^"]+)">[^<]*</a>', r"\1", t)
+    t = t.replace("<b>", "*").replace("</b>", "*")
+    return html.unescape(re.sub(r"<[^>]+>", "", t))
+
+
+def wa_send(phone, apikey, text):
+    r = requests.get("https://api.callmebot.com/whatsapp.php",
+                     params={"phone": phone, "text": to_whatsapp_text(text), "apikey": apikey}, timeout=60)
+    if r.status_code != 200 or "ERROR" in r.text.upper()[:300]:
+        print("CallMeBot رجّع خطأ — راجع الرقم والـ apikey.")
+
+
 # ---------------- التشغيل ----------------
 def main():
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    wa_phone = os.environ.get("CALLMEBOT_PHONE", "").strip()
+    wa_key = os.environ.get("CALLMEBOT_APIKEY", "").strip()
     sa = os.environ.get("FIREBASE_SERVICE_ACCOUNT", "").strip()
     test = os.environ.get("SEND_TEST") == "1"
-    if not token:
-        print("TELEGRAM_BOT_TOKEN مش متضاف في Secrets — مفيش حاجة هتتبعت.")
+    use_wa = bool(wa_phone and wa_key)
+    if not token and not use_wa:
+        print("مفيش Telegram ولا WhatsApp متضافين في Secrets — مفيش حاجة هتتبعت.")
         return 0
 
-    chat_id = None
-    state, db = {}, None
-    ref = None
+    state, db, ref = {}, None, None
     if sa:
         import firebase_admin
         from firebase_admin import credentials, firestore
@@ -178,21 +195,25 @@ def main():
         ref = fs.collection("crmData").document("simpleNotify")
         st = ref.get()
         state = st.to_dict() if st.exists else {}
-        chat_id = state.get("chatId")
     else:
         print("FIREBASE_SERVICE_ACCOUNT مش متضاف — هبعت رسالة تجربة بس.")
 
-    if not chat_id:
+    chat_id = state.get("chatId")
+    if token and not chat_id:
         chat_id = find_chat_id(token)
-        if not chat_id:
-            print("ابعت /start للبوت على تليجرام الأول.")
-            return 0
-        state["chatId"] = chat_id
+        if chat_id:
+            state["chatId"] = chat_id
+        else:
+            print("تليجرام: ابعت /start للبوت الأول.")
+
+    def send(text):
+        if token and chat_id:
+            tg(token, "sendMessage", chat_id=chat_id, text=text, parse_mode="HTML", disable_web_page_preview=True)
+        if use_wa:
+            wa_send(wa_phone, wa_key, text)
 
     if db is None or test:
-        tg(token, "sendMessage", chat_id=chat_id,
-           text="✅ تنبيهات Digital Reach CRM شغالة. هيوصلك تنبيه قبل كل متابعة بـ 15 دقيقة، وملخص كل يوم الساعة 9 الصبح.",
-           disable_web_page_preview=True)
+        send("✅ تنبيهات Digital Reach CRM شغالة. هيوصلك تنبيه قبل كل متابعة بـ 15 دقيقة، وملخص كل يوم الساعة 9 الصبح.")
         if db is None:
             return 0
 
@@ -200,7 +221,7 @@ def main():
     now = datetime.now(tz)
     msgs, state = plan_messages(db, state, now)
     for m in msgs:
-        tg(token, "sendMessage", chat_id=chat_id, text=m, parse_mode="HTML", disable_web_page_preview=True)
+        send(m)
     ref.set(state)
     print(f"اتبعت {len(msgs)} رسالة.")  # من غير تفاصيل العملاء علشان اللوج عام
     return 0
