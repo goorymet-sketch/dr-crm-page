@@ -31,7 +31,7 @@ textarea{min-height:70px}
 .btn.red{background:#fee2e2;color:var(--red)}
 .btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
 .wa{background:#25d366;color:#fff}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
 .stat{background:var(--card);border-radius:14px;padding:14px;border-right:5px solid var(--teal);box-shadow:0 1px 3px #0001}
 .stat b{display:block;font-size:22px;color:var(--navy)}
 .stat small{color:var(--muted)}
@@ -42,16 +42,28 @@ textarea{min-height:70px}
 .card .t{font-weight:800;font-size:15px}
 .card .s{color:var(--muted);font-size:13px}
 .card .acts{display:flex;gap:6px;flex-wrap:wrap}
+.card.click{cursor:pointer}
 .badge{display:inline-block;font-size:12px;padding:1px 9px;border-radius:20px;background:#e0f2fe;color:#075985;margin-left:6px;font-weight:700}
-.badge.won{background:#dcfce7;color:#166534}.badge.lost{background:#fee2e2;color:#991b1b}.badge.k{background:#fef3c7;color:#92400e}
+.badge.won{background:#dcfce7;color:#166534}.badge.lost{background:#fee2e2;color:#991b1b}.badge.k{background:#fef3c7;color:#92400e}.badge.co{background:#ede9fe;color:#5b21b6}
 .due{font-size:12px;font-weight:700;padding:1px 8px;border-radius:8px}
 .due.late{background:#fee2e2;color:#b91c1c}.due.today{background:#fef3c7;color:#92400e}.due.next{background:#e0f2fe;color:#075985}
 h2{font-size:17px;margin:18px 0 8px;color:var(--navy)}
-.empty{text-align:center;color:var(--muted);padding:30px;background:#fff;border-radius:14px}
+.empty{text-align:center;color:var(--muted);padding:24px;background:#fff;border-radius:14px}
 .box{background:#fff;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 1px 3px #0001}
 .in{color:var(--green);font-weight:800}.out{color:var(--red);font-weight:800}
+.bar{height:8px;background:#e2e8f0;border-radius:8px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--teal)}
+.step{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.step:last-child{border-bottom:0}
+.step input[type=checkbox]{width:22px;height:22px;flex:0 0 auto}
+.step .tx{flex:1;min-width:180px}
+.step.done .tx{text-decoration:line-through;color:var(--muted)}
+.prev{overflow:auto;max-height:220px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.prev table{border-collapse:collapse;font-size:12px;width:100%}
+.prev td,.prev th{border-bottom:1px solid var(--line);padding:4px 6px;white-space:nowrap;text-align:right}
+.prev th{background:#f8fafc}
 #modal{position:fixed;inset:0;background:#0008;display:none;align-items:flex-start;justify-content:center;z-index:50;overflow:auto;padding:20px 10px}
-#modal .m{background:#fff;border-radius:16px;padding:18px;width:100%;max-width:520px}
+#modal .m{background:#fff;border-radius:16px;padding:18px;width:100%;max-width:560px}
 #modal label{display:block;font-size:13px;font-weight:700;margin:10px 0 4px;color:var(--navy)}
 #login{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
 #login .m{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:380px}
@@ -82,7 +94,8 @@ h2{font-size:17px;margin:18px 0 8px;color:var(--navy)}
   <span id="sync">محلي</span>
   <div class="sp"></div>
   <button class="btn gold sm" onclick="quickAdd()">+ إضافة</button>
-  <button class="btn ghost sm" id="logoutBtn" onclick="doLogout()">خروج</button>
+  <button class="btn ghost sm" onclick="openImport(curCo||'')">⬆ رفع أرقام</button>
+  <button class="btn ghost sm" onclick="doLogout()">خروج</button>
 </header>
 <nav id="nav"></nav>
 <main id="view"></main>
@@ -92,6 +105,7 @@ h2{font-size:17px;margin:18px 0 8px;color:var(--navy)}
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
 /* ================== الإعدادات ================== */
 var firebaseConfig={
@@ -111,13 +125,23 @@ var STAGES_BROKER=['جديد','تفاوض أسعار','أسعار متاحة','�
 var WON=['تم البيع','حجز مؤكد','عمولة محصلة'], LOST=['خسارة','مرفوض'];
 
 var SCHEMA={
+  companies:{title:'الشركات',name:'شركة',fields:[
+    {k:'name',l:'اسم الشركة',req:1},
+    {k:'contact',l:'اسم المسؤول'},
+    {k:'phone',l:'رقم الواتساب',t:'tel'},
+    {k:'industry',l:'المجال (سياحة، عمرة، عقارات...)'},
+    {k:'deal',l:'الاتفاق (عمولة / نسبة / مبلغ ثابت)'},
+    {k:'goal',l:'الهدف (مثلاً: 20 معتمر في رجب)'},
+    {k:'followUp',l:'موعد المتابعة الجاية',t:'datetime-local'},
+    {k:'note',l:'ملاحظات',t:'textarea'}]},
   sales:{title:'المبيعات',name:'عميل',fields:[
+    {k:'companyId',l:'تابع لشركة',t:'company'},
     {k:'name',l:'اسم العميل',req:1},
-    {k:'company',l:'الشركة'},
+    {k:'company',l:'شركة / جهة العميل'},
     {k:'phone',l:'رقم الواتساب',t:'tel'},
     {k:'stage',l:'المرحلة',t:'select',o:STAGES_SALES},
     {k:'value',l:'قيمة الصفقة',t:'number'},
-    {k:'source',l:'المصدر (إعلان، ترشيح، واتساب...)'},
+    {k:'source',l:'المصدر (إعلان، ترشيح، واتساب، ملف...)'},
     {k:'followUp',l:'موعد المتابعة الجاية',t:'datetime-local'},
     {k:'note',l:'ملاحظات',t:'textarea'}]},
   broker:{title:'الوساطة',name:'جهة / صفقة',fields:[
@@ -137,6 +161,7 @@ var SCHEMA={
     {k:'amount',l:'المبلغ',t:'number',req:1},
     {k:'category',l:'البند (عمولة، إعلان، مواصلات...)'},
     {k:'section',l:'تابع لـ',t:'select',o:['عام','مبيعات','وساطة']},
+    {k:'companyId',l:'الشركة (اختياري)',t:'company'},
     {k:'date',l:'التاريخ',t:'date'},
     {k:'note',l:'ملاحظات',t:'textarea'}]},
   tasks:{title:'مهمة متابعة',name:'مهمة',fields:[
@@ -147,10 +172,10 @@ var SCHEMA={
 };
 
 /* ================== الداتا ================== */
-function emptyDb(){return {sales:[],broker:[],money:[],tasks:[],settings:{waMsg:'أهلاً {name}، معاك محمد طارق من Digital Reach.'}}}
+function emptyDb(){return {companies:[],sales:[],broker:[],money:[],tasks:[],settings:{waMsg:'أهلاً {name}، معاك محمد طارق من Digital Reach.'}}}
 var db=emptyDb();
 try{var s=localStorage.getItem(KEY); if(s){db=Object.assign(emptyDb(),JSON.parse(s));}}catch(e){}
-var tab='dash', q='', fStage='';
+var tab='dash', q='', fStage='', curCo='';
 var fb=null, cloudDoc=null, online=false, unsub=null, saveTimer=null;
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -158,6 +183,8 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 function num(v){v=parseFloat(v);return isNaN(v)?0:v}
 function money(v){return num(v).toLocaleString('en-US')}
 function setSync(t,c){var el=document.getElementById('sync');el.textContent=t;el.style.background=c||'#ffffff22'}
+function co(id){return db.companies.find(function(c){return c.id===id})}
+function coName(id){var c=co(id);return c?c.name:''}
 
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}
@@ -194,9 +221,10 @@ function connectCloud(){
       var d=snap.data(); delete d.updatedAt;
       db=Object.assign(emptyDb(),d);
       try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}
-      online=true; setSync('متزامن أونلاين ✓','#14b8a655'); render();
+      online=true; setSync('متزامن أونلاين ✓','#14b8a655');
+      if(document.getElementById('modal').style.display!=='flex')render();
     }else if(first){
-      online=true; save(); // أول مرة: ارفع اللي على الجهاز
+      online=true; save();
     }
     first=false;
   },function(err){
@@ -222,8 +250,10 @@ function hideLogin(){document.getElementById('login').classList.add('hidden');re
 function waNumber(p){
   p=String(p||'').replace(/\D/g,'');
   if(p.indexOf('00')===0)p=p.slice(2);
-  if(/^01\d{9}$/.test(p))p='2'+p;            // مصر
-  else if(/^05\d{8}$/.test(p))p='966'+p.slice(1); // السعودية
+  if(/^01[0125]\d{8}$/.test(p))p='2'+p;               // مصر 01xxxxxxxxx
+  else if(/^1[0125]\d{8}$/.test(p))p='20'+p;           // مصر من غير الصفر (من الإكسل)
+  else if(/^05\d{8}$/.test(p))p='966'+p.slice(1);      // السعودية 05xxxxxxxx
+  else if(/^5\d{8}$/.test(p))p='966'+p;                // السعودية من غير الصفر
   return p;
 }
 function waLink(phone,name){
@@ -242,17 +272,22 @@ function gcalLink(title,details,dt){
 function dueInfo(dt){
   if(!dt)return null; var d=new Date(dt); if(isNaN(d))return null;
   var now=new Date(), t0=new Date(now.getFullYear(),now.getMonth(),now.getDate()), t1=new Date(t0.getTime()+86400000);
-  var txt=d.toLocaleDateString('ar-EG',{weekday:'short',day:'numeric',month:'short'})+' '+d.toLocaleTimeString('ar-EG',{hour:'numeric',minute:'2-digit'});
-  if(d<now&&d<t1&&d>=t0)return {c:'today',l:'النهارده متأخر '+txt};
-  if(d<t0||d<now)return {c:'late',l:'متأخر: '+txt};
+  var txt=d.toLocaleDateString('ar-EG',{weekday:'short',day:'numeric',month:'short'})+(dt.length>10?' '+d.toLocaleTimeString('ar-EG',{hour:'numeric',minute:'2-digit'}):'');
+  if(d<now&&d>=t0)return {c:'today',l:'النهارده '+txt};
+  if(d<t0)return {c:'late',l:'متأخر: '+txt};
   if(d<t1)return {c:'today',l:'النهارده '+txt};
   return {c:'next',l:txt};
 }
+function toLocalDT(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes())}
 
 /* ================== المتابعة (تجميع) ================== */
 function followUps(){
   var out=[];
-  db.sales.forEach(function(x){if(x.followUp)out.push({sec:'sales',x:x,title:x.name+(x.company?' — '+x.company:''),tag:'مبيعات'})});
+  db.companies.forEach(function(c){
+    if(c.followUp)out.push({sec:'companies',x:c,title:c.name,tag:'شركة'});
+    (c.plan||[]).forEach(function(p){if(p.due&&!p.done)out.push({sec:'plan',x:{id:c.id+'|'+p.id,followUp:p.due,phone:'',note:''},title:p.text,tag:'خطة '+c.name})});
+  });
+  db.sales.forEach(function(x){if(x.followUp)out.push({sec:'sales',x:x,title:x.name+(x.companyId?' — '+coName(x.companyId):(x.company?' — '+x.company:'')),tag:'مبيعات'})});
   db.broker.forEach(function(x){if(x.followUp)out.push({sec:'broker',x:x,title:x.name+(x.contact?' — '+x.contact:''),tag:'وساطة'})});
   db.tasks.forEach(function(x){if(x.followUp&&!x.done)out.push({sec:'tasks',x:x,title:x.title,tag:'مهمة'})});
   out.sort(function(a,b){return new Date(a.x.followUp)-new Date(b.x.followUp)});
@@ -261,15 +296,16 @@ function followUps(){
 function overdueCount(){var n=0,t1=new Date();t1.setHours(23,59,59);followUps().forEach(function(f){if(new Date(f.x.followUp)<=t1)n++});return n}
 
 /* ================== العرض ================== */
-var TABS=[['dash','الرئيسية'],['follow','المتابعة'],['sales','المبيعات'],['broker','الوساطة'],['money','الميزانية'],['settings','إعدادات']];
+var TABS=[['dash','الرئيسية'],['follow','المتابعة'],['companies','الشركات'],['sales','المبيعات'],['broker','الوساطة'],['money','الميزانية'],['settings','إعدادات']];
 function render(){
-  var c=overdueCount();
+  var c=overdueCount(),act=tab==='company'?'companies':tab;
   document.getElementById('nav').innerHTML=TABS.map(function(t){
-    return '<button class="'+(tab===t[0]?'on':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+(t[0]==='follow'&&c?'<span class="cnt">'+c+'</span>':'')+'</button>'}).join('');
-  var v=document.getElementById('view');
-  v.innerHTML=({dash:vDash,follow:vFollow,sales:vSec,broker:vSec,money:vMoney,settings:vSettings})[tab]();
+    return '<button class="'+(act===t[0]?'on':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+(t[0]==='follow'&&c?'<span class="cnt">'+c+'</span>':'')+'</button>'}).join('');
+  if(tab==='company'&&!co(curCo))tab='companies';
+  document.getElementById('view').innerHTML=({dash:vDash,follow:vFollow,companies:vCompanies,company:vCompany,sales:vSec,broker:vSec,money:vMoney,settings:vSettings})[tab]();
 }
-function go(t){tab=t;q='';fStage='';render();window.scrollTo(0,0)}
+function go(t){tab=t;q='';fStage='';if(t!=='company')curCo='';render();window.scrollTo(0,0)}
+function openCo(id){curCo=id;tab='company';render();window.scrollTo(0,0)}
 
 function monthNet(){
   var n=new Date(),key=n.getFullYear()+'-'+pad(n.getMonth()+1),i=0,o=0;
@@ -285,6 +321,7 @@ function vDash(){
   var mn=monthNet();
   var h='<div class="stats">'+
     st(od,'متابعات النهارده والمتأخرة','warn')+
+    st(db.companies.length,'الشركات','navy')+
     st(db.sales.length,'عملاء المبيعات','navy')+
     st(money(pipe),'صفقات مفتوحة (قيمة)','gold')+
     st(money(won),'مبيعات تمت','')+
@@ -293,7 +330,7 @@ function vDash(){
     st(money(mn.i-mn.o),'صافي الشهر ده','')+
     '</div>';
   h+='<h2>أقرب المتابعات</h2>'+(fu.length?'<div class="list">'+fu.slice(0,6).map(fuCard).join('')+'</div>':'<div class="empty">مفيش متابعات. ضيف موعد متابعة لأي عميل أو جهة.</div>');
-  h+='<div class="row" style="margin-top:14px"><button class="btn" onclick="openForm(\'sales\')">+ عميل مبيعات</button><button class="btn" onclick="openForm(\'broker\')">+ فندق / شركة</button><button class="btn" onclick="openForm(\'money\')">+ حركة فلوس</button><button class="btn teal" onclick="openForm(\'tasks\')">+ مهمة متابعة</button></div>';
+  h+='<div class="row" style="margin-top:14px"><button class="btn" onclick="openForm(\'companies\')">+ شركة</button><button class="btn" onclick="openForm(\'sales\')">+ عميل مبيعات</button><button class="btn" onclick="openForm(\'broker\')">+ فندق / شركة سياحة</button><button class="btn" onclick="openForm(\'money\')">+ حركة فلوس</button><button class="btn teal" onclick="openForm(\'tasks\')">+ مهمة متابعة</button></div>';
   return h;
 }
 function st(v,l,c){return '<div class="stat '+c+'"><b>'+v+'</b><small>'+l+'</small></div>'}
@@ -301,66 +338,160 @@ function st(v,l,c){return '<div class="stat '+c+'"><b>'+v+'</b><small>'+l+'</sma
 function fuCard(f){
   var x=f.x,di=dueInfo(x.followUp),name=f.sec==='broker'?(x.contact||x.name):(x.name||'');
   var det=(f.tag+': '+f.title)+(x.phone?'\nواتساب: '+waLink(x.phone,name):'')+(x.note?'\n'+x.note:'');
-  return '<div class="card"><div class="info"><div class="t"><span class="badge k">'+f.tag+'</span>'+esc(f.title)+'</div>'+
+  var coId=f.sec==='plan'?x.id.split('|')[0]:f.sec==='companies'?x.id:'';
+  return '<div class="card"><div class="info"><div class="t"><span class="badge k">'+esc(f.tag)+'</span>'+esc(f.title)+'</div>'+
     '<div class="s">'+(di?'<span class="due '+di.c+'">'+di.l+'</span> ':'')+(x.stage?esc(x.stage)+' · ':'')+esc(x.note||'')+'</div></div>'+
     '<div class="acts">'+(x.phone?'<a class="btn sm wa" target="_blank" href="'+esc(waLink(x.phone,name))+'">واتساب</a>':'')+
     '<a class="btn sm ghost" target="_blank" href="'+esc(gcalLink('متابعة: '+f.title,det,x.followUp))+'">📅 جوجل كالندر</a>'+
     '<button class="btn sm ghost" onclick="snooze(\''+f.sec+'\',\''+x.id+'\')">بكرة</button>'+
     '<button class="btn sm teal" onclick="doneFu(\''+f.sec+'\',\''+x.id+'\')">تم ✓</button>'+
-    (f.sec!=='tasks'?'<button class="btn sm ghost" onclick="openForm(\''+f.sec+'\',\''+x.id+'\')">تعديل</button>':'')+'</div></div>';
+    (coId?'<button class="btn sm ghost" onclick="openCo(\''+coId+'\')">فتح الشركة</button>':
+     (f.sec!=='tasks'?'<button class="btn sm ghost" onclick="openForm(\''+f.sec+'\',\''+x.id+'\')">تعديل</button>':''))+'</div></div>';
 }
 function vFollow(){
-  var fu=followUps(),now=new Date(),t1=new Date();t1.setHours(23,59,59);
-  var late=fu.filter(function(f){return new Date(f.x.followUp)<now&&new Date(f.x.followUp).toDateString()!==now.toDateString()});
-  var today=fu.filter(function(f){return new Date(f.x.followUp).toDateString()===now.toDateString()});
-  var next=fu.filter(function(f){return new Date(f.x.followUp)>t1});
-  var h='<div class="box"><b>إزاي توصلك نوتفكيشن على الموبايل؟</b><div class="s" style="color:var(--muted);font-size:13px;margin-top:4px">'+
-    'دوس "📅 جوجل كالندر" جنب أي متابعة ← هيفتح جوجل كالندر بالميعاد جاهز ← دوس Save. تطبيق Google Calendar على موبايلك هيبعتلك تنبيه قبل الميعاد (حسب إعداد التنبيه الافتراضي عندك).</div>'+
+  var fu=followUps(),now=new Date(),t0=new Date(now.getFullYear(),now.getMonth(),now.getDate()),t1=new Date(t0.getTime()+86400000);
+  var late=fu.filter(function(f){return new Date(f.x.followUp)<t0});
+  var today=fu.filter(function(f){var d=new Date(f.x.followUp);return d>=t0&&d<t1});
+  var next=fu.filter(function(f){return new Date(f.x.followUp)>=t1});
+  var h='<div class="box"><b>إزاي توصلك نوتفكيشن على الموبايل؟</b><div style="color:var(--muted);font-size:13px;margin-top:4px">'+
+    'دوس "📅 جوجل كالندر" جنب أي متابعة ← هيفتح جوجل كالندر بالميعاد جاهز ← دوس Save. تطبيق Google Calendar على موبايلك هيبعتلك تنبيه قبل الميعاد.</div>'+
     '<div class="row" style="margin:10px 0 0"><button class="btn teal" onclick="openForm(\'tasks\')">+ مهمة متابعة جديدة</button></div></div>';
   function grp(t,a){return '<h2>'+t+' ('+a.length+')</h2>'+(a.length?'<div class="list">'+a.map(fuCard).join('')+'</div>':'<div class="empty">لا يوجد</div>')}
   return h+grp('🔴 متأخر',late)+grp('🟡 النهارده',today)+grp('🔵 جاي',next);
 }
 
-function vSec(){
-  var sc=SCHEMA[tab],arr=db[tab].slice(),stages=tab==='sales'?STAGES_SALES:STAGES_BROKER;
-  if(q){var ql=q.toLowerCase();arr=arr.filter(function(x){return JSON.stringify(x).toLowerCase().indexOf(ql)>=0})}
-  if(fStage)arr=arr.filter(function(x){return x.stage===fStage});
-  arr.sort(function(a,b){return (b.updated||0)-(a.updated||0)});
-  var counts=stages.map(function(s){return s+' ('+db[tab].filter(function(x){return x.stage===s}).length+')'});
-  var h='<div class="row"><input placeholder="بحث بالاسم أو الرقم..." value="'+esc(q)+'" oninput="q=this.value;renderList()">'+
-    '<select onchange="fStage=this.value;renderList()"><option value="">كل المراحل</option>'+stages.map(function(s,i){return '<option value="'+esc(s)+'"'+(fStage===s?' selected':'')+'>'+esc(counts[i])+'</option>'}).join('')+'</select>'+
-    '<button class="btn gold" onclick="openForm(\''+tab+'\')">+ '+sc.name+'</button></div><div id="lst">'+listHtml(arr)+'</div>';
+/* ================== الشركات ================== */
+function coStats(c){
+  var leads=db.sales.filter(function(x){return x.companyId===c.id});
+  var won=leads.filter(function(x){return x.stage==='تم البيع'});
+  var plan=c.plan||[],done=plan.filter(function(p){return p.done}).length;
+  var inc=db.money.filter(function(m){return m.companyId===c.id&&m.type!=='مصروف'}).reduce(function(a,m){return a+num(m.amount)},0);
+  var exp=db.money.filter(function(m){return m.companyId===c.id&&m.type==='مصروف'}).reduce(function(a,m){return a+num(m.amount)},0);
+  return {leads:leads,won:won,plan:plan,done:done,pct:plan.length?Math.round(done*100/plan.length):0,inc:inc,exp:exp,
+    wonVal:won.reduce(function(a,x){return a+num(x.value)},0)};
+}
+function vCompanies(){
+  var arr=db.companies.slice().sort(function(a,b){return (b.updated||0)-(a.updated||0)});
+  var h='<div class="row"><button class="btn gold" onclick="openForm(\'companies\')">+ شركة جديدة</button><button class="btn ghost" onclick="openImport(\'\')">⬆ رفع ملف أرقام</button></div>';
+  if(!arr.length)return h+'<div class="empty">ضيف أول شركة بتشتغل معاها (مثلاً نسمات الرحمن)، وجواها هتحط الخطة والعملاء والأرقام.</div>';
+  return h+'<div class="list">'+arr.map(function(c){var s=coStats(c);
+    return '<div class="card click" onclick="openCo(\''+c.id+'\')"><div class="info"><div class="t">'+esc(c.name)+(c.industry?' <span class="badge co">'+esc(c.industry)+'</span>':'')+'</div>'+
+      '<div class="s">عملاء: '+s.leads.length+' · تم البيع: '+s.won.length+' · الخطة: '+s.done+'/'+s.plan.length+(c.goal?' · الهدف: '+esc(c.goal):'')+'</div>'+
+      '<div class="bar"><i style="width:'+s.pct+'%"></i></div></div><div class="acts"><button class="btn sm">فتح ←</button></div></div>'}).join('')+'</div>';
+}
+function vCompany(){
+  var c=co(curCo),s=coStats(c),plan=c.plan||[];
+  var h='<div class="row"><button class="btn ghost sm" onclick="go(\'companies\')">→ كل الشركات</button></div>';
+  h+='<div class="box"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div style="flex:1;min-width:200px">'+
+    '<div style="font-size:20px;font-weight:800;color:var(--navy)">'+esc(c.name)+(c.industry?' <span class="badge co">'+esc(c.industry)+'</span>':'')+'</div>'+
+    '<div style="color:var(--muted);font-size:13px">'+[c.contact,c.phone,c.deal?'الاتفاق: '+c.deal:'',c.goal?'الهدف: '+c.goal:''].filter(Boolean).map(esc).join(' · ')+'</div>'+
+    (c.note?'<div style="font-size:13px;margin-top:4px">'+esc(c.note)+'</div>':'')+'</div><div class="acts" style="display:flex;gap:6px;flex-wrap:wrap">'+
+    (c.phone?'<a class="btn sm wa" target="_blank" href="'+esc(waLink(c.phone,c.contact||c.name))+'">واتساب</a>':'')+
+    '<button class="btn sm ghost" onclick="openForm(\'companies\',\''+c.id+'\')">تعديل</button>'+
+    '<button class="btn sm red" onclick="delCo(\''+c.id+'\')">حذف</button></div></div></div>';
+  h+='<div class="stats">'+st(s.leads.length,'العملاء','navy')+st(s.won.length,'تم البيع','')+st(money(s.wonVal),'قيمة المبيعات','gold')+
+    st(s.pct+'%','تنفيذ الخطة','')+st('<span class="in">'+money(s.inc)+'</span>','دخل من الشركة','gold')+st('<span class="out">'+money(s.exp)+'</span>','مصروف عليها','warn')+'</div>';
+  // الخطة
+  h+='<h2>📋 خطة الشغل ('+s.done+'/'+plan.length+')</h2><div class="box">';
+  h+=plan.length?plan.map(function(p,i){var di=p.due?dueInfo(p.due):null;
+    return '<div class="step'+(p.done?' done':'')+'"><input type="checkbox"'+(p.done?' checked':'')+' onchange="togStep(\''+p.id+'\')">'+
+      '<div class="tx"><b>'+(i+1)+'.</b> '+esc(p.text)+(di&&!p.done?' <span class="due '+di.c+'">'+di.l+'</span>':'')+(p.note?'<div style="font-size:12px;color:var(--muted)">'+esc(p.note)+'</div>':'')+'</div>'+
+      '<div style="display:flex;gap:4px">'+(p.due&&!p.done?'<a class="btn sm ghost" target="_blank" href="'+esc(gcalLink(c.name+': '+p.text,'خطة '+c.name,p.due))+'">📅</a>':'')+
+      '<button class="btn sm ghost" onclick="editStep(\''+p.id+'\')">تعديل</button><button class="btn sm red" onclick="delStep(\''+p.id+'\')">×</button></div></div>'}).join('')
+    :'<div style="color:var(--muted);font-size:14px">لسه مفيش خطة. الصق خطوات الخطة (كل خطوة في سطر) أو ضيف خطوة خطوة.</div>';
+  h+='<div class="row" style="margin:12px 0 0"><button class="btn" onclick="editStep(\'\')">+ خطوة</button><button class="btn ghost" onclick="pastePlan()">📝 لصق خطة كاملة</button></div></div>';
+  // العملاء
+  var leads=s.leads.slice();
+  if(q){var ql=q.toLowerCase();leads=leads.filter(function(x){return JSON.stringify(x).toLowerCase().indexOf(ql)>=0})}
+  if(fStage)leads=leads.filter(function(x){return x.stage===fStage});
+  leads.sort(function(a,b){return (b.updated||0)-(a.updated||0)});
+  h+='<h2>👥 عملاء '+esc(c.name)+' ('+s.leads.length+')</h2><div class="row">'+
+    '<input placeholder="بحث بالاسم أو الرقم..." value="'+esc(q)+'" oninput="q=this.value;refreshCoLeads()">'+
+    '<select onchange="fStage=this.value;refreshCoLeads()"><option value="">كل المراحل</option>'+STAGES_SALES.map(function(st){return '<option'+(fStage===st?' selected':'')+'>'+esc(st)+'</option>'}).join('')+'</select>'+
+    '<button class="btn gold" onclick="openForm(\'sales\',\'\',\''+c.id+'\')">+ عميل</button><button class="btn teal" onclick="openImport(\''+c.id+'\')">⬆ رفع ملف أرقام</button></div>';
+  h+='<div id="lst">'+listHtml(leads.slice(0,300),'sales')+(leads.length>300?'<div class="empty">ظاهر أول 300 — استخدم البحث</div>':'')+'</div>';
+  h+='<div class="row" style="margin-top:12px"><button class="btn ghost" onclick="openForm(\'money\',\'\',\''+c.id+'\')">+ حركة فلوس للشركة</button></div>';
   return h;
 }
-function renderList(){var arr=db[tab].slice();if(q){var ql=q.toLowerCase();arr=arr.filter(function(x){return JSON.stringify(x).toLowerCase().indexOf(ql)>=0})}
-  if(fStage)arr=arr.filter(function(x){return x.stage===fStage});arr.sort(function(a,b){return (b.updated||0)-(a.updated||0)});document.getElementById('lst').innerHTML=listHtml(arr)}
-function listHtml(arr){
-  if(!arr.length)return '<div class="empty">لسه مفيش حاجة هنا. دوس "+" وضيف أول واحد.</div>';
+function refreshCoLeads(){var s=coStats(co(curCo)),leads=s.leads.slice();
+  if(q){var ql=q.toLowerCase();leads=leads.filter(function(x){return JSON.stringify(x).toLowerCase().indexOf(ql)>=0})}
+  if(fStage)leads=leads.filter(function(x){return x.stage===fStage});leads.sort(function(a,b){return (b.updated||0)-(a.updated||0)});
+  document.getElementById('lst').innerHTML=listHtml(leads.slice(0,300),'sales')}
+function getStep(id){var c=co(curCo);return (c.plan||[]).find(function(p){return p.id===id})}
+function togStep(id){var p=getStep(id);p.done=!p.done;co(curCo).updated=Date.now();save();render()}
+function delStep(id){if(!confirm('تحذف الخطوة دي؟'))return;var c=co(curCo);c.plan=c.plan.filter(function(p){return p.id!==id});save();render()}
+function editStep(id){var p=id?getStep(id):{text:'',due:'',note:''};
+  document.getElementById('mbody').innerHTML='<h3 style="margin:0;color:var(--navy)">'+(id?'تعديل خطوة':'خطوة جديدة')+'</h3>'+
+    '<label>الخطوة *</label><input id="s_text" value="'+esc(p.text)+'"><label>الميعاد (اختياري — يظهر في المتابعة)</label><input id="s_due" type="datetime-local" value="'+esc(p.due||'')+'">'+
+    '<label>ملاحظات</label><textarea id="s_note">'+esc(p.note||'')+'</textarea>'+
+    '<div class="row" style="margin-top:14px"><button class="btn gold" onclick="saveStep(\''+(id||'')+'\')">حفظ</button><button class="btn ghost" onclick="closeM()">إلغاء</button></div>';
+  openM()}
+function saveStep(id){var c=co(curCo),t=document.getElementById('s_text').value.trim();if(!t){alert('اكتب الخطوة');return}
+  var o={text:t,due:document.getElementById('s_due').value,note:document.getElementById('s_note').value.trim()};
+  c.plan=c.plan||[];if(id)Object.assign(getStep(id),o);else{o.id=uid();o.done=false;c.plan.push(o)}
+  c.updated=Date.now();save();closeM();render()}
+function pastePlan(){
+  document.getElementById('mbody').innerHTML='<h3 style="margin:0;color:var(--navy)">لصق خطة كاملة</h3>'+
+    '<div style="font-size:13px;color:var(--muted);margin-top:6px">انسخ الخطة من أي مكان (شات، ورد، واتساب) والصقها هنا. كل سطر = خطوة. الترقيم والعلامات اللي في أول السطر هتتشال لوحدها.</div>'+
+    '<textarea id="pp" style="min-height:220px;margin-top:8px" placeholder="1. تجهيز رسالة العرض&#10;2. التواصل مع 50 رقم&#10;3. متابعة المهتمين"></textarea>'+
+    '<label><input type="checkbox" id="ppRep" style="width:auto"> استبدل الخطة الحالية (بدل ما تتضاف عليها)</label>'+
+    '<div class="row" style="margin-top:14px"><button class="btn gold" onclick="savePaste()">إضافة الخطوات</button><button class="btn ghost" onclick="closeM()">إلغاء</button></div>';
+  openM()}
+function savePaste(){var c=co(curCo),lines=document.getElementById('pp').value.split(/\r?\n/).map(function(l){
+    return l.replace(/^[\s\-\*•·✅☑️▪️◾️#>]+/,'').replace(/^(\d+|[٠-٩]+)\s*[\.\-\)\:،]\s*/,'').replace(/^(المهمة|الخطوة|مهمة|خطوة)\s*(\d+|[٠-٩]+)?\s*[:\-–]?\s*/,'').trim()}).filter(Boolean);
+  if(!lines.length){alert('مفيش خطوات');return}
+  if(document.getElementById('ppRep').checked){if(!confirm('هتمسح الخطة الحالية ('+(c.plan||[]).length+' خطوة). متأكد؟'))return;c.plan=[]}
+  c.plan=c.plan||[];lines.forEach(function(t){c.plan.push({id:uid(),text:t,done:false,due:'',note:''})});
+  c.updated=Date.now();save();closeM();render();}
+function delCo(id){var n=db.sales.filter(function(x){return x.companyId===id}).length;
+  if(!confirm('تحذف الشركة؟'+(n?' العملاء بتوعها ('+n+') هيفضلوا في المبيعات من غير شركة.':'')))return;
+  db.companies=db.companies.filter(function(c){return c.id!==id});db.sales.forEach(function(x){if(x.companyId===id)x.companyId=''});
+  save();go('companies')}
+
+/* ================== المبيعات والوساطة ================== */
+function filtered(sec){var arr=db[sec].slice();
+  if(q){var ql=q.toLowerCase();arr=arr.filter(function(x){return (JSON.stringify(x)+coName(x.companyId)).toLowerCase().indexOf(ql)>=0})}
+  if(fStage)arr=arr.filter(function(x){return x.stage===fStage});
+  arr.sort(function(a,b){return (b.updated||0)-(a.updated||0)});return arr}
+function vSec(){
+  var sc=SCHEMA[tab],arr=filtered(tab),stages=tab==='sales'?STAGES_SALES:STAGES_BROKER;
+  var counts=stages.map(function(s){return s+' ('+db[tab].filter(function(x){return x.stage===s}).length+')'});
+  return '<div class="row"><input placeholder="بحث بالاسم أو الرقم أو الشركة..." value="'+esc(q)+'" oninput="q=this.value;renderList()">'+
+    '<select onchange="fStage=this.value;renderList()"><option value="">كل المراحل ('+db[tab].length+')</option>'+stages.map(function(s,i){return '<option value="'+esc(s)+'"'+(fStage===s?' selected':'')+'>'+esc(counts[i])+'</option>'}).join('')+'</select>'+
+    '<button class="btn gold" onclick="openForm(\''+tab+'\')">+ '+sc.name+'</button>'+(tab==='sales'?'<button class="btn teal" onclick="openImport(\'\')">⬆ رفع ملف أرقام</button>':'')+'</div><div id="lst">'+listWrap(arr)+'</div>';
+}
+function listWrap(arr){return listHtml(arr.slice(0,300),tab)+(arr.length>300?'<div class="empty">ظاهر أول 300 من '+arr.length+' — استخدم البحث</div>':'')}
+function renderList(){document.getElementById('lst').innerHTML=listWrap(filtered(tab))}
+function listHtml(arr,sec){
+  if(!arr.length)return '<div class="empty">لسه مفيش حاجة هنا. دوس "+" أو ارفع ملف أرقام.</div>';
   return '<div class="list">'+arr.map(function(x){
     var cls=WON.indexOf(x.stage)>=0?'won':LOST.indexOf(x.stage)>=0?'lost':'';
-    var di=dueInfo(x.followUp),name=tab==='broker'?(x.contact||x.name):x.name;
-    var sub=tab==='sales'?[x.company,x.phone,x.value?money(x.value)+' ج':'',x.source]:[x.contact,x.phone,x.city,x.rate?'سعر '+money(x.rate):'',x.commission?'عمولة '+money(x.commission):''];
-    return '<div class="card"><div class="info"><div class="t">'+(tab==='broker'?'<span class="badge k">'+esc(x.kind||'')+'</span>':'')+esc(x.name)+' <span class="badge '+cls+'">'+esc(x.stage||'')+'</span></div>'+
+    var di=dueInfo(x.followUp),name=sec==='broker'?(x.contact||x.name):x.name;
+    var sub=sec==='sales'?[x.company,x.phone,x.value?money(x.value)+' ج':'',x.source]:[x.contact,x.phone,x.city,x.rate?'سعر '+money(x.rate):'',x.commission?'عمولة '+money(x.commission):''];
+    return '<div class="card"><div class="info"><div class="t">'+(sec==='broker'?'<span class="badge k">'+esc(x.kind||'')+'</span>':'')+
+      (sec==='sales'&&x.companyId&&tab!=='company'?'<span class="badge co" style="cursor:pointer" onclick="openCo(\''+x.companyId+'\')">'+esc(coName(x.companyId))+'</span>':'')+
+      esc(x.name)+' <span class="badge '+cls+'">'+esc(x.stage||'')+'</span></div>'+
       '<div class="s">'+sub.filter(Boolean).map(esc).join(' · ')+'</div>'+
       (di?'<div class="s"><span class="due '+di.c+'">متابعة: '+di.l+'</span></div>':'')+(x.note?'<div class="s">'+esc(x.note)+'</div>':'')+'</div>'+
       '<div class="acts">'+(x.phone?'<a class="btn sm wa" target="_blank" href="'+esc(waLink(x.phone,name))+'">واتساب</a>':'')+
       (x.followUp?'<a class="btn sm ghost" target="_blank" href="'+esc(gcalLink('متابعة: '+x.name,(x.phone?'واتساب: '+waLink(x.phone,name)+'\n':'')+(x.note||''),x.followUp))+'">📅</a>':'')+
-      '<button class="btn sm ghost" onclick="openForm(\''+tab+'\',\''+x.id+'\')">تعديل</button>'+
-      '<button class="btn sm red" onclick="del(\''+tab+'\',\''+x.id+'\')">حذف</button></div></div>';
+      '<button class="btn sm ghost" onclick="openForm(\''+sec+'\',\''+x.id+'\')">تعديل</button>'+
+      '<button class="btn sm red" onclick="del(\''+sec+'\',\''+x.id+'\')">حذف</button></div></div>';
   }).join('')+'</div>';
 }
 
+/* ================== الميزانية ================== */
 function vMoney(){
   var arr=db.money.slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
   var ti=0,to=0;db.money.forEach(function(m){if(m.type==='مصروف')to+=num(m.amount);else ti+=num(m.amount)});
   var mn=monthNet(),bySec={};
-  db.money.forEach(function(m){var k=m.section||'عام';bySec[k]=bySec[k]||{i:0,o:0};if(m.type==='مصروف')bySec[k].o+=num(m.amount);else bySec[k].i+=num(m.amount)});
+  db.money.forEach(function(m){var k=m.companyId?coName(m.companyId)||'شركة محذوفة':(m.section||'عام');bySec[k]=bySec[k]||{i:0,o:0};if(m.type==='مصروف')bySec[k].o+=num(m.amount);else bySec[k].i+=num(m.amount)});
   var h='<div class="stats">'+st('<span class="in">'+money(ti)+'</span>','إجمالي الدخل','')+st('<span class="out">'+money(to)+'</span>','إجمالي المصروفات','warn')+
     st(money(ti-to),'الصافي','gold')+st(money(mn.i-mn.o),'صافي الشهر ده','navy')+'</div>';
-  h+='<div class="box">'+Object.keys(bySec).map(function(k){return '<div>'+esc(k)+': دخل <span class="in">'+money(bySec[k].i)+'</span> · مصروف <span class="out">'+money(bySec[k].o)+'</span> · صافي <b>'+money(bySec[k].i-bySec[k].o)+'</b></div>'}).join('')+(Object.keys(bySec).length?'':'لسه مفيش حركات')+'</div>';
+  h+='<div class="box"><b>حسب القسم / الشركة</b>'+Object.keys(bySec).map(function(k){return '<div style="font-size:14px;margin-top:4px">'+esc(k)+': دخل <span class="in">'+money(bySec[k].i)+'</span> · مصروف <span class="out">'+money(bySec[k].o)+'</span> · صافي <b>'+money(bySec[k].i-bySec[k].o)+'</b></div>'}).join('')+(Object.keys(bySec).length?'':'<div>لسه مفيش حركات</div>')+'</div>';
   h+='<div class="row"><button class="btn gold" onclick="openForm(\'money\')">+ حركة فلوس</button></div>';
   h+=arr.length?'<div class="list">'+arr.map(function(m){
-    return '<div class="card"><div class="info"><div class="t"><span class="'+(m.type==='مصروف'?'out':'in')+'">'+(m.type==='مصروف'?'−':'+')+money(m.amount)+'</span> '+esc(m.category||'')+' <span class="badge">'+esc(m.section||'عام')+'</span></div>'+
+    return '<div class="card"><div class="info"><div class="t"><span class="'+(m.type==='مصروف'?'out':'in')+'">'+(m.type==='مصروف'?'−':'+')+money(m.amount)+'</span> '+esc(m.category||'')+' <span class="badge">'+esc(m.section||'عام')+'</span>'+(m.companyId?'<span class="badge co">'+esc(coName(m.companyId))+'</span>':'')+'</div>'+
       '<div class="s">'+esc(m.date||'')+(m.note?' · '+esc(m.note):'')+'</div></div>'+
       '<div class="acts"><button class="btn sm ghost" onclick="openForm(\'money\',\''+m.id+'\')">تعديل</button><button class="btn sm red" onclick="del(\'money\',\''+m.id+'\')">حذف</button></div></div>'}).join('')+'</div>':'<div class="empty">لسه مفيش حركات فلوس.</div>';
   return h;
@@ -370,56 +501,144 @@ function vSettings(){
   return '<div class="box"><b>رسالة الواتساب الافتراضية</b><div style="font-size:13px;color:var(--muted)">اكتب {name} مكان اسم العميل.</div>'+
     '<textarea id="waMsg">'+esc(db.settings.waMsg)+'</textarea><div class="row" style="margin-top:8px"><button class="btn" onclick="db.settings.waMsg=document.getElementById(\'waMsg\').value;save();alert(\'اتحفظت\')">حفظ الرسالة</button></div></div>'+
     '<div class="box"><b>نسخة احتياطية</b><div style="font-size:13px;color:var(--muted)">نزّل ملف بكل الداتا (ممكن تبعته لـ Claude يحلله أو يرجعه).</div>'+
-    '<div class="row" style="margin-top:8px"><button class="btn" onclick="exportJson()">تنزيل نسخة JSON</button>'+
-    '<label class="btn ghost" style="display:inline-block">استيراد نسخة<input type="file" accept=".json" class="hidden" onchange="importJson(this)"></label></div></div>'+
+    '<div class="row" style="margin-top:8px"><button class="btn" onclick="exportJson()">تنزيل نسخة JSON</button><button class="btn ghost" onclick="exportCsv()">تنزيل العملاء Excel (CSV)</button>'+
+    '<label class="btn ghost">استيراد نسخة JSON<input type="file" accept=".json" class="hidden" onchange="importJson(this)"></label></div></div>'+
     '<div class="box"><b>الحالة</b><div style="font-size:13px">'+(online?'متصل بـ Firebase — الداتا بتتحفظ أونلاين في crmData/simple':'شغال على الجهاز ده بس. سجّل دخول علشان الداتا تتحفظ أونلاين.')+'</div>'+
-    '<div style="font-size:13px;color:var(--muted)">المبيعات: '+db.sales.length+' · الوساطة: '+db.broker.length+' · الفلوس: '+db.money.length+' · المهام: '+db.tasks.length+'</div></div>';
+    '<div style="font-size:13px;color:var(--muted)">الشركات: '+db.companies.length+' · المبيعات: '+db.sales.length+' · الوساطة: '+db.broker.length+' · الفلوس: '+db.money.length+' · المهام: '+db.tasks.length+'</div></div>';
+}
+
+/* ================== رفع ملف الأرقام ================== */
+var IMP={rows:[],head:[],map:{}};
+function openImport(coId){
+  document.getElementById('mbody').innerHTML='<h3 style="margin:0;color:var(--navy)">⬆ رفع ملف أرقام</h3>'+
+    '<div style="font-size:13px;color:var(--muted);margin-top:6px">ارفع Excel أو CSV (عمود فيه الأرقام، ويفضل عمود للأسماء)، أو الصق الأرقام تحت.</div>'+
+    '<label>يتضافوا لـ</label><select id="i_co"><option value="">بدون شركة (مبيعات عامة)</option>'+db.companies.map(function(c){return '<option value="'+c.id+'"'+(c.id===coId?' selected':'')+'>'+esc(c.name)+'</option>'}).join('')+'</select>'+
+    '<label>الملف (xlsx / xls / csv)</label><input type="file" id="i_file" accept=".xlsx,.xls,.csv,.txt" onchange="readImpFile(this)">'+
+    '<label>أو الصق هنا (كل عميل في سطر: اسم ورقم، أو رقم بس)</label><textarea id="i_paste" placeholder="أحمد محمد 01012345678&#10;01198765432" oninput="readImpPaste()"></textarea>'+
+    '<div id="i_map"></div>'+
+    '<label>المرحلة</label><select id="i_stage">'+STAGES_SALES.map(function(s){return '<option>'+s+'</option>'}).join('')+'</select>'+
+    '<label>المصدر</label><input id="i_src" value="ملف أرقام '+new Date().toISOString().slice(0,10)+'">'+
+    '<label><input type="checkbox" id="i_dup" checked style="width:auto"> تجاهل الأرقام المتكررة (الموجودة قبل كده في نفس الشركة)</label>'+
+    '<div id="i_msg" style="font-size:13px;margin-top:8px;color:var(--navy);font-weight:700"></div>'+
+    '<div class="row" style="margin-top:14px"><button class="btn gold" onclick="doImport()">رفع العملاء</button><button class="btn ghost" onclick="closeM()">إلغاء</button></div>';
+  IMP={rows:[],head:[],map:{}};openM();
+}
+function readImpFile(inp){
+  var f=inp.files[0];if(!f)return;var isCsv=/\.(csv|txt)$/i.test(f.name),r=new FileReader();
+  r.onload=function(){
+    var rows=[];
+    try{
+      if(window.XLSX){var wb=isCsv?XLSX.read(r.result,{type:'string',raw:true}):XLSX.read(new Uint8Array(r.result),{type:'array'});
+        rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''});}
+      else if(isCsv)rows=r.result.split(/\r?\n/).map(function(l){return l.split(/[,;\t]/)});
+      else{alert('مكتبة الإكسل ما اتحملتش (النت؟). احفظ الملف CSV وارفعه تاني.');return}
+    }catch(e){alert('مقدرتش أقرا الملف: '+e.message);return}
+    setImpRows(rows.filter(function(r){return r.some(function(c){return String(c).trim()})}));
+  };
+  if(isCsv)r.readAsText(f,'UTF-8');else r.readAsArrayBuffer(f);
+}
+function readImpPaste(){
+  var lines=document.getElementById('i_paste').value.split(/\r?\n/).filter(function(l){return l.trim()});
+  var rows=lines.map(function(l){
+    if(/[\t,;]/.test(l))return l.split(/[\t,;]/).map(function(x){return x.trim()});
+    var m=l.match(/(\+?[\d\s\-]{8,})/);var ph=m?m[1].trim():'';var nm=l.replace(ph,'').replace(/[:\-–]+$/,'').trim();
+    return [nm,ph];});
+  setImpRows([['الاسم','الرقم']].concat(rows));
+}
+function isPhone(v){var d=String(v||'').replace(/\D/g,'');return d.length>=9&&d.length<=15}
+function setImpRows(rows){
+  if(!rows.length){document.getElementById('i_map').innerHTML='';IMP.rows=[];return}
+  var first=rows[0],hasHead=!first.some(isPhone);
+  var head=hasHead?first.map(function(h,i){return String(h||'عمود '+(i+1))}):first.map(function(_,i){return 'عمود '+(i+1)});
+  var data=hasHead?rows.slice(1):rows,n=Math.max.apply(null,rows.map(function(r){return r.length}));
+  while(head.length<n)head.push('عمود '+(head.length+1));
+  function pick(re,fb){for(var i=0;i<head.length;i++)if(re.test(head[i]))return i;return fb}
+  var phoneCol=pick(/phone|mobile|tel|whats|رقم|موبايل|تليفون|هاتف|واتس|جوال/i,-1);
+  if(phoneCol<0){var best=-1,bc=0;for(var i=0;i<n;i++){var c=data.slice(0,50).filter(function(r){return isPhone(r[i])}).length;if(c>bc){bc=c;best=i}}phoneCol=best}
+  var nameCol=pick(/name|اسم|الاسم|العميل/i,-1);
+  if(nameCol<0){for(var j=0;j<n;j++)if(j!==phoneCol){nameCol=j;break}}
+  IMP={rows:data,head:head,map:{phone:phoneCol,name:nameCol,note:pick(/note|ملاحظ|تفاصيل/i,-1),company:pick(/company|شركة|جهة/i,-1),value:pick(/value|price|amount|قيمة|سعر|مبلغ/i,-1)}};
+  function sel(k,l){return '<div style="flex:1;min-width:120px"><label>'+l+'</label><select onchange="IMP.map.'+k+'=+this.value"><option value="-1">—</option>'+head.map(function(h,i){return '<option value="'+i+'"'+(IMP.map[k]===i?' selected':'')+'>'+esc(h)+'</option>'}).join('')+'</select></div>'}
+  document.getElementById('i_map').innerHTML='<div style="margin-top:10px;font-weight:700;color:var(--navy)">لقيت '+data.length+' صف — راجع الأعمدة:</div><div class="row" style="margin:0">'+
+    sel('phone','عمود الرقم *')+sel('name','عمود الاسم')+sel('company','عمود الجهة')+sel('value','عمود القيمة')+sel('note','عمود الملاحظات')+'</div>'+
+    '<div class="prev"><table><tr>'+head.map(function(h){return '<th>'+esc(h)+'</th>'}).join('')+'</tr>'+data.slice(0,5).map(function(r){return '<tr>'+head.map(function(_,i){return '<td>'+esc(r[i]||'')+'</td>'}).join('')+'</tr>'}).join('')+'</table></div>';
+}
+function doImport(){
+  var m=IMP.map;if(!IMP.rows.length){alert('ارفع ملف أو الصق أرقام الأول');return}
+  if(m.phone==null||m.phone<0){alert('اختار عمود الرقم');return}
+  var coId=document.getElementById('i_co').value,stage=document.getElementById('i_stage').value,src=document.getElementById('i_src').value,dup=document.getElementById('i_dup').checked;
+  var seen={};db.sales.forEach(function(x){if(x.phone&&(x.companyId||'')===coId)seen[waNumber(x.phone)]=1});
+  var add=0,skipD=0,skipE=0,now=Date.now();
+  IMP.rows.forEach(function(r,i){
+    var ph=String(r[m.phone]||'').trim();if(!isPhone(ph)){skipE++;return}
+    var key=waNumber(ph);if(dup&&seen[key]){skipD++;return}seen[key]=1;
+    function g(k){return m[k]!=null&&m[k]>=0?String(r[m[k]]||'').trim():''}
+    db.sales.push({id:uid(),companyId:coId,name:g('name')||ph,company:g('company'),phone:ph,stage:stage,value:g('value').replace(/[^\d.]/g,''),
+      source:src,followUp:'',note:g('note'),created:now,updated:now-i});add++;
+  });
+  if(coId){var c=co(coId);if(c)c.updated=now}
+  save();closeM();if(coId)openCo(coId);else go('sales');
+  alert('تم رفع '+add+' عميل'+(skipD?' · اتجاهل '+skipD+' رقم متكرر':'')+(skipE?' · '+skipE+' صف من غير رقم صالح':''));
 }
 
 /* ================== الفورم ================== */
-function openForm(sec,id){
+function openM(){document.getElementById('modal').style.display='flex'}
+function closeM(){document.getElementById('modal').style.display='none'}
+function openForm(sec,id,coId){
   var sc=SCHEMA[sec],x=id?db[sec].find(function(i){return i.id===id}):{};
   if(!x)return;
-  if(!id&&sec==='money')x={date:new Date().toISOString().slice(0,10),type:'دخل',section:'عام'};
+  if(!id){if(sec==='money')x={date:new Date().toISOString().slice(0,10),type:'دخل',section:'عام',companyId:coId||''};
+    if(sec==='sales')x={companyId:coId||curCo||''};}
   var h='<h3 style="margin:0;color:var(--navy)">'+(id?'تعديل ':'إضافة ')+sc.name+'</h3>';
   sc.fields.forEach(function(f){
     var v=x[f.k]==null?'':x[f.k];
     h+='<label>'+f.l+(f.req?' *':'')+'</label>';
     if(f.t==='select')h+='<select id="f_'+f.k+'">'+f.o.map(function(o){return '<option'+(v===o?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select>';
+    else if(f.t==='company')h+='<select id="f_'+f.k+'"><option value="">— بدون —</option>'+db.companies.map(function(c){return '<option value="'+c.id+'"'+(v===c.id?' selected':'')+'>'+esc(c.name)+'</option>'}).join('')+'</select>';
     else if(f.t==='textarea')h+='<textarea id="f_'+f.k+'">'+esc(v)+'</textarea>';
     else h+='<input id="f_'+f.k+'" type="'+(f.t||'text')+'" value="'+esc(v)+'"'+(f.t==='number'?' inputmode="decimal"':'')+'>';
   });
   h+='<div class="row" style="margin-top:14px"><button class="btn gold" onclick="saveForm(\''+sec+'\',\''+(id||'')+'\')">حفظ</button><button class="btn ghost" onclick="closeM()">إلغاء</button></div>';
-  document.getElementById('mbody').innerHTML=h;
-  document.getElementById('modal').style.display='flex';
+  document.getElementById('mbody').innerHTML=h;openM();
 }
-function closeM(){document.getElementById('modal').style.display='none'}
 function saveForm(sec,id){
   var sc=SCHEMA[sec],o={};
   for(var i=0;i<sc.fields.length;i++){var f=sc.fields[i],v=document.getElementById('f_'+f.k).value.trim();
     if(f.req&&!v){alert('املا خانة: '+f.l);return}o[f.k]=v}
   o.updated=Date.now();
   if(id){var x=db[sec].find(function(i){return i.id===id});Object.assign(x,o)}
-  else{o.id=uid();o.created=Date.now();db[sec].push(o)}
-  save();closeM();render();
+  else{o.id=uid();o.created=Date.now();if(sec==='companies')o.plan=[];db[sec].push(o)}
+  save();closeM();
+  if(sec==='companies'&&!id)openCo(o.id);else render();
   if(o.followUp&&confirm('تحب تضيف ميعاد المتابعة ده لجوجل كالندر علشان يجيلك تنبيه على الموبايل؟')){
     var nm=o.name||o.title||'';window.open(gcalLink('متابعة: '+nm,(o.phone?'واتساب: '+waLink(o.phone,o.contact||nm)+'\n':'')+(o.note||''),o.followUp),'_blank');
   }
 }
 function del(sec,id){if(!confirm('متأكد إنك عايز تحذف؟'))return;db[sec]=db[sec].filter(function(x){return x.id!==id});save();render()}
-function find(sec,id){return db[sec].find(function(x){return x.id===id})}
-function doneFu(sec,id){var x=find(sec,id);if(!x)return;
+function findItem(sec,id){
+  if(sec==='plan'){var p=id.split('|'),c=co(p[0]);if(!c)return null;var s=(c.plan||[]).find(function(x){return x.id===p[1]});
+    return s?{_step:s,_co:c}:null}
+  return db[sec].find(function(x){return x.id===id})}
+function doneFu(sec,id){var x=findItem(sec,id);if(!x)return;
+  if(sec==='plan'){x._step.done=true;x._co.updated=Date.now();save();render();return}
   if(sec==='tasks')x.done=true;else{x.lastContact=new Date().toISOString();x.followUp=''}
   x.updated=Date.now();save();render();
   if(sec!=='tasks'&&confirm('تحدد ميعاد المتابعة الجاية دلوقتي؟'))openForm(sec,id);}
-function snooze(sec,id){var x=find(sec,id);if(!x)return;var d=new Date(x.followUp),n=new Date();if(d<n)d=n;d.setDate(d.getDate()+1);
-  x.followUp=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());x.updated=Date.now();save();render()}
-function quickAdd(){var m={sales:'sales',broker:'broker',money:'money'}[tab]||(tab==='follow'?'tasks':null);
+function snooze(sec,id){var x=findItem(sec,id);if(!x)return;
+  var cur=sec==='plan'?x._step.due:x.followUp,d=new Date(cur),n=new Date();if(isNaN(d)||d<n)d=n;d.setDate(d.getDate()+1);
+  if(sec==='plan')x._step.due=toLocalDT(d);else{x.followUp=toLocalDT(d);x.updated=Date.now()}save();render()}
+function quickAdd(){
+  if(tab==='company'){openForm('sales','',curCo);return}
+  var m={sales:'sales',broker:'broker',money:'money',companies:'companies'}[tab]||(tab==='follow'?'tasks':null);
   if(m)openForm(m);else{document.getElementById('mbody').innerHTML='<h3 style="margin:0 0 10px;color:var(--navy)">تضيف إيه؟</h3><div class="list">'+
-  '<button class="btn" onclick="openForm(\'sales\')">عميل مبيعات</button><button class="btn" onclick="openForm(\'broker\')">فندق / شركة سياحة / صفقة وساطة</button><button class="btn" onclick="openForm(\'money\')">حركة فلوس</button><button class="btn teal" onclick="openForm(\'tasks\')">مهمة متابعة</button><button class="btn ghost" onclick="closeM()">إلغاء</button></div>';
-  document.getElementById('modal').style.display='flex'}}
+  '<button class="btn" onclick="openForm(\'companies\')">شركة (بخطة وعملاء)</button><button class="btn" onclick="openForm(\'sales\')">عميل مبيعات</button><button class="btn" onclick="openForm(\'broker\')">فندق / شركة سياحة / صفقة وساطة</button><button class="btn" onclick="openForm(\'money\')">حركة فلوس</button><button class="btn teal" onclick="openForm(\'tasks\')">مهمة متابعة</button><button class="btn ghost" onclick="closeM()">إلغاء</button></div>';
+  openM()}}
 function exportJson(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}));
   a.download='dr-crm-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click()}
+function exportCsv(){var cols=['الشركة','الاسم','الرقم','المرحلة','القيمة','المصدر','المتابعة','ملاحظات'];
+  var lines=[cols].concat(db.sales.map(function(x){return [coName(x.companyId)||x.company,x.name,x.phone,x.stage,x.value,x.source,x.followUp,x.note]}))
+    .map(function(r){return r.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+lines],{type:'text/csv'}));a.download='dr-crm-clients.csv';a.click()}
 function importJson(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);
   if(!confirm('الاستيراد هيستبدل كل الداتا الحالية بالنسخة دي. متأكد؟'))return;db=Object.assign(emptyDb(),d);save();render();alert('تم الاستيراد')}catch(e){alert('الملف مش صالح')}};r.readAsText(f)}
 document.getElementById('modal').addEventListener('click',function(e){if(e.target.id==='modal')closeM()});
