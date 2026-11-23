@@ -222,6 +222,8 @@ function connectCloud(){
       db=Object.assign(emptyDb(),d);
       try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}
       online=true; setSync('متزامن أونلاين ✓','#14b8a655');
+      var btz='';try{btz=Intl.DateTimeFormat().resolvedOptions().timeZone}catch(x){}
+      if(btz&&db.settings.tz!==btz){db.settings.tz=btz;save();}
       if(document.getElementById('modal').style.display!=='flex')render();
     }else if(first){
       online=true; save();
@@ -353,8 +355,8 @@ function vFollow(){
   var late=fu.filter(function(f){return new Date(f.x.followUp)<t0});
   var today=fu.filter(function(f){var d=new Date(f.x.followUp);return d>=t0&&d<t1});
   var next=fu.filter(function(f){return new Date(f.x.followUp)>=t1});
-  var h='<div class="box"><b>إزاي توصلك نوتفكيشن على الموبايل؟</b><div style="color:var(--muted);font-size:13px;margin-top:4px">'+
-    'دوس "📅 جوجل كالندر" جنب أي متابعة ← هيفتح جوجل كالندر بالميعاد جاهز ← دوس Save. تطبيق Google Calendar على موبايلك هيبعتلك تنبيه قبل الميعاد.</div>'+
+  var h='<div class="box"><b>🔔 التنبيهات على الموبايل</b><div style="color:var(--muted);font-size:13px;margin-top:4px">'+
+    'بوت تليجرام بيبعتلك تنبيه قبل كل متابعة بـ 15 دقيقة + ملخص كل يوم 9 الصبح (لوحده، من غير ما تفتح الصفحة). ولو عايز كمان تحطها في جوجل كالندر دوس "📅".</div>'+
     '<div class="row" style="margin:10px 0 0"><button class="btn teal" onclick="openForm(\'tasks\')">+ مهمة متابعة جديدة</button></div></div>';
   function grp(t,a){return '<h2>'+t+' ('+a.length+')</h2>'+(a.length?'<div class="list">'+a.map(fuCard).join('')+'</div>':'<div class="empty">لا يوجد</div>')}
   return h+grp('🔴 متأخر',late)+grp('🟡 النهارده',today)+grp('🔵 جاي',next);

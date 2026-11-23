@@ -1,0 +1,31 @@
+name: CRM Telegram reminders
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "ابعت رسالة تجربة"
+        type: boolean
+        default: true
+
+concurrency:
+  group: crm-notify
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q firebase-admin requests
+      - run: python scripts/notify.py
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SEND_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.test && '1' || '0' }}
