@@ -186,8 +186,20 @@ function setSync(t,c){var el=document.getElementById('sync');el.textContent=t;el
 function co(id){return db.companies.find(function(c){return c.id===id})}
 function coName(id){var c=co(id);return c?c.name:''}
 
+var remTimer=null;
+function remItems(){return followUps().map(function(f){var x=f.x,d=new Date(x.followUp);if(isNaN(d))return null;
+  var name=f.sec==='broker'?(x.contact||x.name):(x.name||'');
+  return {key:f.sec+':'+x.id+'@'+x.followUp,due:d.toISOString(),tag:f.tag,title:f.title,note:(x.note||'').slice(0,300),wa:x.phone?waLink(x.phone,name):''}}).filter(Boolean)}
+function pushReminders(test){
+  var u=(db.settings.remUrl||'').trim();if(!/^https:\/\/script\.google\.com\//.test(u))return false;
+  var tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone}catch(x){}
+  fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({items:remItems(),tz:tz,crmUrl:location.href.split(/[?#]/)[0],test:!!test})}).catch(function(e){console.error(e)});
+  return true;
+}
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}
+  clearTimeout(remTimer);remTimer=setTimeout(function(){pushReminders(false)},2500);
   if(online&&cloudDoc){
     setSync('جاري الحفظ...','#f2b70555');
     clearTimeout(saveTimer);
@@ -356,7 +368,7 @@ function vFollow(){
   var today=fu.filter(function(f){var d=new Date(f.x.followUp);return d>=t0&&d<t1});
   var next=fu.filter(function(f){return new Date(f.x.followUp)>=t1});
   var h='<div class="box"><b>🔔 التنبيهات على الموبايل</b><div style="color:var(--muted);font-size:13px;margin-top:4px">'+
-    'بوت تليجرام بيبعتلك تنبيه قبل كل متابعة بـ 15 دقيقة + ملخص كل يوم 9 الصبح (لوحده، من غير ما تفتح الصفحة). ولو عايز كمان تحطها في جوجل كالندر دوس "📅".</div>'+
+    (db.settings.remUrl?'شغالة ✓ — إيميل قبل كل متابعة بـ 15 دقيقة + ملخص 9 الصبح، والمواعيد بتتحط لوحدها في جوجل كالندر بتنبيه.':'لسه مش متفعلة — فعّلها من تاب الإعدادات (رابط Apps Script).')+'</div>'+
     '<div class="row" style="margin:10px 0 0"><button class="btn teal" onclick="openForm(\'tasks\')">+ مهمة متابعة جديدة</button></div></div>';
   function grp(t,a){return '<h2>'+t+' ('+a.length+')</h2>'+(a.length?'<div class="list">'+a.map(fuCard).join('')+'</div>':'<div class="empty">لا يوجد</div>')}
   return h+grp('🔴 متأخر',late)+grp('🟡 النهارده',today)+grp('🔵 جاي',next);
@@ -500,7 +512,10 @@ function vMoney(){
 }
 
 function vSettings(){
-  return '<div class="box"><b>رسالة الواتساب الافتراضية</b><div style="font-size:13px;color:var(--muted)">اكتب {name} مكان اسم العميل.</div>'+
+  return '<div class="box"><b>🔔 التنبيهات على الإيميل + جوجل كالندر</b><div style="font-size:13px;color:var(--muted)">الصق هنا رابط الـ Web app بتاع Google Apps Script (بيبدأ بـ https://script.google.com/). بعدها كل ما تحفظ حاجة المواعيد بتتبعت لوحدها.</div>'+
+    '<input id="remUrl" dir="ltr" placeholder="https://script.google.com/macros/s/.../exec" value="'+esc(db.settings.remUrl||'')+'">'+
+    '<div class="row" style="margin-top:8px"><button class="btn" onclick="saveRemUrl()">حفظ وابعت إيميل تجربة</button></div></div>'+
+    '<div class="box"><b>رسالة الواتساب الافتراضية</b><div style="font-size:13px;color:var(--muted)">اكتب {name} مكان اسم العميل.</div>'+
     '<textarea id="waMsg">'+esc(db.settings.waMsg)+'</textarea><div class="row" style="margin-top:8px"><button class="btn" onclick="db.settings.waMsg=document.getElementById(\'waMsg\').value;save();alert(\'اتحفظت\')">حفظ الرسالة</button></div></div>'+
     '<div class="box"><b>نسخة احتياطية</b><div style="font-size:13px;color:var(--muted)">نزّل ملف بكل الداتا (ممكن تبعته لـ Claude يحلله أو يرجعه).</div>'+
     '<div class="row" style="margin-top:8px"><button class="btn" onclick="exportJson()">تنزيل نسخة JSON</button><button class="btn ghost" onclick="exportCsv()">تنزيل العملاء Excel (CSV)</button>'+
@@ -508,6 +523,10 @@ function vSettings(){
     '<div class="box"><b>الحالة</b><div style="font-size:13px">'+(online?'متصل بـ Firebase — الداتا بتتحفظ أونلاين في crmData/simple':'شغال على الجهاز ده بس. سجّل دخول علشان الداتا تتحفظ أونلاين.')+'</div>'+
     '<div style="font-size:13px;color:var(--muted)">الشركات: '+db.companies.length+' · المبيعات: '+db.sales.length+' · الوساطة: '+db.broker.length+' · الفلوس: '+db.money.length+' · المهام: '+db.tasks.length+'</div></div>';
 }
+
+function saveRemUrl(){var u=document.getElementById('remUrl').value.trim();
+  if(u&&!/^https:\/\/script\.google\.com\//.test(u)){alert('الرابط لازم يبدأ بـ https://script.google.com/');return}
+  db.settings.remUrl=u;save();if(u){pushReminders(true);alert('اتحفظ ✓ — هيوصلك إيميل تجربة خلال دقيقة، والمواعيد هتظهر في جوجل كالندر.')}}
 
 /* ================== رفع ملف الأرقام ================== */
 var IMP={rows:[],head:[],map:{}};
