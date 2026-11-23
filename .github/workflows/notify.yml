@@ -29,5 +29,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CALLMEBOT_PHONE: ${{ secrets.CALLMEBOT_PHONE }}
           CALLMEBOT_APIKEY: ${{ secrets.CALLMEBOT_APIKEY }}
+          TEXTMEBOT_APIKEY: ${{ secrets.TEXTMEBOT_APIKEY }}
+          TEXTMEBOT_RECIPIENT: ${{ secrets.TEXTMEBOT_RECIPIENT }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           SEND_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.test && '1' || '0' }}

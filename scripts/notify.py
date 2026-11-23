@@ -10,6 +10,8 @@ Secrets في GitHub (تليجرام أو واتساب أو الاتنين):
   TELEGRAM_BOT_TOKEN        توكن البوت من BotFather
   CALLMEBOT_PHONE           رقمك بكود الدولة (مثال +201000504083)
   CALLMEBOT_APIKEY          الكود اللي CallMeBot بعتهولك على واتساب
+  TEXTMEBOT_APIKEY          مفتاح TextMeBot (الرقم المربوط هو اللي بيبعت)
+  TEXTMEBOT_RECIPIENT       رقمك اللي هيستقبل التنبيه بكود الدولة
   FIREBASE_SERVICE_ACCOUNT  محتوى ملف JSON بتاع Service account من Firebase
 """
 import html
@@ -165,6 +167,13 @@ def to_whatsapp_text(t):
     return html.unescape(re.sub(r"<[^>]+>", "", t))
 
 
+def textmebot_send(recipient, apikey, text):
+    r = requests.get("https://api.textmebot.com/send.php",
+                     params={"recipient": recipient, "apikey": apikey, "text": to_whatsapp_text(text)}, timeout=60)
+    if r.status_code != 200 or "error" in r.text.lower()[:300]:
+        print("TextMeBot رجّع خطأ — راجع الرقم والـ apikey والاشتراك.")
+
+
 def wa_send(phone, apikey, text):
     r = requests.get("https://api.callmebot.com/whatsapp.php",
                      params={"phone": phone, "text": to_whatsapp_text(text), "apikey": apikey}, timeout=60)
@@ -180,7 +189,10 @@ def main():
     sa = os.environ.get("FIREBASE_SERVICE_ACCOUNT", "").strip()
     test = os.environ.get("SEND_TEST") == "1"
     use_wa = bool(wa_phone and wa_key)
-    if not token and not use_wa:
+    tmb_key = os.environ.get("TEXTMEBOT_APIKEY", "").strip()
+    tmb_to = os.environ.get("TEXTMEBOT_RECIPIENT", "").strip()
+    use_tmb = bool(tmb_key and tmb_to)
+    if not token and not use_wa and not use_tmb:
         print("مفيش Telegram ولا WhatsApp متضافين في Secrets — مفيش حاجة هتتبعت.")
         return 0
 
@@ -211,6 +223,8 @@ def main():
             tg(token, "sendMessage", chat_id=chat_id, text=text, parse_mode="HTML", disable_web_page_preview=True)
         if use_wa:
             wa_send(wa_phone, wa_key, text)
+        if use_tmb:
+            textmebot_send(tmb_to, tmb_key, text)
 
     if db is None or test:
         send("✅ تنبيهات Digital Reach CRM شغالة. هيوصلك تنبيه قبل كل متابعة بـ 15 دقيقة، وملخص كل يوم الساعة 9 الصبح.")
