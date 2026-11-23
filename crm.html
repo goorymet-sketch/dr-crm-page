@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Reach CRM — مبيعات · وساطة · ميزانية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b1f3a;--navy2:#13294b;--gold:#f2b705;--teal:#14b8a6;--red:#ef4444;--bg:#f4f6fb;--card:#fff;--muted:#64748b;--line:#e2e8f0;--green:#16a34a}
+*{box-sizing:border-box}
+body{margin:0;font-family:Cairo,Tahoma,sans-serif;background:var(--bg);color:#0f172a}
+header{background:var(--navy);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+header h1{font-size:18px;margin:0;font-weight:800}
+header h1 span{color:var(--gold)}
+#sync{font-size:12px;padding:3px 10px;border-radius:20px;background:#ffffff22}
+header .sp{flex:1}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;background:var(--navy2)}
+nav button{flex:0 0 auto;border:0;background:#ffffff14;color:#fff;padding:8px 14px;border-radius:10px;font:600 14px Cairo;cursor:pointer}
+nav button.on{background:var(--gold);color:var(--navy)}
+nav .cnt{background:var(--red);color:#fff;border-radius:10px;padding:0 7px;font-size:12px;margin-right:4px}
+main{max-width:1100px;margin:0 auto;padding:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.row input,.row select{flex:1;min-width:140px}
+input,select,textarea{font:14px Cairo;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;width:100%}
+textarea{min-height:70px}
+.btn{text-decoration:none;display:inline-block;border:0;border-radius:10px;padding:9px 14px;font:700 14px Cairo;cursor:pointer;background:var(--navy);color:#fff;white-space:nowrap}
+.btn.gold{background:var(--gold);color:var(--navy)}
+.btn.teal{background:var(--teal)}
+.btn.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.btn.red{background:#fee2e2;color:var(--red)}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+.wa{background:#25d366;color:#fff}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border-radius:14px;padding:14px;border-right:5px solid var(--teal);box-shadow:0 1px 3px #0001}
+.stat b{display:block;font-size:22px;color:var(--navy)}
+.stat small{color:var(--muted)}
+.stat.warn{border-color:var(--red)}.stat.gold{border-color:var(--gold)}.stat.navy{border-color:var(--navy)}
+.list{display:grid;gap:10px}
+.card{background:var(--card);border-radius:14px;padding:12px 14px;box-shadow:0 1px 3px #0001;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.card .info{flex:1;min-width:200px}
+.card .t{font-weight:800;font-size:15px}
+.card .s{color:var(--muted);font-size:13px}
+.card .acts{display:flex;gap:6px;flex-wrap:wrap}
+.badge{display:inline-block;font-size:12px;padding:1px 9px;border-radius:20px;background:#e0f2fe;color:#075985;margin-left:6px;font-weight:700}
+.badge.won{background:#dcfce7;color:#166534}.badge.lost{background:#fee2e2;color:#991b1b}.badge.k{background:#fef3c7;color:#92400e}
+.due{font-size:12px;font-weight:700;padding:1px 8px;border-radius:8px}
+.due.late{background:#fee2e2;color:#b91c1c}.due.today{background:#fef3c7;color:#92400e}.due.next{background:#e0f2fe;color:#075985}
+h2{font-size:17px;margin:18px 0 8px;color:var(--navy)}
+.empty{text-align:center;color:var(--muted);padding:30px;background:#fff;border-radius:14px}
+.box{background:#fff;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 1px 3px #0001}
+.in{color:var(--green);font-weight:800}.out{color:var(--red);font-weight:800}
+#modal{position:fixed;inset:0;background:#0008;display:none;align-items:flex-start;justify-content:center;z-index:50;overflow:auto;padding:20px 10px}
+#modal .m{background:#fff;border-radius:16px;padding:18px;width:100%;max-width:520px}
+#modal label{display:block;font-size:13px;font-weight:700;margin:10px 0 4px;color:var(--navy)}
+#login{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+#login .m{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:380px}
+#login h3{margin:0 0 6px;color:var(--navy)}
+#login p{color:var(--muted);font-size:13px;margin:0 0 12px}
+#login input{margin-bottom:10px}
+#loginErr{color:var(--red);font-size:13px;min-height:18px}
+.hidden{display:none!important}
+@media(max-width:600px){header h1{font-size:16px}.card .acts{width:100%}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="m">
+    <h3>Digital Reach CRM</h3>
+    <p>ادخل بنفس إيميل وباسورد الـ CRM القديم علشان الداتا تتحفظ أونلاين وتظهر على أي جهاز.</p>
+    <input id="lEmail" type="email" placeholder="الإيميل" autocomplete="username">
+    <input id="lPass" type="password" placeholder="كلمة المرور" autocomplete="current-password">
+    <div id="loginErr"></div>
+    <button class="btn gold" style="width:100%" onclick="doLogin()">دخول</button>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="useOffline()">اشتغل على الجهاز ده بس (من غير أونلاين)</button>
+  </div>
+</div>
+
+<header>
+  <h1>Digital Reach <span>CRM</span></h1>
+  <span id="sync">محلي</span>
+  <div class="sp"></div>
+  <button class="btn gold sm" onclick="quickAdd()">+ إضافة</button>
+  <button class="btn ghost sm" id="logoutBtn" onclick="doLogout()">خروج</button>
+</header>
+<nav id="nav"></nav>
+<main id="view"></main>
+
+<div id="modal"><div class="m" id="mbody"></div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+/* ================== الإعدادات ================== */
+var firebaseConfig={
+  apiKey:"AIzaSyDhZKeWe1ytVMt6Vlm4JExESk9kXq3RFeg",
+  authDomain:"digitalreach-crm.firebaseapp.com",
+  projectId:"digitalreach-crm",
+  storageBucket:"digitalreach-crm.firebasestorage.app",
+  messagingSenderId:"633336135091",
+  appId:"1:633336135091:web:de8f20b2fa143ae6665fc6"
+};
+// ملف داتا منفصل: crmData/simple (مش بيلمس main ولا jisr)
+var DOC_PATH=['crmData','simple'];
+var KEY='dr_simple_crm_v1';
+
+var STAGES_SALES=['جديد','تم التواصل','مهتم','عرض سعر','تم البيع','خسارة'];
+var STAGES_BROKER=['جديد','تفاوض أسعار','أسعار متاحة','عرض لشركة','حجز مؤكد','عمولة محصلة','مرفوض'];
+var WON=['تم البيع','حجز مؤكد','عمولة محصلة'], LOST=['خسارة','مرفوض'];
+
+var SCHEMA={
+  sales:{title:'المبيعات',name:'عميل',fields:[
+    {k:'name',l:'اسم العميل',req:1},
+    {k:'company',l:'الشركة'},
+    {k:'phone',l:'رقم الواتساب',t:'tel'},
+    {k:'stage',l:'المرحلة',t:'select',o:STAGES_SALES},
+    {k:'value',l:'قيمة الصفقة',t:'number'},
+    {k:'source',l:'المصدر (إعلان، ترشيح، واتساب...)'},
+    {k:'followUp',l:'موعد المتابعة الجاية',t:'datetime-local'},
+    {k:'note',l:'ملاحظات',t:'textarea'}]},
+  broker:{title:'الوساطة',name:'جهة / صفقة',fields:[
+    {k:'kind',l:'النوع',t:'select',o:['فندق','شركة سياحة','صفقة']},
+    {k:'name',l:'الاسم (فندق / شركة / وصف الصفقة)',req:1},
+    {k:'contact',l:'اسم المسؤول'},
+    {k:'phone',l:'رقم الواتساب',t:'tel'},
+    {k:'city',l:'المنطقة'},
+    {k:'stage',l:'المرحلة',t:'select',o:STAGES_BROKER},
+    {k:'rate',l:'سعر الليلة / الجروب',t:'number'},
+    {k:'rooms',l:'عدد الغرف / الأفراد',t:'number'},
+    {k:'commission',l:'العمولة المتوقعة',t:'number'},
+    {k:'followUp',l:'موعد المتابعة الجاية',t:'datetime-local'},
+    {k:'note',l:'ملاحظات',t:'textarea'}]},
+  money:{title:'الميزانية',name:'حركة فلوس',fields:[
+    {k:'type',l:'النوع',t:'select',o:['دخل','مصروف']},
+    {k:'amount',l:'المبلغ',t:'number',req:1},
+    {k:'category',l:'البند (عمولة، إعلان، مواصلات...)'},
+    {k:'section',l:'تابع لـ',t:'select',o:['عام','مبيعات','وساطة']},
+    {k:'date',l:'التاريخ',t:'date'},
+    {k:'note',l:'ملاحظات',t:'textarea'}]},
+  tasks:{title:'مهمة متابعة',name:'مهمة',fields:[
+    {k:'title',l:'المطلوب',req:1},
+    {k:'phone',l:'رقم واتساب (اختياري)',t:'tel'},
+    {k:'followUp',l:'الميعاد',t:'datetime-local',req:1},
+    {k:'note',l:'ملاحظات',t:'textarea'}]}
+};
+
+/* ================== الداتا ================== */
+function emptyDb(){return {sales:[],broker:[],money:[],tasks:[],settings:{waMsg:'أهلاً {name}، معاك محمد طارق من Digital Reach.'}}}
+var db=emptyDb();
+try{var s=localStorage.getItem(KEY); if(s){db=Object.assign(emptyDb(),JSON.parse(s));}}catch(e){}
+var tab='dash', q='', fStage='';
+var fb=null, cloudDoc=null, online=false, unsub=null, saveTimer=null;
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function num(v){v=parseFloat(v);return isNaN(v)?0:v}
+function money(v){return num(v).toLocaleString('en-US')}
+function setSync(t,c){var el=document.getElementById('sync');el.textContent=t;el.style.background=c||'#ffffff22'}
+
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}
+  if(online&&cloudDoc){
+    setSync('جاري الحفظ...','#f2b70555');
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(function(){
+      var data=JSON.parse(JSON.stringify(db));
+      data.updatedAt=firebase.firestore.FieldValue.serverTimestamp();
+      cloudDoc.set(data).then(function(){setSync('محفوظ أونلاين ✓','#14b8a655')})
+      .catch(function(e){setSync('فشل الحفظ أونلاين — محفوظ على الجهاز','#ef444477');console.error(e)});
+    },700);
+  }else setSync('محفوظ على الجهاز');
+}
+
+/* ================== Firebase ================== */
+function initFirebase(){try{
+  firebase.initializeApp(firebaseConfig);
+  fb={auth:firebase.auth(),fs:firebase.firestore()};
+  cloudDoc=fb.fs.collection(DOC_PATH[0]).doc(DOC_PATH[1]);
+  fb.auth.onAuthStateChanged(function(u){
+    if(u){hideLogin();connectCloud();}
+    else{online=false;if(unsub){unsub();unsub=null}
+      if(localStorage.getItem(KEY+'_offline')==='1')hideLogin();else showLogin();}
+  });
+}catch(e){console.error(e);hideLogin();setSync('Firebase مش متاح — محلي');}}
+
+function connectCloud(){
+  setSync('جاري الاتصال...');
+  var first=true;
+  unsub=cloudDoc.onSnapshot(function(snap){
+    if(snap.metadata.hasPendingWrites)return;
+    if(snap.exists){
+      var d=snap.data(); delete d.updatedAt;
+      db=Object.assign(emptyDb(),d);
+      try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}
+      online=true; setSync('متزامن أونلاين ✓','#14b8a655'); render();
+    }else if(first){
+      online=true; save(); // أول مرة: ارفع اللي على الجهاز
+    }
+    first=false;
+  },function(err){
+    online=false; console.error(err);
+    setSync(err.code==='permission-denied'?'Firebase رافض الصلاحية — محلي':'مش متصل — محلي','#ef444477');
+  });
+}
+function doLogin(){
+  var e=document.getElementById('lEmail').value.trim(),p=document.getElementById('lPass').value;
+  var er=document.getElementById('loginErr'); er.textContent='';
+  if(!fb){er.textContent='Firebase مش متاح.';return}
+  fb.auth.signInWithEmailAndPassword(e,p).catch(function(err){
+    er.textContent=err.code==='auth/invalid-credential'?'الإيميل أو كلمة المرور غلط.':
+      err.code==='auth/unauthorized-domain'?'الدومين مش مضاف في Firebase Authentication.':('خطأ: '+err.message);
+  });
+}
+function useOffline(){localStorage.setItem(KEY+'_offline','1');hideLogin();}
+function doLogout(){localStorage.removeItem(KEY+'_offline');if(fb&&fb.auth.currentUser)fb.auth.signOut();else showLogin();}
+function showLogin(){document.getElementById('login').classList.remove('hidden')}
+function hideLogin(){document.getElementById('login').classList.add('hidden');render()}
+
+/* ================== واتساب وكالندر ================== */
+function waNumber(p){
+  p=String(p||'').replace(/\D/g,'');
+  if(p.indexOf('00')===0)p=p.slice(2);
+  if(/^01\d{9}$/.test(p))p='2'+p;            // مصر
+  else if(/^05\d{8}$/.test(p))p='966'+p.slice(1); // السعودية
+  return p;
+}
+function waLink(phone,name){
+  var msg=(db.settings.waMsg||'').replace(/\{name\}/g,name||'');
+  return 'https://wa.me/'+waNumber(phone)+'?text='+encodeURIComponent(msg);
+}
+function pad(n){return (n<10?'0':'')+n}
+function gcalFmt(d){return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00'}
+function gcalLink(title,details,dt){
+  var d=new Date(dt); if(isNaN(d))return '#';
+  var e=new Date(d.getTime()+30*60000);
+  var tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone}catch(x){}
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+
+    '&dates='+gcalFmt(d)+'/'+gcalFmt(e)+'&details='+encodeURIComponent(details||'')+(tz?'&ctz='+encodeURIComponent(tz):'');
+}
+function dueInfo(dt){
+  if(!dt)return null; var d=new Date(dt); if(isNaN(d))return null;
+  var now=new Date(), t0=new Date(now.getFullYear(),now.getMonth(),now.getDate()), t1=new Date(t0.getTime()+86400000);
+  var txt=d.toLocaleDateString('ar-EG',{weekday:'short',day:'numeric',month:'short'})+' '+d.toLocaleTimeString('ar-EG',{hour:'numeric',minute:'2-digit'});
+  if(d<now&&d<t1&&d>=t0)return {c:'today',l:'النهارده متأخر '+txt};
+  if(d<t0||d<now)return {c:'late',l:'متأخر: '+txt};
+  if(d<t1)return {c:'today',l:'النهارده '+txt};
+  return {c:'next',l:txt};
+}
+
+/* ================== المتابعة (تجميع) ================== */
+function followUps(){
+  var out=[];
+  db.sales.forEach(function(x){if(x.followUp)out.push({sec:'sales',x:x,title:x.name+(x.company?' — '+x.company:''),tag:'مبيعات'})});
+  db.broker.forEach(function(x){if(x.followUp)out.push({sec:'broker',x:x,title:x.name+(x.contact?' — '+x.contact:''),tag:'وساطة'})});
+  db.tasks.forEach(function(x){if(x.followUp&&!x.done)out.push({sec:'tasks',x:x,title:x.title,tag:'مهمة'})});
+  out.sort(function(a,b){return new Date(a.x.followUp)-new Date(b.x.followUp)});
+  return out;
+}
+function overdueCount(){var n=0,t1=new Date();t1.setHours(23,59,59);followUps().forEach(function(f){if(new Date(f.x.followUp)<=t1)n++});return n}
+
+/* ================== العرض ================== */
+var TABS=[['dash','الرئيسية'],['follow','المتابعة'],['sales','المبيعات'],['broker','الوساطة'],['money','الميزانية'],['settings','إعدادات']];
+function render(){
+  var c=overdueCount();
+  document.getElementById('nav').innerHTML=TABS.map(function(t){
+    return '<button class="'+(tab===t[0]?'on':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+(t[0]==='follow'&&c?'<span class="cnt">'+c+'</span>':'')+'</button>'}).join('');
+  var v=document.getElementById('view');
+  v.innerHTML=({dash:vDash,follow:vFollow,sales:vSec,broker:vSec,money:vMoney,settings:vSettings})[tab]();
+}
+function go(t){tab=t;q='';fStage='';render();window.scrollTo(0,0)}
+
+function monthNet(){
+  var n=new Date(),key=n.getFullYear()+'-'+pad(n.getMonth()+1),i=0,o=0;
+  db.money.forEach(function(m){if((m.date||'').indexOf(key)===0){if(m.type==='مصروف')o+=num(m.amount);else i+=num(m.amount)}});
+  return {i:i,o:o};
+}
+function vDash(){
+  var fu=followUps(),od=overdueCount();
+  var pipe=db.sales.filter(function(x){return WON.indexOf(x.stage)<0&&LOST.indexOf(x.stage)<0}).reduce(function(a,x){return a+num(x.value)},0);
+  var won=db.sales.filter(function(x){return x.stage==='تم البيع'}).reduce(function(a,x){return a+num(x.value)},0);
+  var bAct=db.broker.filter(function(x){return LOST.indexOf(x.stage)<0&&x.stage!=='عمولة محصلة'});
+  var com=bAct.reduce(function(a,x){return a+num(x.commission)},0);
+  var mn=monthNet();
+  var h='<div class="stats">'+
+    st(od,'متابعات النهارده والمتأخرة','warn')+
+    st(db.sales.length,'عملاء المبيعات','navy')+
+    st(money(pipe),'صفقات مفتوحة (قيمة)','gold')+
+    st(money(won),'مبيعات تمت','')+
+    st(bAct.length,'جهات وساطة نشطة','navy')+
+    st(money(com),'عمولات متوقعة','gold')+
+    st(money(mn.i-mn.o),'صافي الشهر ده','')+
+    '</div>';
+  h+='<h2>أقرب المتابعات</h2>'+(fu.length?'<div class="list">'+fu.slice(0,6).map(fuCard).join('')+'</div>':'<div class="empty">مفيش متابعات. ضيف موعد متابعة لأي عميل أو جهة.</div>');
+  h+='<div class="row" style="margin-top:14px"><button class="btn" onclick="openForm(\'sales\')">+ عميل مبيعات</button><button class="btn" onclick="openForm(\'broker\')">+ فندق / شركة</button><button class="btn" onclick="openForm(\'money\')">+ حركة فلوس</button><button class="btn teal" onclick="openForm(\'tasks\')">+ مهمة متابعة</button></div>';
+  return h;
+}
+function st(v,l,c){return '<div class="stat '+c+'"><b>'+v+'</b><small>'+l+'</small></div>'}
+
+function fuCard(f){
+  var x=f.x,di=dueInfo(x.followUp),name=f.sec==='broker'?(x.contact||x.name):(x.name||'');
+  var det=(f.tag+': '+f.title)+(x.phone?'\nواتساب: '+waLink(x.phone,name):'')+(x.note?'\n'+x.note:'');
+  return '<div class="card"><div class="info"><div class="t"><span class="badge k">'+f.tag+'</span>'+esc(f.title)+'</div>'+
+    '<div class="s">'+(di?'<span class="due '+di.c+'">'+di.l+'</span> ':'')+(x.stage?esc(x.stage)+' · ':'')+esc(x.note||'')+'</div></div>'+
+    '<div class="acts">'+(x.phone?'<a class="btn sm wa" target="_blank" href="'+esc(waLink(x.phone,name))+'">واتساب</a>':'')+
+    '<a class="btn sm ghost" target="_blank" href="'+esc(gcalLink('متابعة: '+f.title,det,x.followUp))+'">📅 جوجل كالندر</a>'+
+    '<button class="btn sm ghost" onclick="snooze(\''+f.sec+'\',\''+x.id+'\')">بكرة</button>'+
+    '<button class="btn sm teal" onclick="doneFu(\''+f.sec+'\',\''+x.id+'\')">تم ✓</button>'+
+    (f.sec!=='tasks'?'<button class="btn sm ghost" onclick="openForm(\''+f.sec+'\',\''+x.id+'\')">تعديل</button>':'')+'</div></div>';
+}
+function vFollow(){
+  var fu=followUps(),now=new Date(),t1=new Date();t1.setHours(23,59,59);
+  var late=fu.filter(function(f){return new Date(f.x.followUp)<now&&new Date(f.x.followUp).toDateString()!==now.toDateString()});
+  var today=fu.filter(function(f){return new Date(f.x.followUp).toDateString()===now.toDateString()});
+  var next=fu.filter(function(f){return new Date(f.x.followUp)>t1});
+  var h='<div class="box"><b>إزاي توصلك نوتفكيشن على الموبايل؟</b><div class="s" style="color:var(--muted);font-size:13px;margin-top:4px">'+
+    'دوس "📅 جوجل كالندر" جنب أي متابعة ← هيفتح جوجل كالندر بالميعاد جاهز ← دوس Save. تطبيق Google Calendar على موبايلك هيبعتلك تنبيه قبل الميعاد (حسب إعداد التنبيه الافتراضي عندك).</div>'+
+    '<div class="row" style="margin:10px 0 0"><button class="btn teal" onclick="openForm(\'tasks\')">+ مهمة متابعة جديدة</button></div></div>';
+  function grp(t,a){return '<h2>'+t+' ('+a.length+')</h2>'+(a.length?'<div class="list">'+a.map(fuCard).join('')+'</div>':'<div class="empty">لا يوجد</div>')}
+  return h+grp('🔴 متأخر',late)+grp('🟡 النهارده',today)+grp('🔵 جاي',next);
+}
+
+function vSec(){
+  var sc=SCHEMA[tab],arr=db[tab].slice(),stages=tab==='sales'?STAGES_SALES:STAGES_BROKER;
+  if(q){var ql=q.toLowerCase();arr=arr.filter(function(x){return JSON.stringify(x).toLowerCase().indexOf(ql)>=0})}
+  if(fStage)arr=arr.filter(function(x){return x.stage===fStage});
+  arr.sort(function(a,b){return (b.updated||0)-(a.updated||0)});
+  var counts=stages.map(function(s){return s+' ('+db[tab].filter(function(x){return x.stage===s}).length+')'});
+  var h='<div class="row"><input placeholder="بحث بالاسم أو الرقم..." value="'+esc(q)+'" oninput="q=this.value;renderList()">'+
+    '<select onchange="fStage=this.value;renderList()"><option value="">كل المراحل</option>'+stages.map(function(s,i){return '<option value="'+esc(s)+'"'+(fStage===s?' selected':'')+'>'+esc(counts[i])+'</option>'}).join('')+'</select>'+
+    '<button class="btn gold" onclick="openForm(\''+tab+'\')">+ '+sc.name+'</button></div><div id="lst">'+listHtml(arr)+'</div>';
+  return h;
+}
+function renderList(){var arr=db[tab].slice();if(q){var ql=q.toLowerCase();arr=arr.filter(function(x){return JSON.stringify(x).toLowerCase().indexOf(ql)>=0})}
+  if(fStage)arr=arr.filter(function(x){return x.stage===fStage});arr.sort(function(a,b){return (b.updated||0)-(a.updated||0)});document.getElementById('lst').innerHTML=listHtml(arr)}
+function listHtml(arr){
+  if(!arr.length)return '<div class="empty">لسه مفيش حاجة هنا. دوس "+" وضيف أول واحد.</div>';
+  return '<div class="list">'+arr.map(function(x){
+    var cls=WON.indexOf(x.stage)>=0?'won':LOST.indexOf(x.stage)>=0?'lost':'';
+    var di=dueInfo(x.followUp),name=tab==='broker'?(x.contact||x.name):x.name;
+    var sub=tab==='sales'?[x.company,x.phone,x.value?money(x.value)+' ج':'',x.source]:[x.contact,x.phone,x.city,x.rate?'سعر '+money(x.rate):'',x.commission?'عمولة '+money(x.commission):''];
+    return '<div class="card"><div class="info"><div class="t">'+(tab==='broker'?'<span class="badge k">'+esc(x.kind||'')+'</span>':'')+esc(x.name)+' <span class="badge '+cls+'">'+esc(x.stage||'')+'</span></div>'+
+      '<div class="s">'+sub.filter(Boolean).map(esc).join(' · ')+'</div>'+
+      (di?'<div class="s"><span class="due '+di.c+'">متابعة: '+di.l+'</span></div>':'')+(x.note?'<div class="s">'+esc(x.note)+'</div>':'')+'</div>'+
+      '<div class="acts">'+(x.phone?'<a class="btn sm wa" target="_blank" href="'+esc(waLink(x.phone,name))+'">واتساب</a>':'')+
+      (x.followUp?'<a class="btn sm ghost" target="_blank" href="'+esc(gcalLink('متابعة: '+x.name,(x.phone?'واتساب: '+waLink(x.phone,name)+'\n':'')+(x.note||''),x.followUp))+'">📅</a>':'')+
+      '<button class="btn sm ghost" onclick="openForm(\''+tab+'\',\''+x.id+'\')">تعديل</button>'+
+      '<button class="btn sm red" onclick="del(\''+tab+'\',\''+x.id+'\')">حذف</button></div></div>';
+  }).join('')+'</div>';
+}
+
+function vMoney(){
+  var arr=db.money.slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
+  var ti=0,to=0;db.money.forEach(function(m){if(m.type==='مصروف')to+=num(m.amount);else ti+=num(m.amount)});
+  var mn=monthNet(),bySec={};
+  db.money.forEach(function(m){var k=m.section||'عام';bySec[k]=bySec[k]||{i:0,o:0};if(m.type==='مصروف')bySec[k].o+=num(m.amount);else bySec[k].i+=num(m.amount)});
+  var h='<div class="stats">'+st('<span class="in">'+money(ti)+'</span>','إجمالي الدخل','')+st('<span class="out">'+money(to)+'</span>','إجمالي المصروفات','warn')+
+    st(money(ti-to),'الصافي','gold')+st(money(mn.i-mn.o),'صافي الشهر ده','navy')+'</div>';
+  h+='<div class="box">'+Object.keys(bySec).map(function(k){return '<div>'+esc(k)+': دخل <span class="in">'+money(bySec[k].i)+'</span> · مصروف <span class="out">'+money(bySec[k].o)+'</span> · صافي <b>'+money(bySec[k].i-bySec[k].o)+'</b></div>'}).join('')+(Object.keys(bySec).length?'':'لسه مفيش حركات')+'</div>';
+  h+='<div class="row"><button class="btn gold" onclick="openForm(\'money\')">+ حركة فلوس</button></div>';
+  h+=arr.length?'<div class="list">'+arr.map(function(m){
+    return '<div class="card"><div class="info"><div class="t"><span class="'+(m.type==='مصروف'?'out':'in')+'">'+(m.type==='مصروف'?'−':'+')+money(m.amount)+'</span> '+esc(m.category||'')+' <span class="badge">'+esc(m.section||'عام')+'</span></div>'+
+      '<div class="s">'+esc(m.date||'')+(m.note?' · '+esc(m.note):'')+'</div></div>'+
+      '<div class="acts"><button class="btn sm ghost" onclick="openForm(\'money\',\''+m.id+'\')">تعديل</button><button class="btn sm red" onclick="del(\'money\',\''+m.id+'\')">حذف</button></div></div>'}).join('')+'</div>':'<div class="empty">لسه مفيش حركات فلوس.</div>';
+  return h;
+}
+
+function vSettings(){
+  return '<div class="box"><b>رسالة الواتساب الافتراضية</b><div style="font-size:13px;color:var(--muted)">اكتب {name} مكان اسم العميل.</div>'+
+    '<textarea id="waMsg">'+esc(db.settings.waMsg)+'</textarea><div class="row" style="margin-top:8px"><button class="btn" onclick="db.settings.waMsg=document.getElementById(\'waMsg\').value;save();alert(\'اتحفظت\')">حفظ الرسالة</button></div></div>'+
+    '<div class="box"><b>نسخة احتياطية</b><div style="font-size:13px;color:var(--muted)">نزّل ملف بكل الداتا (ممكن تبعته لـ Claude يحلله أو يرجعه).</div>'+
+    '<div class="row" style="margin-top:8px"><button class="btn" onclick="exportJson()">تنزيل نسخة JSON</button>'+
+    '<label class="btn ghost" style="display:inline-block">استيراد نسخة<input type="file" accept=".json" class="hidden" onchange="importJson(this)"></label></div></div>'+
+    '<div class="box"><b>الحالة</b><div style="font-size:13px">'+(online?'متصل بـ Firebase — الداتا بتتحفظ أونلاين في crmData/simple':'شغال على الجهاز ده بس. سجّل دخول علشان الداتا تتحفظ أونلاين.')+'</div>'+
+    '<div style="font-size:13px;color:var(--muted)">المبيعات: '+db.sales.length+' · الوساطة: '+db.broker.length+' · الفلوس: '+db.money.length+' · المهام: '+db.tasks.length+'</div></div>';
+}
+
+/* ================== الفورم ================== */
+function openForm(sec,id){
+  var sc=SCHEMA[sec],x=id?db[sec].find(function(i){return i.id===id}):{};
+  if(!x)return;
+  if(!id&&sec==='money')x={date:new Date().toISOString().slice(0,10),type:'دخل',section:'عام'};
+  var h='<h3 style="margin:0;color:var(--navy)">'+(id?'تعديل ':'إضافة ')+sc.name+'</h3>';
+  sc.fields.forEach(function(f){
+    var v=x[f.k]==null?'':x[f.k];
+    h+='<label>'+f.l+(f.req?' *':'')+'</label>';
+    if(f.t==='select')h+='<select id="f_'+f.k+'">'+f.o.map(function(o){return '<option'+(v===o?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select>';
+    else if(f.t==='textarea')h+='<textarea id="f_'+f.k+'">'+esc(v)+'</textarea>';
+    else h+='<input id="f_'+f.k+'" type="'+(f.t||'text')+'" value="'+esc(v)+'"'+(f.t==='number'?' inputmode="decimal"':'')+'>';
+  });
+  h+='<div class="row" style="margin-top:14px"><button class="btn gold" onclick="saveForm(\''+sec+'\',\''+(id||'')+'\')">حفظ</button><button class="btn ghost" onclick="closeM()">إلغاء</button></div>';
+  document.getElementById('mbody').innerHTML=h;
+  document.getElementById('modal').style.display='flex';
+}
+function closeM(){document.getElementById('modal').style.display='none'}
+function saveForm(sec,id){
+  var sc=SCHEMA[sec],o={};
+  for(var i=0;i<sc.fields.length;i++){var f=sc.fields[i],v=document.getElementById('f_'+f.k).value.trim();
+    if(f.req&&!v){alert('املا خانة: '+f.l);return}o[f.k]=v}
+  o.updated=Date.now();
+  if(id){var x=db[sec].find(function(i){return i.id===id});Object.assign(x,o)}
+  else{o.id=uid();o.created=Date.now();db[sec].push(o)}
+  save();closeM();render();
+  if(o.followUp&&confirm('تحب تضيف ميعاد المتابعة ده لجوجل كالندر علشان يجيلك تنبيه على الموبايل؟')){
+    var nm=o.name||o.title||'';window.open(gcalLink('متابعة: '+nm,(o.phone?'واتساب: '+waLink(o.phone,o.contact||nm)+'\n':'')+(o.note||''),o.followUp),'_blank');
+  }
+}
+function del(sec,id){if(!confirm('متأكد إنك عايز تحذف؟'))return;db[sec]=db[sec].filter(function(x){return x.id!==id});save();render()}
+function find(sec,id){return db[sec].find(function(x){return x.id===id})}
+function doneFu(sec,id){var x=find(sec,id);if(!x)return;
+  if(sec==='tasks')x.done=true;else{x.lastContact=new Date().toISOString();x.followUp=''}
+  x.updated=Date.now();save();render();
+  if(sec!=='tasks'&&confirm('تحدد ميعاد المتابعة الجاية دلوقتي؟'))openForm(sec,id);}
+function snooze(sec,id){var x=find(sec,id);if(!x)return;var d=new Date(x.followUp),n=new Date();if(d<n)d=n;d.setDate(d.getDate()+1);
+  x.followUp=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());x.updated=Date.now();save();render()}
+function quickAdd(){var m={sales:'sales',broker:'broker',money:'money'}[tab]||(tab==='follow'?'tasks':null);
+  if(m)openForm(m);else{document.getElementById('mbody').innerHTML='<h3 style="margin:0 0 10px;color:var(--navy)">تضيف إيه؟</h3><div class="list">'+
+  '<button class="btn" onclick="openForm(\'sales\')">عميل مبيعات</button><button class="btn" onclick="openForm(\'broker\')">فندق / شركة سياحة / صفقة وساطة</button><button class="btn" onclick="openForm(\'money\')">حركة فلوس</button><button class="btn teal" onclick="openForm(\'tasks\')">مهمة متابعة</button><button class="btn ghost" onclick="closeM()">إلغاء</button></div>';
+  document.getElementById('modal').style.display='flex'}}
+function exportJson(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}));
+  a.download='dr-crm-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click()}
+function importJson(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);
+  if(!confirm('الاستيراد هيستبدل كل الداتا الحالية بالنسخة دي. متأكد؟'))return;db=Object.assign(emptyDb(),d);save();render();alert('تم الاستيراد')}catch(e){alert('الملف مش صالح')}};r.readAsText(f)}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target.id==='modal')closeM()});
+render();
+initFirebase();
+</script>
+</body>
+</html>
