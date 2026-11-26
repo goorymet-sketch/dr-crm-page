@@ -174,10 +174,10 @@ var SCHEMA={
 };
 
 /* ================== الداتا ================== */
-function emptyDb(){return {companies:[],sales:[],broker:[],money:[],tasks:[],log:[],seeds:{},settings:{waMsg:'أهلاً {name}، معاك محمد طارق من Digital Reach.'}}}
+function emptyDb(){return {companies:[],sales:[],broker:[],money:[],tasks:[],waiting:[],log:[],seeds:{},settings:{waMsg:'أهلاً {name}، معاك محمد طارق من Digital Reach.'}}}
 var db=emptyDb();
 try{var s=localStorage.getItem(KEY); if(s){db=Object.assign(emptyDb(),JSON.parse(s));}}catch(e){}
-var tab='goal', q='', fStage='', curCo='';
+var tab='today', q='', fStage='', curCo='';
 var fb=null, cloudDoc=null, online=false, unsub=null, saveTimer=null;
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -354,18 +354,100 @@ function loadSeed(S){
   (S.sales||[]).forEach(function(x){var o=JSON.parse(JSON.stringify(x));delete o.co;o.companyId=o.companyId||'';o.id=uid();o.created=o.updated=now;db.sales.push(o)});
   (S.broker||[]).forEach(function(x){var o=JSON.parse(JSON.stringify(x));o.id=uid();o.created=o.updated=now;db.broker.push(o)});
   (S.tasks||[]).forEach(function(x){var o=JSON.parse(JSON.stringify(x));o.id=uid();o.created=now;db.tasks.push(o)});
+  if(!db.waiting)db.waiting=[];(S.waiting||[]).forEach(function(x){var o=JSON.parse(JSON.stringify(x));o.id=uid();o.status=o.status||'مستني';o.sentAt=o.sentAt||now;db.waiting.push(o)});
   if(!db.log)db.log=[];(S.log||[]).slice().reverse().forEach(function(t,i){db.log.unshift({id:uid(),t:now-i*1000,text:t,sec:'ملف'})});
   db.seeds[k]=now;save();render();alert('اتدمج ✓ — من غير ما يتمسح حاجة');
 }
 
+
+/* ================== النهارده ================== */
+var WEEK_SEED={key:'week-2026-11-26',waiting:[
+ {who:'اماني (فكره وحدوته — 186K)',channel:'واتساب',phone:'01099390192',what:'عرض تعاون لجروب قعدة ستات — رحلة 23 ديسمبر',sentAt:'2026-11-26T09:43'},
+ {who:'مامتي طباخة (تيك توك 121K)',channel:'واتساب',phone:'01017410553',what:'ردت وطلبت التفاصيل — اتبعتلها التفاصيل ولينك الصفحة، مستنيين قرارها',sentAt:'2026-11-26T12:25'},
+ {who:'محجبات ومنقبات جميلات (أدمن كلام ستات)',channel:'ماسنجر',what:'رسالة تعاون + تصحيح الميعاد 23 ديسمبر',sentAt:'2026-11-26T09:34'},
+ {who:'فكره وحدوته مع اماني (أدمن قعدة ستات)',channel:'ماسنجر',what:'رسالة تعاون + تصحيح الميعاد 23 ديسمبر',sentAt:'2026-11-26T09:34'},
+ {who:'Esraa Amer (أدمن ماميز اسكندرية)',channel:'ماسنجر',what:'رسالة تعاون — رحلة 23 ديسمبر',sentAt:'2026-11-26T09:35'},
+ {who:'Shahinaz Ibrahim (أدمن سيدات تبادل خبرات الحج والعمرة)',channel:'ماسنجر',what:'رسالة تعاون — رحلة 23 ديسمبر',sentAt:'2026-11-26T09:36'},
+ {who:'Eslam ELmasry (أدمن هوانم طنطا)',channel:'ماسنجر',what:'رسالة تعاون — رحلة 23 ديسمبر',sentAt:'2026-11-26T09:37'},
+ {who:'مطبخ ماما @matbakhmama5 (128K)',channel:'تيك توك',what:'عرض مسوّقة — 500 جنيه عن كل ست',sentAt:'2026-11-26T09:56'},
+ {who:'يوميات أم مصرية @egyptian_momy',channel:'تيك توك',what:'عرض مسوّقة — 500 جنيه عن كل ست',sentAt:'2026-11-26T09:55'},
+ {who:'يوميات أم مصرية بالسعودية',channel:'تيك توك',what:'عرض مسوّقة — 500 جنيه عن كل ست',sentAt:'2026-11-26T09:57'}],
+ tasks:[{title:'ابعت رسالة التعاون لـ Sara Ahmed Zaher (هوانم الجيزة) — ماسنجر',followUp:'2026-11-27T10:00',note:'اتوقفت النهارده بسبب حد رسايل فيسبوك'},
+  {title:'ابعت رسالة التعاون لـ ايهاب نافع (تجمع بنات طنطا) — ماسنجر',followUp:'2026-11-27T10:20',note:''},
+  {title:'ابعت رسالة التعاون لـ روضات الجنان (هوانم كفرالشيخ) — ماسنجر',followUp:'2026-11-27T10:40',note:''}],
+ log:['النهارده: 5 رسايل أدمنز فيسبوك + 4 صانعات محتوى تيك توك + 2 واتساب — مامتي طباخة ردت واتبعتلها التفاصيل واللينك']};
+function ago(t){var d=new Date(t);if(isNaN(d))return '';var m=Math.round((Date.now()-d)/60000);
+  if(m<60)return 'من '+Math.max(m,1)+' دقيقة';var h=Math.round(m/60);if(h<24)return 'من '+h+' ساعة';return 'من '+Math.round(h/24)+' يوم'}
+function umrahWon(){var ids=db.companies.filter(function(c){return /نسمات|عمر/.test(c.name||'')}).map(function(c){return c.id});
+  return db.sales.filter(function(x){return x.stage==='تم البيع'&&(ids.indexOf(x.companyId)>=0||/عمر|عمرة|نسمات/.test((x.company||'')+(x.source||'')))}).length}
+function vToday(){
+  if(!db.waiting)db.waiting=[];
+  var now=new Date(),t1=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
+  var got=incomeTotal(),mn=monthNet(),deals=openDeals(),wt=deals.reduce(function(a,d){return a+d.w},0);
+  var wait=db.waiting.filter(function(w){return w.status==='مستني'}).sort(function(a,b){return new Date(a.sentAt)-new Date(b.sentAt)});
+  var fu=followUps().filter(function(f){return new Date(f.x.followUp)<t1});
+  var open=db.sales.filter(function(x){return WON.indexOf(x.stage)<0&&LOST.indexOf(x.stage)<0}).map(function(x){return {sec:'sales',x:x,tag:'مبيعات'}})
+    .concat(db.broker.filter(function(x){return LOST.indexOf(x.stage)<0&&x.stage!=='عمولة محصلة'}).map(function(x){return {sec:'broker',x:x,tag:'وساطة'}}))
+    .sort(function(a,b){return (b.x.updated||0)-(a.x.updated||0)});
+  var h='<div class="box" style="background:var(--navy);color:#fff"><div style="font-size:18px;font-weight:800">📍 '+now.toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'})+'</div>'+
+    '<div style="font-size:14px;margin-top:4px">🕋 عملاء رحلة 23 ديسمبر: <b style="color:var(--gold)">'+umrahWon()+' من 5</b> · 🎯 اتحصّل: <b style="color:var(--gold)">'+money(got)+'</b> من '+money(GOAL.amount)+'</div></div>';
+  h+='<div class="stats">'+st(wait.length,'⏳ مستني رد','gold')+st(fu.length,'✅ مهام النهارده والمتأخرة','warn')+st(open.length,'🔥 فرص مفتوحة','navy')+st(money(Math.round(wt)),'💰 فلوس متوقعة','')+'</div>';
+  // مستني رد
+  h+='<h2>⏳ مستني رد ('+wait.length+')</h2><div class="row"><button class="btn gold sm" onclick="editWait(\'\')">+ بعتّ لحد</button>'+
+    (db.seeds&&db.seeds[WEEK_SEED.key]?'':'<button class="btn teal sm" onclick="loadSeed(WEEK_SEED)">⬇ ضيف شغل الأسبوع (10 جهات + مهام بكرة)</button>')+'</div>';
+  h+=wait.length?'<div class="list">'+wait.map(function(w){
+    return '<div class="card"><div class="info"><div class="t"><span class="badge k">'+esc(w.channel||'')+'</span>'+esc(w.who)+'</div>'+
+      '<div class="s">'+esc(w.what||'')+' · <span class="due '+(Date.now()-new Date(w.sentAt)>86400000?'late':'today')+'">'+ago(w.sentAt)+'</span></div></div>'+
+      '<div class="acts">'+(w.phone?'<a class="btn sm wa" target="_blank" href="https://wa.me/'+waNumber(w.phone)+'">واتساب</a>':'')+
+      '<button class="btn sm teal" onclick="waitDone(\''+w.id+'\',\'رد\')">ردّ ✓</button>'+
+      '<button class="btn sm ghost" onclick="waitDone(\''+w.id+'\',\'مفيش رد\')">مفيش رد</button>'+
+      '<button class="btn sm ghost" onclick="editWait(\''+w.id+'\')">تعديل</button></div></div>'}).join('')+'</div>'
+    :'<div class="empty">مفيش حد مستني رده. كل ما تبعت لحد دوس "+ بعتّ لحد".</div>';
+  // مهام
+  h+='<h2>✅ مهام النهارده ('+fu.length+')</h2>'+(fu.length?'<div class="list">'+fu.slice(0,8).map(fuCard).join('')+'</div>':'<div class="empty">مفيش مهام النهارده 👌</div>')+
+    '<div class="row" style="margin-top:8px"><button class="btn teal sm" onclick="openForm(\'tasks\')">+ مهمة</button></div>';
+  // فرص
+  h+='<h2>🔥 الفرص المفتوحة ('+open.length+')</h2>'+(open.length?'<div class="list">'+open.slice(0,10).map(function(o){var x=o.x;
+    return '<div class="card"><div class="info"><div class="t"><span class="badge k">'+o.tag+'</span>'+esc(x.name)+' <span class="badge">'+esc(x.stage||'')+'</span></div>'+
+      '<div class="s">'+esc((x.note||'').slice(0,140))+'</div></div><div class="acts"><button class="btn sm ghost" onclick="openForm(\''+o.sec+'\',\''+x.id+'\')">تعديل</button></div></div>'}).join('')+'</div>'+
+      (open.length>10?'<div class="s" style="margin-top:6px">ظاهر 10 من '+open.length+' — الباقي في المبيعات والوساطة</div>':''):'<div class="empty">مفيش فرص مفتوحة.</div>');
+  // فلوس
+  h+='<h2>💰 الفلوس</h2><div class="stats">'+st('<span class="in">'+money(got)+'</span>','اتحصّل من 24/11','')+st(money(mn.i-mn.o),'صافي الشهر ده','navy')+
+    st(money(Math.round(wt)),'متوقع من الفرص','gold')+st(money(Math.max(0,GOAL.amount-got)),'فاضل للهدف','warn')+'</div>';
+  // سجل سريع
+  h+='<h2>📝 سجّل اللي عملته</h2><div class="row"><input id="logTxt" placeholder="مثلا: كلمت أم عمر واتفقنا على..." style="flex:1;min-width:200px"><button class="btn teal" onclick="addLog()">سجّل</button></div>';
+  var lg=(db.log||[]).slice(0,5);
+  if(lg.length)h+='<div class="list">'+lg.map(function(l){var d=new Date(l.t);return '<div class="card"><div class="info"><div class="s">'+d.toLocaleDateString('ar-EG')+' '+pad(d.getHours())+':'+pad(d.getMinutes())+'</div><div class="t" style="font-weight:600">'+esc(l.text)+'</div></div></div>'}).join('')+'</div>';
+  return h;
+}
+function editWait(id){var w=id?db.waiting.find(function(x){return x.id===id}):{channel:'واتساب',sentAt:toLocalDT(new Date())};
+  document.getElementById('mbody').innerHTML='<h3 style="margin:0;color:var(--navy)">'+(id?'تعديل':'بعتّ لحد ومستني رده')+'</h3>'+
+    '<label>مين؟ *</label><input id="w_who" value="'+esc(w.who||'')+'">'+
+    '<label>فين؟</label><select id="w_ch">'+['واتساب','ماسنجر','تيك توك','انستجرام','تليفون','تاني'].map(function(o){return '<option'+(w.channel===o?' selected':'')+'>'+o+'</option>'}).join('')+'</select>'+
+    '<label>رقم الواتساب (اختياري)</label><input id="w_ph" type="tel" value="'+esc(w.phone||'')+'">'+
+    '<label>بعتله إيه؟</label><input id="w_what" value="'+esc(w.what||'')+'">'+
+    '<label>إمتى؟</label><input id="w_at" type="datetime-local" value="'+esc(w.sentAt||'')+'">'+
+    '<div class="row" style="margin-top:14px"><button class="btn gold" onclick="saveWait(\''+(id||'')+'\')">حفظ</button>'+(id?'<button class="btn red" onclick="delWait(\''+id+'\')">حذف</button>':'')+'<button class="btn ghost" onclick="closeM()">إلغاء</button></div>';
+  openM()}
+function saveWait(id){var who=document.getElementById('w_who').value.trim();if(!who){alert('اكتب مين');return}
+  var o={who:who,channel:document.getElementById('w_ch').value,phone:document.getElementById('w_ph').value.trim(),what:document.getElementById('w_what').value.trim(),sentAt:document.getElementById('w_at').value||toLocalDT(new Date())};
+  if(!db.waiting)db.waiting=[];
+  if(id)Object.assign(db.waiting.find(function(x){return x.id===id}),o);else{o.id=uid();o.status='مستني';db.waiting.push(o);logIt('بعتّ لـ '+who+' ('+o.channel+')','مستني رد')}
+  save();closeM();render()}
+function delWait(id){if(!confirm('تحذفه؟'))return;db.waiting=db.waiting.filter(function(x){return x.id!==id});save();closeM();render()}
+function waitDone(id,st){var w=db.waiting.find(function(x){return x.id===id});if(!w)return;
+  var note=st==='رد'?prompt('قال إيه باختصار؟ (اختياري)','')||'':'';w.status=st;w.doneAt=Date.now();w.reply=note;
+  logIt(w.who+': '+(st==='رد'?'ردّ'+(note?' — '+note:''):'مفيش رد'),'مستني رد');save();render();
+  if(st==='رد'&&confirm('تحب تضيف مهمة متابعة ليه؟')){openForm('tasks');setTimeout(function(){var t=document.getElementById('f_title');if(t)t.value='متابعة مع '+w.who;var p=document.getElementById('f_phone');if(p)p.value=w.phone||''},50)}}
+
 /* ================== العرض ================== */
-var TABS=[['goal','🎯 الهدف'],['dash','الرئيسية'],['follow','المتابعة'],['companies','الشركات'],['sales','المبيعات'],['broker','الوساطة'],['money','الميزانية'],['settings','إعدادات']];
+var TABS=[['today','📍 النهارده'],['goal','🎯 الهدف'],['dash','الرئيسية'],['follow','المتابعة'],['companies','الشركات'],['sales','المبيعات'],['broker','الوساطة'],['money','الميزانية'],['settings','إعدادات']];
 function render(){
   var c=overdueCount(),act=tab==='company'?'companies':tab;
   document.getElementById('nav').innerHTML=TABS.map(function(t){
     return '<button class="'+(act===t[0]?'on':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+(t[0]==='follow'&&c?'<span class="cnt">'+c+'</span>':'')+'</button>'}).join('');
   if(tab==='company'&&!co(curCo))tab='companies';
-  document.getElementById('view').innerHTML=({goal:vGoal,dash:vDash,follow:vFollow,companies:vCompanies,company:vCompany,sales:vSec,broker:vSec,money:vMoney,settings:vSettings})[tab]();
+  document.getElementById('view').innerHTML=({today:vToday,goal:vGoal,dash:vDash,follow:vFollow,companies:vCompanies,company:vCompany,sales:vSec,broker:vSec,money:vMoney,settings:vSettings})[tab]();
 }
 function go(t){tab=t;q='';fStage='';if(t!=='company')curCo='';render();window.scrollTo(0,0)}
 function openCo(id){curCo=id;tab='company';render();window.scrollTo(0,0)}
@@ -570,7 +652,7 @@ function vSettings(){
     '<div class="row" style="margin-top:8px"><button class="btn" onclick="exportJson()">تنزيل نسخة JSON</button><button class="btn ghost" onclick="exportCsv()">تنزيل العملاء Excel (CSV)</button>'+
     '<label class="btn ghost">استيراد نسخة JSON<input type="file" accept=".json" class="hidden" onchange="importJson(this)"></label></div></div>'+
     '<div class="box"><b>الحالة</b><div style="font-size:13px">'+(online?'متصل بـ Firebase — الداتا بتتحفظ أونلاين في crmData/simple':'شغال على الجهاز ده بس. سجّل دخول علشان الداتا تتحفظ أونلاين.')+'</div>'+
-    '<div style="font-size:13px;color:var(--muted)">الشركات: '+db.companies.length+' · المبيعات: '+db.sales.length+' · الوساطة: '+db.broker.length+' · الفلوس: '+db.money.length+' · المهام: '+db.tasks.length+'</div></div>';
+    '<div style="font-size:13px;color:var(--muted)">الشركات: '+db.companies.length+' · المبيعات: '+db.sales.length+' · الوساطة: '+db.broker.length+' · الفلوس: '+db.money.length+' · المهام: '+db.tasks.length+' · مستني رد: '+(db.waiting||[]).length+'</div></div>';
 }
 
 function saveRemUrl(){var u=document.getElementById('remUrl').value.trim();
