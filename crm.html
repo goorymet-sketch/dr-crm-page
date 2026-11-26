@@ -361,21 +361,7 @@ function loadSeed(S){
 
 
 /* ================== النهارده ================== */
-var WEEK_SEED={key:'week-2026-11-26',waiting:[
- {who:'اماني (فكره وحدوته — 186K)',channel:'واتساب',phone:'01099390192',what:'عرض تعاون لجروب قعدة ستات — رحلة 23 ديسمبر',sentAt:'2026-11-26T09:43'},
- {who:'مامتي طباخة (تيك توك 121K)',channel:'واتساب',phone:'01017410553',what:'ردت وطلبت التفاصيل — اتبعتلها التفاصيل ولينك الصفحة، مستنيين قرارها',sentAt:'2026-11-26T12:25'},
- {who:'محجبات ومنقبات جميلات (أدمن كلام ستات)',channel:'ماسنجر',what:'رسالة تعاون + تصحيح الميعاد 23 ديسمبر',sentAt:'2026-11-26T09:34'},
- {who:'فكره وحدوته مع اماني (أدمن قعدة ستات)',channel:'ماسنجر',what:'رسالة تعاون + تصحيح الميعاد 23 ديسمبر',sentAt:'2026-11-26T09:34'},
- {who:'Esraa Amer (أدمن ماميز اسكندرية)',channel:'ماسنجر',what:'رسالة تعاون — رحلة 23 ديسمبر',sentAt:'2026-11-26T09:35'},
- {who:'Shahinaz Ibrahim (أدمن سيدات تبادل خبرات الحج والعمرة)',channel:'ماسنجر',what:'رسالة تعاون — رحلة 23 ديسمبر',sentAt:'2026-11-26T09:36'},
- {who:'Eslam ELmasry (أدمن هوانم طنطا)',channel:'ماسنجر',what:'رسالة تعاون — رحلة 23 ديسمبر',sentAt:'2026-11-26T09:37'},
- {who:'مطبخ ماما @matbakhmama5 (128K)',channel:'تيك توك',what:'عرض مسوّقة — 500 جنيه عن كل ست',sentAt:'2026-11-26T09:56'},
- {who:'يوميات أم مصرية @egyptian_momy',channel:'تيك توك',what:'عرض مسوّقة — 500 جنيه عن كل ست',sentAt:'2026-11-26T09:55'},
- {who:'يوميات أم مصرية بالسعودية',channel:'تيك توك',what:'عرض مسوّقة — 500 جنيه عن كل ست',sentAt:'2026-11-26T09:57'}],
- tasks:[{title:'ابعت رسالة التعاون لـ Sara Ahmed Zaher (هوانم الجيزة) — ماسنجر',followUp:'2026-11-27T10:00',note:'اتوقفت النهارده بسبب حد رسايل فيسبوك'},
-  {title:'ابعت رسالة التعاون لـ ايهاب نافع (تجمع بنات طنطا) — ماسنجر',followUp:'2026-11-27T10:20',note:''},
-  {title:'ابعت رسالة التعاون لـ روضات الجنان (هوانم كفرالشيخ) — ماسنجر',followUp:'2026-11-27T10:40',note:''}],
- log:['النهارده: 5 رسايل أدمنز فيسبوك + 4 صانعات محتوى تيك توك + 2 واتساب — مامتي طباخة ردت واتبعتلها التفاصيل واللينك']};
+var WEEK_SEED=null;
 function ago(t){var d=new Date(t);if(isNaN(d))return '';var m=Math.round((Date.now()-d)/60000);
   if(m<60)return 'من '+Math.max(m,1)+' دقيقة';var h=Math.round(m/60);if(h<24)return 'من '+h+' ساعة';return 'من '+Math.round(h/24)+' يوم'}
 function umrahWon(){var ids=db.companies.filter(function(c){return /نسمات|عمر/.test(c.name||'')}).map(function(c){return c.id});
@@ -394,7 +380,7 @@ function vToday(){
   h+='<div class="stats">'+st(wait.length,'⏳ مستني رد','gold')+st(fu.length,'✅ مهام النهارده والمتأخرة','warn')+st(open.length,'🔥 فرص مفتوحة','navy')+st(money(Math.round(wt)),'💰 فلوس متوقعة','')+'</div>';
   // مستني رد
   h+='<h2>⏳ مستني رد ('+wait.length+')</h2><div class="row"><button class="btn gold sm" onclick="editWait(\'\')">+ بعتّ لحد</button>'+
-    (db.seeds&&db.seeds[WEEK_SEED.key]?'':'<button class="btn teal sm" onclick="loadSeed(WEEK_SEED)">⬇ ضيف شغل الأسبوع (10 جهات + مهام بكرة)</button>')+'</div>';
+    '<label class="btn teal sm">⬇ استيراد ملف شغل<input type="file" accept=".json" class="hidden" onchange="loadSeedFile(this)"></label>'+'</div>';
   h+=wait.length?'<div class="list">'+wait.map(function(w){
     return '<div class="card"><div class="info"><div class="t"><span class="badge k">'+esc(w.channel||'')+'</span>'+esc(w.who)+'</div>'+
       '<div class="s">'+esc(w.what||'')+' · <span class="due '+(Date.now()-new Date(w.sentAt)>86400000?'late':'today')+'">'+ago(w.sentAt)+'</span></div></div>'+
